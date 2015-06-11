@@ -28,26 +28,36 @@ if component.inputname == component.outputname:
     print "try again"
     sys.exit()
 
-if os.path.isfile(component.inputname) and os.path.isfile(component.outputname):
+if os.path.isfile(component.inputname) and not os.path.isdir(component.outputname):
+    component.iofilepairs.append([component.inputname,component.outputname])
     print "converting one file:",component.inputname
-    component.inputstub = component.inputname
+
+else:
+    print "not proper input"
+    sys.exit()
+
+print component.iofilepairs
+
+for inputfile, outputfile in component.iofilepairs:
+
+    component.inputstub = inputfile
     component.inputstub = re.sub(".*/","",component.inputstub)
     component.inputstub = re.sub("\..*","",component.inputstub)
     print "file stub is ",component.inputstub
 
-with open(component.inputname) as infile:
-    component.onefile = infile.read()
+    with open(inputfile) as infile:
+        component.onefile = infile.read()
 
-print component.onefile[:100]
+    print component.onefile[:100]
 
-myoperations.setvariables(component.onefile)
+    myoperations.setvariables(component.onefile)
 
-component.onefile = myoperations.mytransform(component.onefile)
+    component.onefile = myoperations.mytransform(component.onefile)
 
-with open(component.outputname, 'w') as outfile:
-    outfile.write(component.onefile)
+    with open(outputfile, 'w') as outfile:
+        outfile.write(component.onefile)
 
-print component.replaced_macros
+    print component.replaced_macros
 
 sys.exit()
 

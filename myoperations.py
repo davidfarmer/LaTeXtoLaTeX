@@ -34,7 +34,7 @@ def mytransform(text):
     # Labels and references need to be added by hand.
 
     thetext = re.sub(r"\\noindent{\\bf Example [0-9]+\.}",r"\\begin{example}",thetext)
-    thetext = re.sub(r"\hspace{\\fill} \$\blacksquare\$",r"\\end{example}",thetext)
+    thetext = re.sub(r"\\hspace{\\fill} \$\\blacksquare\$",r"\\end{example}",thetext)
 
     # delete empty label arguments
     thetext = re.sub(r"\\label{[a-zA-Z]+:[a-zA-Z]+:}","",thetext)

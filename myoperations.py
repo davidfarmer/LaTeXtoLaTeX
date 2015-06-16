@@ -26,10 +26,18 @@ def mytransform(text):
     thetext = utilities.replacemacro(thetext,r"\begin{exercise}",1,
                          r"\begin{exercise}\label{exercise:"+component.chapter_abbrev+":#1}")
 
+    # in actions.tex and crypt.tex many examples start with something like
+    # \noindent {\bf Example 2.}
+    # and end with
+    # \hspace{\fill} $\blacksquare$
+    # so we convert these to \begin{example} \end{example}.
+    # Labels and references need to be added by hand.
+
+    thetext = re.sub(r"\\noindent{\\bf Example [0-9]+\.}",r"\\begin{example}",thetext)
+    thetext = re.sub(r"\hspace{\\fill} \$\blacksquare\$",r"\\end{example}",thetext)
+
     # delete empty label arguments
     thetext = re.sub(r"\\label{[a-zA-Z]+:[a-zA-Z]+:}","",thetext)
-
-    thetext = utilities.replacemacro(thetext,"\myit",0,"\\emph")
 
     return thetext
 

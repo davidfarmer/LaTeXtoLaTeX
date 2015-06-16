@@ -31,10 +31,10 @@ def mytransform(text):
     # and end with
     # \hspace{\fill} $\blacksquare$
     # so we convert these to \begin{example} \end{example}.
-    # Labels and references need to be added by hand.
+    # Labels and references still need to be added by hand.
 
-    thetext = re.sub(r"\\noindent\s*{\\bf\s+Example\s+[0-9]+\.\s*}",r"\\begin{example}",thetext)
-    thetext = re.sub(r"\\hspace{\\fill} \$\\blacksquare\$",r"\\end{example}",thetext)
+    thetext = re.sub(r"\\noindent\s*{\\bf\s+Example\s+[0-9.]+\s*}",r"\\begin{example}",thetext)
+    thetext = re.sub(r"\\hspace{\\fill}\s*\$\\blacksquare\$",r"\\end{example}",thetext)
 
     # delete empty label arguments
     thetext = re.sub(r"\\label{[a-zA-Z]+:[a-zA-Z]+:}","",thetext)

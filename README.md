@@ -13,3 +13,5 @@ in the file
     myoperations.py
 
 
+You may wish to comment out the print statements.
+

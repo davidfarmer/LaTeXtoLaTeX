@@ -2,6 +2,14 @@
 
 Do something like:
 
-./ltol.py ../book_chapters_LaTeX_original/ ../book_chapters_struc_LaTeX/
+./ltol.py full_path_to_original_directory full_path_to_new_directory
 
-and also make sure the images directory was copied
+The transformations are done by the function
+
+    mytransform
+
+in the file
+
+    myoperations.py
+
+

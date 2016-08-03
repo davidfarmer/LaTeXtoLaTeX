@@ -24,6 +24,8 @@ if not len(sys.argv) == 3:
 component.inputname = sys.argv[1]
 component.outputname = sys.argv[2]
 
+filetype = "mbx"
+
 if component.inputname == component.outputname:
     print "must have input distinct from output"
     print "try again"
@@ -39,7 +41,7 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
     outputdir = component.outputname
     outputdir = re.sub(r"/*$","",outputdir)  # remove trailing slash
     outputdir = outputdir + "/"              # and then put it back
-    latexfiles = glob.glob(inputdir + "/*.tex")
+    latexfiles = glob.glob(inputdir + "/*." + filetype)
     for inputfilename in latexfiles:
         outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", inputfilename)
         if inputfilename == outputfilename:
@@ -68,28 +70,14 @@ for inputfile, outputfile in component.iofilepairs:
 
     print component.onefile[:100]
 
-    myoperations.setvariables(component.onefile)
+#    myoperations.setvariables(component.onefile)
 
     component.onefile = myoperations.mytransform(component.onefile)
 
     with open(outputfile, 'w') as outfile:
         outfile.write(component.onefile)
 
-    print component.replaced_macros
+#    print component.replaced_macros
 
 sys.exit()
-
-latexfiles = glob.glob(latexfiledir + "/*.tex")
-if nonsense == xxx:
-        print "found these LaTeX files:",latexfiles
-        if len(latexfiles) == 1:
-            junk.allworks[work_key]['latexfile'] = latexfiles[0]
-        else:
-            print "Warning, multiple latex files:",latexfiles
-            for file in latexfiles:
-                with open(file) as f:
-                    filecontents = f.read()
-                    if "begin{document}" in filecontents:
-                         junk.allworks[work_key]['latexfile'] = file
-                         break
 

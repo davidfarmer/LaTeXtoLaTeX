@@ -12,7 +12,7 @@ def setvariables(text):
 
 ###################
 
-def mytransform(text):
+def mytransform_mbx(text):
 
     thetext = text
 
@@ -29,7 +29,24 @@ def mytransform(text):
                      "\n        <hint>\n            <p>\n               <" + r"\1" + ">" + r"\2" +
                      "\n               </" + r"\1" + ">\n            </p>\n        </hint>",thetext, 0, re.DOTALL)
 
-    # commands below probably do nothing
+    return thetext
+
+###################
+
+def mytransform_html(text):
+
+    thetext = text
+
+    # the white space before the end of an h5 makes a space before the "." added by CSS
+    thetext = re.sub(r"\s+</h5>", "</h5>", thetext)
+
+    return thetext
+
+###################
+
+def mytransform_tex(text):
+
+    thetext = text
 
     # replace \begin{prop}{the_label} by
     # \begin{prop}\label{proposition:chaptername:the_label}

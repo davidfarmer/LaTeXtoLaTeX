@@ -1,5 +1,6 @@
 
-inputname=""
+filetype = ""
+inputname = ""
 outputname = ""
 
 iofilepairs = []

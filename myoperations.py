@@ -29,7 +29,15 @@ def mytransform_mbx(text):
     thetext = re.sub(r"</image>\s*","</image>\n",thetext)
     
     thetext = re.sub(r"<figure(.*?)</figure>",process_figure,thetext,0,re.DOTALL)
-    thetext = re.sub(r"<exercise(.*?)</exercise>",process_exercise,thetext,0,re.DOTALL)
+
+    # temporarily hide exercises tag
+    thetext = re.sub(r"<exercises", "<EXERCISES",thetext)
+    thetext = re.sub(r"<exercisegroup", "<EXERCISEGROUP",thetext)
+    # because of how we are handling exercises with xml:ids
+    thetext = re.sub(r"\s*<exercise(.*?)</exercise>\s*",process_exercise,thetext,0,re.DOTALL)
+    # then put it back
+    thetext = re.sub(r"<EXERCISES", "<exercises",thetext)
+    thetext = re.sub(r"<EXERCISEGROUP", "<exercisegroup",thetext)
     
     return thetext
 
@@ -144,11 +152,12 @@ def process_exercise(txt):
 
     # check that we have only one exercise
     if "<exercise" in the_text:
-        return "<exercise" + the_text + "<exercise>"
+        print "Error: exercise within an exercise", the_text[:200]
+        return '\n' + "<exercise" + the_text + "<exercise>" + '\n'
 
     if the_text.count("<answer>") > 1:
         print "More than one answer in this exercise:", the_text[:200]
-        return "<exercise" + the_text + "<exercise>"
+        return '\n' + "<exercise" + the_text + "<exercise>" + '\n'
 
     if "<answer>" in the_text:
         the_answer = re.search('<answer>(.*?)</answer>',the_text,re.DOTALL).group(1)
@@ -158,7 +167,7 @@ def process_exercise(txt):
 
     if the_text.count("<statement>") != 1:
         print "No (or more than one) statement in this exercise:", the_text[:200]
-        return "<exercise" + the_text + "<exercise>"
+        return '\n' + "<exercise" + the_text + "<exercise>" + '\n'
 
     the_statement = re.search('<statement>(.*?)</statement>',the_text,re.DOTALL).group(1)
     the_statement = the_statement.strip()
@@ -167,7 +176,7 @@ def process_exercise(txt):
     end_of_opening_tag = re.match('([^>]*>)',the_text).group(1)
     the_text = re.sub('^([^>]*>)\s*', '', the_text)
 
-    the_result = '  <exercise' + end_of_opening_tag + '\n'
+    the_result = '\n' + '  <exercise' + end_of_opening_tag + '\n'
     the_result += '    <webwork seed="1">' + '\n'
     the_result += '      <setup>' + '\n'
     the_result += '        <var name="">' + '\n'
@@ -186,6 +195,6 @@ def process_exercise(txt):
     the_result += '        ' + the_answer + '\n'
     the_result += '      </solution>' + '\n'
     the_result += '    </webwork>' + '\n'
-    the_result += '  </exercise>'
+    the_result += '  </exercise>' + '\n'
 
     return the_result

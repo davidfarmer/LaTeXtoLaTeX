@@ -27,7 +27,9 @@ def mytransform_mbx(text):
     # and other image things
     thetext = re.sub(r"\s*<image>\s*<latex-image-code><!\[CDATA\[\s*","\n<image>\n<description></description>\n<latex-image-code><![CDATA[\n",thetext)
     thetext = re.sub(r"</image>\s*","</image>\n",thetext)
-    thetext = re.sub(r"<\\image>\s*","</image>\n",thetext)
+    
+    thetext = re.sub(r"<figure(.*?)</figure>",process_figure,thetext,0,re.DOTALL)
+    thetext = re.sub(r"<exercise(.*?)</exercise>",process_exercise,thetext,0,re.DOTALL)
     
     return thetext
 
@@ -94,3 +96,96 @@ def mytransform_tex(text):
 
     return thetext
 
+#####################
+#####################
+
+def process_figure(txt):
+
+    """We are given <figure***</figure> and we want to do something with the ***
+       Currently: transfer the fig_id to the contined image
+
+    """
+
+    the_text = txt.group(1)
+
+    # check that we have only one figure
+    if "<figure" in the_text:
+        return "<figure" + the_text + "<figure>"
+
+    elif the_text.startswith(">"):  # no xml:id, so nothing to do
+        return "<figure" + the_text + "<figure>"
+
+    # should start with the xml:id:
+    try:
+        the_xml_id = re.match('^ xml:id="fig_([^"]+)"',the_text).group(1)
+    except AttributeError:
+        print "figure should have an xml:id, but it doesn't",the_text[:200]
+        return "<figure" + the_text + "<figure>"
+    
+    # should be only one contained image
+    if the_text.count("<image>") != 1:
+        print "Error: more than one contained image in fig_" + the_xml_id
+        return "<figure" + the_text + "<figure>" 
+
+    # now put that id on the image
+    the_text = re.sub("<image>",'<image xml:id="img_' + the_xml_id + '" >', the_text)
+
+    return "<figure xml:id=" + the_text + "<figure>" 
+
+###################
+
+def process_exercise(txt):
+    """We are given <exercise***</exercise> and we want to do something with the ***
+       Currently: wrap everything in a blank webwork exercise
+
+    """
+
+    the_text = txt.group(1)
+
+    # check that we have only one exercise
+    if "<exercise" in the_text:
+        return "<exercise" + the_text + "<exercise>"
+
+    if the_text.count("<answer>") > 1:
+        print "More than one answer in this exercise:", the_text[:200]
+        return "<exercise" + the_text + "<exercise>"
+
+    if "<answer>" in the_text:
+        the_answer = re.search('<answer>(.*?)</answer>',the_text,re.DOTALL).group(1)
+    else:
+        the_answer = ""
+    the_answer = the_answer.strip()
+
+    if the_text.count("<statement>") != 1:
+        print "No (or more than one) statement in this exercise:", the_text[:200]
+        return "<exercise" + the_text + "<exercise>"
+
+    the_statement = re.search('<statement>(.*?)</statement>',the_text,re.DOTALL).group(1)
+    the_statement = the_statement.strip()
+
+    # exrtract the xml:id, so we can do nice spacing
+    end_of_opening_tag = re.match('([^>]*>)',the_text).group(1)
+    the_text = re.sub('^([^>]*>)\s*', '', the_text)
+
+    the_result = '  <exercise' + end_of_opening_tag + '\n'
+    the_result += '    <webwork seed="1">' + '\n'
+    the_result += '      <setup>' + '\n'
+    the_result += '        <var name="">' + '\n'
+    the_result += '          <static></static>' + '\n'
+    the_result += '        </var>' + '\n'
+    the_result += '        <pg-code>' + '\n'
+    the_result += '        </pg-code>' + '\n'
+    the_result += '      </setup>' + '\n'
+    the_result += '      <statement>' + '\n'
+    the_result += '        ' + the_statement + '\n'
+    the_result += '      </statement>' + '\n'
+    the_result += '      <answer>' + '\n'
+    the_result += '        ' + the_answer + '\n'
+    the_result += '      </answer>' + '\n'
+    the_result += '      <solution>' + '\n'
+    the_result += '        ' + the_answer + '\n'
+    the_result += '      </solution>' + '\n'
+    the_result += '    </webwork>' + '\n'
+    the_result += '  </exercise>'
+
+    return the_result

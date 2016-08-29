@@ -16,6 +16,26 @@ def mytransform_mbx(text):
 
     thetext = text
 
+    # start and end paragraphs on the same line, with a blank line above and below.
+    # and similarly for caption, cell, title (except for space above and below)
+    thetext = re.sub(r"\s*<(p)>\s*","\n\n<" + r"\1" + ">",thetext)
+    thetext = re.sub(r"\s*</(p)>\s*","</" + r"\1" + ">\n\n",thetext)
+    thetext = re.sub(r"\s*<(cell|caption|title)>\s*","\n<" + r"\1" + ">",thetext)
+    thetext = re.sub(r"\s*</(cell|caption|title)>\s*","</" + r"\1" + ">\n",thetext)
+
+    # do what Alex wanted with <latex-image-code><![CDATA[ 
+    # and other image things
+    thetext = re.sub(r"\s*<image>\s*<latex-image-code><!\[CDATA\[\s*","\n<image>\n<description></description>\n<latex-image-code><![CDATA[\n",thetext)
+    thetext = re.sub(r"</image>\s*","</image>\n",thetext)
+    thetext = re.sub(r"<\\image>\s*","</image>\n",thetext)
+    
+    return thetext
+
+
+def old_mytransform_mbx(text):
+
+    thetext = text
+
     thetext = postprocess.put_lists_in_paragraphs(thetext)
 
     # if statement starts and ends with  list, wrap it in p

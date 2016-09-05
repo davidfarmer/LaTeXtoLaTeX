@@ -12,7 +12,73 @@ def setvariables(text):
 
 ###################
 
-def mytransform_mbx(text):
+def mytransform_mbxpp(text):
+
+    thetext = text
+
+    # first remove extraneous spaces and put in appropriate carriage returns
+
+    thetext = postprocess.tag_before_after("p", "\n\n", "", "", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("row|tabular|image|latex-image-code|asymptote", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("me|men|md|mdn", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("exercises|exercisegroup|exercise", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("webwork|setup|var|set|pg-code", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("mrow|intertext", "\n", "", "", "\n", thetext)
+    thetext = postprocess.tag_before_after("dt", "\n\n", "", "", "\n", thetext)
+    thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("li", "\n\n", "", "", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("ul|ol|dl", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
+    thetext = postprocess.tag_before_after("theorem|proposition|lemma|conjecture|corollary",
+                                           "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("definition|example|insight|remark|proof",
+                                           "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("figure|table",
+                                           "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("introduction|statement|solution|answer", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("subsection", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("chapter|section", "\n", "\n", "\n", "\n", thetext)
+
+#    # first remove all the spaces at the beginning of a line
+#    thetext = re.sub("\n +", "\n", thetext)
+
+    # then put it back
+    thetext = postprocess.add_space_within("chapter", thetext)
+    thetext = postprocess.add_space_within("section", thetext)
+    thetext = postprocess.add_space_within("subsection", thetext)
+    thetext = postprocess.add_space_within("introduction", thetext)
+    thetext = postprocess.add_space_within("figure", thetext)
+    thetext = postprocess.add_space_within("image", thetext)
+    thetext = postprocess.add_space_within("asymptote", thetext)
+    thetext = postprocess.add_space_within("sidebyside", thetext)
+    thetext = postprocess.add_space_within("aside", thetext)
+    thetext = postprocess.add_space_within("latex-image-code", thetext)
+    thetext = postprocess.add_space_within("definition|theorem|example|insight", thetext)
+    thetext = postprocess.add_space_within("proposition|lemma|remark|conjecture|corollary", thetext)
+    thetext = postprocess.add_space_within("statement|solution|answer|proof", thetext)
+    thetext = postprocess.add_space_within("p", thetext)
+    thetext = postprocess.add_space_within("paragraphs", thetext)
+    thetext = postprocess.add_space_within("ul", thetext)
+    thetext = postprocess.add_space_within("ol", thetext)
+    thetext = postprocess.add_space_within("dl", thetext)
+    thetext = postprocess.add_space_within("li", thetext)
+    thetext = postprocess.add_space_within("me|men|md|mdn", thetext)
+    thetext = postprocess.add_space_within("exercises", thetext)
+    thetext = postprocess.add_space_within("exercisegroup", thetext)
+    thetext = postprocess.add_space_within("exercise", thetext)
+    thetext = postprocess.add_space_within("webwork", thetext)
+    thetext = postprocess.add_space_within("setup", thetext)
+    thetext = postprocess.add_space_within("var", thetext)
+    thetext = postprocess.add_space_within("set", thetext)
+    thetext = postprocess.add_space_within("pg-code", thetext)
+    thetext = postprocess.add_space_within("table", thetext)
+    thetext = postprocess.add_space_within("tabular", thetext)
+    thetext = postprocess.add_space_within("row", thetext)
+
+    return thetext
+
+def old_mytransform_mbx2(text):
 
     thetext = text
 
@@ -28,6 +94,8 @@ def mytransform_mbx(text):
     thetext = re.sub(r"\s*<image>\s*<latex-image-code><!\[CDATA\[\s*","\n<image>\n<description></description>\n<latex-image-code><![CDATA[\n",thetext)
     thetext = re.sub(r"</image>\s*","</image>\n",thetext)
     
+    thetext = re.sub(r"></image>\s*",">\n</image>\n",thetext)
+
     thetext = re.sub(r"<figure(.*?)</figure>",process_figure,thetext,0,re.DOTALL)
 
     # temporarily hide exercises tag
@@ -118,27 +186,27 @@ def process_figure(txt):
 
     # check that we have only one figure
     if "<figure" in the_text:
-        return "<figure" + the_text + "<figure>"
+        return "<figure" + the_text + "</figure>"
 
     elif the_text.startswith(">"):  # no xml:id, so nothing to do
-        return "<figure" + the_text + "<figure>"
+        return "<figure" + the_text + "</figure>"
 
     # should start with the xml:id:
     try:
         the_xml_id = re.match('^ xml:id="fig_([^"]+)"',the_text).group(1)
     except AttributeError:
         print "figure should have an xml:id, but it doesn't",the_text[:200]
-        return "<figure" + the_text + "<figure>"
+        return "<figure" + the_text + "</figure>"
     
     # should be only one contained image
     if the_text.count("<image>") != 1:
         print "Error: more than one contained image in fig_" + the_xml_id
-        return "<figure" + the_text + "<figure>" 
+        return "<figure" + the_text + "</figure>" 
 
     # now put that id on the image
     the_text = re.sub("<image>",'<image xml:id="img_' + the_xml_id + '" >', the_text)
 
-    return "<figure xml:id=" + the_text + "<figure>" 
+    return "<figure" + the_text + "</figure>" 
 
 ###################
 
@@ -153,11 +221,11 @@ def process_exercise(txt):
     # check that we have only one exercise
     if "<exercise" in the_text:
         print "Error: exercise within an exercise", the_text[:200]
-        return '\n' + "<exercise" + the_text + "<exercise>" + '\n'
+        return '\n' + "<exercise" + the_text + "</exercise>" + '\n'
 
-    if the_text.count("<answer>") > 1:
+    if the_text.count("<answer") > 1:
         print "More than one answer in this exercise:", the_text[:200]
-        return '\n' + "<exercise" + the_text + "<exercise>" + '\n'
+        return '\n' + "<exercise" + the_text + "</exercise>" + '\n'
 
     if "<answer>" in the_text:
         the_answer = re.search('<answer>(.*?)</answer>',the_text,re.DOTALL).group(1)
@@ -167,7 +235,7 @@ def process_exercise(txt):
 
     if the_text.count("<statement>") != 1:
         print "No (or more than one) statement in this exercise:", the_text[:200]
-        return '\n' + "<exercise" + the_text + "<exercise>" + '\n'
+        return '\n' + "<exercise" + the_text + "</exercise>" + '\n'
 
     the_statement = re.search('<statement>(.*?)</statement>',the_text,re.DOTALL).group(1)
     the_statement = the_statement.strip()

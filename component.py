@@ -3,6 +3,8 @@ filetype = ""
 inputname = ""
 outputname = ""
 
+indentamount = "  "
+
 iofilepairs = []
 
 error_messages = []

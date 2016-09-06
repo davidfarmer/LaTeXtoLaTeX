@@ -28,7 +28,6 @@ def mytransform_mbxpp(text):
     thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
     thetext = postprocess.tag_before_after("li", "\n\n", "", "", "\n\n", thetext)
     thetext = postprocess.tag_before_after("ul|ol|dl", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("theorem|proposition|lemma|conjecture|corollary",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("definition|example|insight|remark|proof",
@@ -39,6 +38,7 @@ def mytransform_mbxpp(text):
     thetext = postprocess.tag_before_after("introduction|statement|solution|answer", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("subsection", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("chapter|section", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
 
 #    # first remove all the spaces at the beginning of a line
 #    thetext = re.sub("\n +", "\n", thetext)

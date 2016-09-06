@@ -78,6 +78,18 @@ def mytransform_mbxpp(text):
 
     return thetext
 
+##################
+
+def mytransform_mbx(text):
+
+    thetext = text
+
+    thetext = re.sub(r"<figure(.*?)</figure>",process_figure,thetext,0,re.DOTALL)
+
+    return thetext
+
+##################
+
 def old_mytransform_mbx2(text):
 
     thetext = text
@@ -200,13 +212,38 @@ def process_figure(txt):
     
     # should be only one contained image
     if the_text.count("<image>") != 1:
-        print "Error: more than one contained image in fig_" + the_xml_id
+        print "more than one contained image in fig_" + the_xml_id
+        the_text = process_fig_mult(the_text)
         return "<figure" + the_text + "</figure>" 
 
-    # now put that id on the image
-    the_text = re.sub("<image>",'<image xml:id="img_' + the_xml_id + '" >', the_text)
+# skip this, because it was done in a previous iteration
+#    # now put that id on the image
+#    the_text = re.sub("<image>",'<image xml:id="img_' + the_xml_id + '" >', the_text)
 
     return "<figure" + the_text + "</figure>" 
+
+##################
+
+def process_fig_mult(text):
+
+    thetext = text
+
+    text_parts = thetext.split("START")
+
+    new_text = []
+
+    for part in text_parts:
+        try:
+            this_id = re.search("figures/(.*?).tex", part).group(1)
+            print "found a possible image id:", this_id
+            part = re.sub("<image>", '<image xml:id="' + this_id + '" >', part)
+        except:
+            pass
+        new_text.append(part)
+
+    new_text = "START".join(new_text) 
+       
+    return new_text
 
 ###################
 

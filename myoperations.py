@@ -84,6 +84,154 @@ def mytransform_mbx(text):
 
     thetext = text
 
+    if ("<introduction" in thetext and 
+        "<exercises" in thetext and
+        "<subsection" not in thetext):
+        print "XXXX",component.inputstub
+
+    thetext = re.sub(r"\\epsilon\b",r"\\varepsilon",thetext)
+
+    thetext = re.sub(r"\\,\^",r"^",thetext)
+
+#    if "|" in thetext:
+#        print thetext.count("|")
+    for tag in ["m", "mrow", "me", "men"]:
+        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
+        thetext = re.sub(the_search, replaceabs, thetext, 0, re.DOTALL)
+
+    for tag in ["aside"]:
+        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
+        thetext = re.sub(the_search, replaceaside, thetext, 0, re.DOTALL)
+#
+#    thetext = mytransform_mbx_figure(thetext)
+
+#    thetext = process_fig_mult(thetext)
+
+#    thetext = re.sub(r'<image xml:id="([^"]+)" >', deduplicate_id, thetext,0,re.DOTALL)
+
+    return thetext
+
+def replaceaside(txt):
+
+    this_text = txt.group(1)
+
+    this_text = re.sub("\s*<em>Note:</em>\s*","",this_text)
+
+    return this_text
+
+def replaceabs(txt):
+
+    this_math = txt.group(1)
+
+    if "text" in this_math and "xref" in this_math:
+        print this_math
+
+    this_math = re.sub(r"\|\|([^\|]+)\|\|", r"\\norm{\1}",this_math)
+    this_math = re.sub(r"\\big\|\\big\|([^\|]+)\\big\|\\big\|", r"\\norm{\1}",this_math)
+    this_math = re.sub("\|\_","ZZZXCVBNM",this_math)
+#    if "|" in this_math:
+#        print this_math.count("|")
+
+    this_math = re.sub(r"\\left\|(.*?)\\right\|",r"\\abs{" + r"\1" + "}",this_math, 0 ,re.DOTALL)
+    this_math = re.sub(r"\\big\|(.*?)\\big\|",r"\\abs{" + r"\1" + "}",this_math, 0 ,re.DOTALL)
+    this_math = re.sub(r"\|(.*?)\|",r"\\abs{" + r"\1" + "}",this_math, 0 ,re.DOTALL)
+
+    if "|" in this_math:
+        print this_math.count("|")
+
+    this_math = re.sub("ZZZXCVBNM","|_",this_math)
+
+    return this_math
+
+
+###############
+
+def mytransform_mbx_img_fig(text):
+
+    thetext = text
+
+#    thetext = re.sub(r"<cell(.*?)</cell>",cell_hack,thetext,0,re.DOTALL)
+#
+#    thetext = mytransform_mbx_figure(thetext)
+
+#    thetext = process_fig_mult(thetext)
+
+    thetext = re.sub(r'<image xml:id="([^"]+)" >', deduplicate_id, thetext,0,re.DOTALL)
+
+    return thetext
+
+def deduplicate_id(txt):
+
+    this_id = txt.group(1)
+
+    idcounter = 1
+    if this_id in component.ids:
+        print "found duplicate id:", this_id
+        this_id = this_id + "X"
+        if this_id in component.ids:
+           while this_id + str(idcounter) in component.ids:
+               idcounter += 1
+           this_id = this_id + str(idcounter)
+
+    component.ids.append(this_id)
+
+    return '<image xml:id="' + this_id + '" >'
+
+################
+def mytransform_mbx_cell(text):
+
+    thetext = text
+
+#    thetext = re.sub(r"<sidebyside(.*?)</sidebyside>",sbs_hack,thetext,0,re.DOTALL)
+    thetext = re.sub(r"<cell(.*?)</cell>",cell_hack,thetext,0,re.DOTALL)
+
+    thetext = mytransform_mbx_figure(thetext)
+
+    return thetext
+
+##################
+
+def cell_hack(txt):
+
+    the_text = txt.group(1)
+
+    if "<cell" in the_text:
+        print "ERROR: nested cell"
+        return "<cell" + the_text + "</cell>"
+
+    the_text_stripped = the_text.strip()
+
+    if the_text_stripped.startswith("><!--") and the_text_stripped.endswith("-->"):
+        return "<cell>\n          <figure" + the_text + "</figure>\n          </cell>"
+    else:
+        return "<cell" + the_text + "</cell>"
+
+##################
+
+def sbs_hack(txt):
+
+    the_text = txt.group(1)
+
+    if "<sidebyside" in the_text:
+        print "ERROR: nested sidebyside"
+        return "<sidebyside" + the_text + "</sidebyside>"
+
+    if "<image" in the_text and "<figure" not in the_text:
+        print "bare image in sbs"
+        the_text = process_fig_mult(the_text)
+        return "<figure" + the_text + "</figure>"
+
+#    print "processing a sidebyside:", the_text[:130]
+    the_text = re.sub(r"<figure(.*?)</figure>",process_figure,the_text,0,re.DOTALL)
+
+    return "<sidebyside" + the_text + "</sidebyside>"
+
+##################
+
+def mytransform_mbx_figure(text):
+
+    thetext = text
+
     thetext = re.sub(r"<figure(.*?)</figure>",process_figure,thetext,0,re.DOTALL)
 
     return thetext
@@ -200,25 +348,31 @@ def process_figure(txt):
     if "<figure" in the_text:
         return "<figure" + the_text + "</figure>"
 
-    elif the_text.startswith(">"):  # no xml:id, so nothing to do
+    elif the_text.startswith(">"):  # no xml:id, so look elsewhere
+        if "START" in the_text and "<image>" in the_text:
+            the_text = process_fig_mult(the_text)
         return "<figure" + the_text + "</figure>"
 
     # should start with the xml:id:
     try:
-        the_xml_id = re.match('^ xml:id="fig_([^"]+)"',the_text).group(1)
+     #   the_xml_id = re.match('^ xml:id="fig_([^"]+)"',the_text).group(1)
+        the_xml_id = re.match('^ xml:id="fig([^"]+)"',the_text).group(1)
     except AttributeError:
         print "figure should have an xml:id, but it doesn't",the_text[:200]
         return "<figure" + the_text + "</figure>"
+
+    if the_xml_id.startswith("_"):
+        the_xml_id = the_xml_id[1:]
     
     # should be only one contained image
-    if the_text.count("<image>") != 1:
+    if the_text.count("<image>") > 1:
         print "more than one contained image in fig_" + the_xml_id
         the_text = process_fig_mult(the_text)
         return "<figure" + the_text + "</figure>" 
 
-# skip this, because it was done in a previous iteration
-#    # now put that id on the image
-#    the_text = re.sub("<image>",'<image xml:id="img_' + the_xml_id + '" >', the_text)
+# should we skip this, because it was done in a previous iteration?
+    # now put that id on the image
+    the_text = re.sub("<image>",'<image xml:id="img_' + the_xml_id + '" >', the_text)
 
     return "<figure" + the_text + "</figure>" 
 
@@ -234,10 +388,13 @@ def process_fig_mult(text):
 
     for part in text_parts:
         try:
-            this_id = re.search("figures/(.*?).tex", part).group(1)
+            this_id = re.search("figures/(.*?)\.(tex|asy)", part).group(1)
             print "found a possible image id:", this_id
+            this_id = re.sub("fig_", "img_", this_id)
+            this_id = re.sub("^fig", "img_", this_id)
             part = re.sub("<image>", '<image xml:id="' + this_id + '" >', part)
         except:
+            print "can't find the figures filename",part[:10]
             pass
         new_text.append(part)
 

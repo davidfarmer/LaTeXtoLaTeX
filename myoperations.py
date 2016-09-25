@@ -84,24 +84,13 @@ def mytransform_mbx(text):
 
     thetext = text
 
-    if ("<introduction" in thetext and 
-        "<exercises" in thetext and
-        "<subsection" not in thetext):
-        print "XXXX",component.inputstub
-
-    thetext = re.sub(r"\\epsilon\b",r"\\varepsilon",thetext)
-
-    thetext = re.sub(r"\\,\^",r"^",thetext)
-
-#    if "|" in thetext:
-#        print thetext.count("|")
-    for tag in ["m", "mrow", "me", "men"]:
+    for tag in ["title"]:
         the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
-        thetext = re.sub(the_search, replaceabs, thetext, 0, re.DOTALL)
+        thetext = re.sub(the_search, replacetag, thetext, 0, re.DOTALL)
 
-    for tag in ["aside"]:
+    for tag in ["p"]:
         the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
-        thetext = re.sub(the_search, replaceaside, thetext, 0, re.DOTALL)
+        thetext = re.sub(the_search, fixp, thetext, 0, re.DOTALL)
 #
 #    thetext = mytransform_mbx_figure(thetext)
 
@@ -110,6 +99,38 @@ def mytransform_mbx(text):
 #    thetext = re.sub(r'<image xml:id="([^"]+)" >', deduplicate_id, thetext,0,re.DOTALL)
 
     return thetext
+
+def replacetag(txt):
+
+    this_text = txt.group(1)
+
+    while '$' in this_text:
+       # print "found $"
+        this_text = re.sub(r"\$","<m>",this_text,1)
+        this_text = re.sub(r"\$","</m>",this_text,1)
+
+    return this_text
+
+def fixp(txt):
+
+    this_text = txt.group(1)
+
+    if this_text.startswith(r"<p>\text{"):
+        print "found starting text"
+        this_text = this_text[8:]
+        if not this_text.startswith("{"):
+            print "missing bracket", this_text[:10]
+        btext, the_remainder = utilities.first_bracketed_string(this_text)
+        btext = btext[1:-1]   # remove { and }
+        btext = btext.lstrip()
+        btext = re.sub(r"\\\(","<m>",btext)
+        btext = re.sub(r"\\\)","</m>",btext)
+        this_text = "<p>" + btext + the_remainder
+
+ #   if component.inputstub == 'sec_series':
+ #       print this_text[:10]
+
+    return this_text
 
 def replaceaside(txt):
 

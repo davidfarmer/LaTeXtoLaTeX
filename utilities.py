@@ -114,9 +114,10 @@ def replacemacro(text,macroname,numargs,replacementtext):
                          thetext,1,re.DOTALL)
 
     for idx, val in enumerate(component.replaced_macros):
-        print "substituting number"+str(idx) + "for"+val
+        the_val = re.sub(r"\\",r"\\\\",val)
+        print "substituting number"+str(idx) + "for" + the_val
         print r"xxxx" + str(idx) + r"yyyy"
-        thetext = re.sub(r"xxxx" + str(idx) + r"yyyy", val, thetext)
+        thetext = re.sub(r"xxxx" + str(idx) + r"yyyy", the_val, thetext)
 
     return thetext
 

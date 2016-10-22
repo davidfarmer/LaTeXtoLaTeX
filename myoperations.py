@@ -22,20 +22,20 @@ def mytransform_mbxpp(text):
     thetext = postprocess.tag_before_after("row|tabular|image|latex-image-code|asymptote", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("me|men|md|mdn", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("exercises|exercisegroup|exercise", "\n", "\n", "\n", "\n", thetext)
-    thetext = postprocess.tag_before_after("webwork|setup|var|set|pg-code", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("webwork|setup|set|pg-code", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("mrow|intertext", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dt", "\n\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
     thetext = postprocess.tag_before_after("li", "\n\n", "", "", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("ul|ol|dl", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("ul|ol|dl", "\n\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("theorem|proposition|lemma|conjecture|corollary",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("definition|example|insight|remark|proof",
+    thetext = postprocess.tag_before_after("definition|example|insight|exploration|activity|remark|proof",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("figure|table",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("introduction|statement|solution|answer", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint|objectives", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("subsection", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("chapter|section", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
@@ -48,15 +48,16 @@ def mytransform_mbxpp(text):
     thetext = postprocess.add_space_within("section", thetext)
     thetext = postprocess.add_space_within("subsection", thetext)
     thetext = postprocess.add_space_within("introduction", thetext)
+    thetext = postprocess.add_space_within("objectives", thetext)
     thetext = postprocess.add_space_within("figure", thetext)
     thetext = postprocess.add_space_within("image", thetext)
     thetext = postprocess.add_space_within("asymptote", thetext)
     thetext = postprocess.add_space_within("sidebyside", thetext)
     thetext = postprocess.add_space_within("aside", thetext)
     thetext = postprocess.add_space_within("latex-image-code", thetext)
-    thetext = postprocess.add_space_within("definition|theorem|example|insight", thetext)
+    thetext = postprocess.add_space_within("definition|theorem|example|insight|exploration|activity", thetext)
     thetext = postprocess.add_space_within("proposition|lemma|remark|conjecture|corollary", thetext)
-    thetext = postprocess.add_space_within("statement|solution|answer|proof", thetext)
+    thetext = postprocess.add_space_within("statement|solution|answer|hint|proof", thetext)
     thetext = postprocess.add_space_within("p", thetext)
     thetext = postprocess.add_space_within("paragraphs", thetext)
     thetext = postprocess.add_space_within("ul", thetext)
@@ -69,7 +70,7 @@ def mytransform_mbxpp(text):
     thetext = postprocess.add_space_within("exercise", thetext)
     thetext = postprocess.add_space_within("webwork", thetext)
     thetext = postprocess.add_space_within("setup", thetext)
-    thetext = postprocess.add_space_within("var", thetext)
+ #   thetext = postprocess.add_space_within("var", thetext)
     thetext = postprocess.add_space_within("set", thetext)
     thetext = postprocess.add_space_within("pg-code", thetext)
     thetext = postprocess.add_space_within("table", thetext)
@@ -84,14 +85,31 @@ def mytransform_mbx(text):
 
     thetext = text
 
-    for tag in ["title"]:
-        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
-        thetext = re.sub(the_search, replacetag, thetext, 0, re.DOTALL)
+    if "xml ver" not in thetext:
+        thetext = '<?xml version="1.0" encoding="UTF-8" ?>' + '\n' + thetext
 
-    for tag in ["p"]:
-        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
-        thetext = re.sub(the_search, fixp, thetext, 0, re.DOTALL)
-#
+    thetext = re.sub(r"(<pg-code>(.*?)</pg-code>)", replacepgcode, thetext, 0, re.DOTALL)
+
+ #   for tag in ["p"]:
+#    for tag in ["pg-code"]:
+#        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
+#        thetext = re.sub(the_search, replacetag, thetext, 0, re.DOTALL)
+
+#    thetext = re.sub(r"\\ds\s*\\lim_", r"\\lim\\limits_", thetext)
+#    thetext = re.sub(r"\\displaystyle\s*\\lim_", r"\\lim\\limits_", thetext)
+
+#    for tag in ["cell","mrow","title","li"]:
+#        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
+#        thetext = re.sub(the_search, replacetag, thetext, 0, re.DOTALL)
+
+#    for tag in ["mrow"]:
+#        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
+#        thetext = re.sub(the_search, replacetag, thetext, 0, re.DOTALL)
+
+#    for tag in ["p"]:
+#        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
+#        thetext = re.sub(the_search, fixp, thetext, 0, re.DOTALL)
+
 #    thetext = mytransform_mbx_figure(thetext)
 
 #    thetext = process_fig_mult(thetext)
@@ -104,10 +122,24 @@ def replacetag(txt):
 
     this_text = txt.group(1)
 
-    while '$' in this_text:
-       # print "found $"
-        this_text = re.sub(r"\$","<m>",this_text,1)
-        this_text = re.sub(r"\$","</m>",this_text,1)
+#    if "draw" in this_text:
+#        return this_text
+
+#    this_text = re.sub(r"\\parbox\[[^\]]*\]",r"\\parbox",this_text)
+######    this_text = re.sub("\s*(<var [^<>]*/>)\s*", r" \1",this_text)
+
+    if trimmed_text:
+        print trimmed_text
+    if "<var" in this_text:
+        print this_text
+#    this_text = utilities.replacemacro(this_text,r"\parbox",2,"#2")
+
+#    this_text = re.sub(r"<answer>.*?</answer>\s*","",this_text,1,re.DOTALL)
+
+#    while '$' in this_text:
+#       # print "found $"
+#        this_text = re.sub(r"\$","<m>",this_text,1)
+#        this_text = re.sub(r"\$","</m>",this_text,1)
 
     return this_text
 
@@ -132,13 +164,37 @@ def fixp(txt):
 
     return this_text
 
-def replaceaside(txt):
+def replacepgcode(txt):
 
     this_text = txt.group(1)
 
-    this_text = re.sub("\s*<em>Note:</em>\s*","",this_text)
+    trimmed_text = re.sub(r"<pg-code>(.*?)</pg-code>", r"\1", this_text, 0, re.DOTALL)
+    if not trimmed_text.strip():
+        return this_text
+    print " "
+    pglines = trimmed_text.split("\n")
+    first_length = 0
+    excess_length = 0
+    spaces_to_delete = ""
+    shortened_lines = []
+    for line in pglines:
+        if not line:
+            print "blank line"
+        else:
+            starting_spaces = re.sub(r"( *)\S.*",r"\1",line)
+    #        print(len(starting_spaces),"    ",line[:50])
+            if not first_length:
+                first_length = len(starting_spaces)
+            elif not excess_length:
+                excess_length = len(starting_spaces) - first_length
+                spaces_to_delete = " " * excess_length
+            line = re.sub("^" + spaces_to_delete, "", line)
+            shortened_lines.append(line)
+            print line
 
-    return this_text
+    the_answer = "<pg-code>\n" + "\n".join(shortened_lines) + "</pg-code>"
+
+    return the_answer
 
 def replaceabs(txt):
 
@@ -471,9 +527,9 @@ def process_exercise(txt):
     the_result += '      <statement>' + '\n'
     the_result += '        ' + the_statement + '\n'
     the_result += '      </statement>' + '\n'
-    the_result += '      <answer>' + '\n'
-    the_result += '        ' + the_answer + '\n'
-    the_result += '      </answer>' + '\n'
+#    the_result += '      <answer>' + '\n'
+#    the_result += '        ' + the_answer + '\n'
+#    the_result += '      </answer>' + '\n'
     the_result += '      <solution>' + '\n'
     the_result += '        ' + the_answer + '\n'
     the_result += '      </solution>' + '\n'

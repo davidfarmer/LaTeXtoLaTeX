@@ -2,32 +2,56 @@
 import re
 import component
 
+##################
 
-def put_lists_in_paragraphs(text):
+def wrap_li_content_in_p(text):
 
-    thetext = text
+    the_text = text
 
-    thetext = re.sub(r"\s*</p>\s*<(ol|ul|dl)\b(.*?)</\1>",
-                     "\n                  " + r"<\1" + r"\2" + "\n                  " + r"</\1>" + "\n                </p>", thetext, 0, re.DOTALL)
-    # think about whether that needs to be done twice, when there are successive alternating blocks
+    the_text = re.sub(r"<li\b([^<>]*)>(.*?)(</li>|<ul\b[^>]*>|<ol\b[^>]*>)",
+                        fix_li,the_text,0,re.DOTALL)
 
-    thetext = re.sub(r"\s*</p>\s*<(ol|ul|dl)\b(.*?)</\1>",
-                     "\n                  " + r"<\1" + r"\2" + "\n                  " + r"</\1>" + "\n                </p>", thetext, 0, re.DOTALL)
-    # note that this simple approach is confused by nested lists
+    return the_text
 
-    return thetext
+
+def fix_li(txt):
+
+    the_param = txt.group(1)
+    the_text = txt.group(2)
+    the_ending_tag = txt.group(3)
+
+    the_text = the_text.strip()
+
+    if not the_text:
+        pass   # nothing to do, except return the enclosing tags
+    elif the_text.startswith("<p>") or the_text.endswith("</p>"):
+        pass     # already in <p> so don't do anything
+    else:
+        the_text = "<p>" + the_text + "</p>\n"
+
+    return "<li" + the_param + ">" + the_text + the_ending_tag
 
 ##################
 
 def tag_before_after(tag, startbefore, endbefore, startafter, endafter, text):
+    """ Replace the white space around starting and ending tags
+        by the given white space (or by nothing).
+
+        If the "new" text is not white space, then the text is not changed.
+
+    """
 
     thetag = "(" + tag + ")"
     thetext = text
 
-    thetext = re.sub("\s*(<" + thetag + r"\b[^>]*?>)", startbefore + r"\1", thetext)
-    thetext = re.sub("(<" + thetag + r"\b[^>]*?>)\s*", r"\1" + endbefore, thetext)
-    thetext = re.sub("\s*(</" + thetag + r">)", startafter + r"\1", thetext)
-    thetext = re.sub("(</" + thetag + r">)\s*", r"\1" + endafter, thetext)
+    if not startbefore or startbefore.isspace():
+        thetext = re.sub("\s*(<" + thetag + r"\b[^>]*?>)", startbefore + r"\1", thetext)
+    if not endbefore or endbefore.isspace():
+        thetext = re.sub("(<" + thetag + r"\b[^>]*?>)\s*", r"\1" + endbefore, thetext)
+    if not startafter or startafter.isspace():
+        thetext = re.sub("\s*(</" + thetag + r">)", startafter + r"\1", thetext)
+    if not endafter or endafter.isspace():
+        thetext = re.sub("(</" + thetag + r">)\s*", r"\1" + endafter, thetext)
 
     return thetext
 

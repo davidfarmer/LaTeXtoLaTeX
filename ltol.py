@@ -6,6 +6,7 @@ import os
 import glob
 
 import component
+import transforms
 import myoperations
 
 #################################
@@ -14,21 +15,21 @@ import myoperations
 #################################
 
 if not len(sys.argv) == 4:
-    print 'To convert a LaTeX file to a different form, do either:'
-    print './ltol.py filetype inputfile outputfile'
+    print 'To convert a file to a different form, do either:'
+    print './ltol.py filetype_plus inputfile outputfile'
     print 'to convert one file, or'
-    print './ltol.py filetype inputdirectory outputdirectory'
+    print './ltol.py filetype_plus inputdirectory outputdirectory'
     print 'to convert all the "filetype" files in a directory.  The outputdirectory must already exist.'
-    print 'Supported filetypes:  tex, mbx, mbxpp, html'
+    print 'Supported filetype_plus:  tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, html'
     sys.exit()
 
-component.filetype = sys.argv[1]
+component.filetype_plus = sys.argv[1]
 component.inputname = sys.argv[2]
 component.outputname = sys.argv[3]
 
-if component.filetype not in ["mbx", "mbxpp", "tex", "html"]:
+if component.filetype_plus not in ["mbx", "mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "tex", "html"]:
     print "Filetype not recognized."
-    print 'Supported filetypes are tex, mbx, mbxpp, and html'
+    print 'Supported filetype_plus are tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, and html'
     sys.exit()
 
 if component.inputname == component.outputname:
@@ -42,10 +43,10 @@ if os.path.isfile(component.inputname) and not os.path.isdir(component.outputnam
 
 elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
 
-    if component.filetype == "mbxpp":
+    if component.filetype_plus in ["mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         fileextension = "mbx"
     else:
-        fileextension = component.filetype
+        fileextension = component.filetype_plus
 
     inputdir = component.inputname
     inputdir = re.sub(r"/*$","",inputdir)  # remove trailing slash
@@ -83,17 +84,26 @@ for inputfile, outputfile in component.iofilepairs:
 
 #    myoperations.setvariables(component.onefile)
 
-    if component.filetype == 'tex':
+    if component.filetype_plus == 'tex':
         component.onefile = myoperations.mytransform_tex(component.onefile)
-    elif component.filetype == 'mbx':
-        component.onefile = myoperations.mytransform_mbx(component.onefile)
-    elif component.filetype == 'mbxpp':
-        component.onefile = myoperations.mytransform_mbxpp(component.onefile)
-    elif component.filetype == 'html':
+    elif component.filetype_plus == 'html':
         component.onefile = myoperations.mytransform_html(component.onefile)
+    elif component.filetype_plus == 'mbx':
+        component.onefile = myoperations.mytransform_mbx(component.onefile)
+    elif component.filetype_plus == 'mbx_pp':
+        component.onefile = transforms.mbx_pp(component.onefile)
+    elif component.filetype_plus in ["mbx_fix", "mbx_strict_tex", "mbx_strict_html"]:
+        component.onefile = transforms.mbx_fix(component.onefile)
     else:
         print "doing nothing"
 
+    if component.filetype_plus in ["mbx_strict_tex", "mbx_strict_html"]:
+        component.onefile = transforms.mbx_strict(component.onefile)
+
+    if component.filetype_plus == "mbx_strict_tex":
+        component.onefile = transforms.mbx_strict_tex(component.onefile)
+    elif component.filetype_plus == "mbx_strict_html":
+        component.onefile = transforms.mbx_strict_html(component.onefile)
 
     with open(outputfile, 'w') as outfile:
         outfile.write(component.onefile)

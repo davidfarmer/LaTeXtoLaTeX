@@ -1,5 +1,5 @@
 
-filetype = ""
+filetype_plus = ""
 inputname = ""
 outputname = ""
 

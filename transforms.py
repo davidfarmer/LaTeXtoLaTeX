@@ -9,6 +9,9 @@ import postprocess
 ###################
 
 def mbx_fix(text):
+    """ Correct some authoring shortcuts.
+
+    """
 
     thetext = text
 
@@ -24,6 +27,9 @@ def mbx_fix(text):
 ###################
 
 def mbx_strict(text):
+    """ Remove white space that confuses xslt.
+
+    """
 
     thetext = text
 
@@ -40,6 +46,7 @@ def mbx_strict(text):
 ###################
 
 def mbx_strict_tex(text):
+    # Nothing here yet
 
     thetext = text
 
@@ -48,6 +55,9 @@ def mbx_strict_tex(text):
 ###################
 
 def mbx_strict_html(text):
+    """ Rewrite some markup that confuses HTML/MathJax.
+
+    """
 
     thetext = text
 
@@ -59,6 +69,9 @@ def mbx_strict_html(text):
 ###################
 
 def mbx_pp(text):
+    """ Pretty-print MBX source.
+
+    """
 
     thetext = text
 

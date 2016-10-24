@@ -62,7 +62,7 @@ def mbx_strict_html(text):
     thetext = text
 
     # mathjax can cause a line feed between math and punctuation
-    thetext = re.sub("</m>\s*([,:;.])", r"\\text{\1}</m>", thetext)
+    thetext = re.sub("</m>\s*([,:;.!?]+)", r"\\text{\1}</m>", thetext)
 
     return thetext
 

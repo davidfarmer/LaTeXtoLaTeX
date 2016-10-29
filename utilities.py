@@ -36,7 +36,7 @@ def first_bracketed_string(text, depth=0, lbrack="{", rbrack="}"):
 
     """
 
-    thetext = text.strip()
+    thetext = text.lstrip()
 
     if not thetext:
         print "Error: no text"
@@ -224,6 +224,29 @@ def replacemac(txt,numargs,replacementtext):
 
 #################
 
+def text_before(text, target):
+    """If text is of the form *target*, return (*,target*).
+    Otherwise, return ("",text)
+    Note that target can be a tuple.
+    """
+
+    thetext = text
+    thetarget = target
+
+    if isinstance(thetarget, str):
+        thetarget = [thetarget]
+    thetarget = tuple(thetarget)
+
+    firstpart = ""
+
+    while thetext and not thetext.startswith(thetarget):
+        firstpart += thetext[0]
+        thetext = thetext[1:]
+
+    if thetext:
+        return (firstpart,thetext)
+    else:
+        return("",text)
 
 #################
 

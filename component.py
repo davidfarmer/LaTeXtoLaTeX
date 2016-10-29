@@ -12,3 +12,5 @@ replaced_macros = []
 
 ids = []
 
+something_changed = False
+

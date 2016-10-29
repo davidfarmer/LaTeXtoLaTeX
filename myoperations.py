@@ -16,10 +16,28 @@ def mytransform_mbx(text):
 
     thetext = text
 
-    if "xml ver" not in thetext:
-        thetext = '<?xml version="1.0" encoding="UTF-8" ?>' + '\n' + thetext
+    # put periods outside math mode
+    # but be careful about ***\right.</m>
+    thetext = re.sub(r"([^t])(\.|,) *</m>", r"\1</m>\2", thetext)
 
-    thetext = re.sub(r"(<pg-code>(.*?)</pg-code>)", replacepgcode, thetext, 0, re.DOTALL)
+    for fcn in ["sin", "cos", "tan", "sec", "csc", "cot",
+                "sinh", "cosh", "tanh", "sech", "csch", "coth",
+                "ln", "log"]:
+        component.something_changed = True
+        while component.something_changed:
+            component.something_changed = False
+            # note that "cos\b" does not match ' cos1 '
+            thetext = re.sub(r"\\(" + fcn + r")((\b|[0-9]).*)", wrap_in_parentheses,
+                             thetext, 1, re.DOTALL)    # probably don't need the DOTALL
+        thetext = re.sub(r"\\" + fcn + "XXXXXXXXXX", r"\\" + fcn, thetext)
+
+    # no space at end of math mode
+    thetext = re.sub(r" *</m>", r"</m>", thetext)
+
+#    if "xml ver" not in thetext:
+#        thetext = '<?xml version="1.0" encoding="UTF-8" ?>' + '\n' + thetext
+#
+#    thetext = re.sub(r"(<pg-code>(.*?)</pg-code>)", replacepgcode, thetext, 0, re.DOTALL)
 
  #   for tag in ["p"]:
 #    for tag in ["pg-code"]:
@@ -48,6 +66,127 @@ def mytransform_mbx(text):
 #    thetext = re.sub(r'<image xml:id="([^"]+)" >', deduplicate_id, thetext,0,re.DOTALL)
 
     return thetext
+
+def wrap_in_parentheses(txt):
+
+    the_function = "\\" + txt.group(1)
+    everything_else = txt.group(2)
+
+    the_function += "XXXXXXXXXX"
+    component.something_changed = True
+
+    everything_else = everything_else.lstrip()
+
+    if everything_else.startswith("^"):
+        the_function += "^"
+        everything_else = everything_else[1:]
+        if everything_else.startswith("{"):
+            the_exponent, everything_else = utilities.first_bracketed_string(everything_else)
+            the_function += the_exponent
+        else:
+            the_function += everything_else[0]
+            everything_else = everything_else[1:]
+
+    everything_else = everything_else.lstrip()
+
+    # first case, the arcument is already in parentheses
+    if everything_else.startswith(("(", "[", "\\big", "\\Big", "\\left")):
+        return the_function + everything_else
+    # second case, there is an argument not in parentheses, but that
+    # could be x, or t, or \theta, or \varphi, or ...
+#    elif everything_else.startswith(("\\theta", "\\var", "\\pi")):
+#        the_argument = "\\"
+#        everything_else = everything_else[1:]
+#        print everything_else[:20]
+#        nothing, the_letters, everything_else =  re.split('(\w+)', everything_else, 1)
+#        the_argument += the_letters
+#        everything_else = everything_else.lstrip()
+#        return the_function + "(" + the_argument + ")" + " " + everything_else
+    elif everything_else.startswith("{"):  # eg, \ln{x}  **why did someone write that?
+        the_argument, everything_else = utilities.first_bracketed_string(everything_else)
+        the_argument = utilities.strip_brackets(the_argument)
+        everything_else = everything_else.lstrip()
+        return the_function + "(" + the_argument + ")" + " " + everything_else
+ #   elif everything_else.startswith(("\\", "}", "<")):  # eg, \ln \abs{t+1}
+    elif everything_else.startswith(("}", "<")):  # eg, <m>\sin</m>
+        return the_function + everything_else
+
+###############
+#
+# If we get this far, we are now looking for an argument of the form
+# (number) (variable) (exponent or subscript)
+# or maybe something like 2 \pi t
+#
+####################
+
+    the_argument = ""
+
+    # numbers, which could be decimal, but not ending in a decimal point
+    if everything_else[0].isdigit():
+        nothing, the_numbers, everything_else =  re.split('([0-9.]*[0-9])', everything_else, 1)
+        the_argument = the_numbers
+ #       everything_else = everything_else.lstrip()
+        # this needs to be fixed, and also not duplate the "else" code
+ #       if everything_else.startswith("x"):
+ #             the_argument += everything_else[0]
+ #             everything_else = everything_else[1:]
+#        everything_else = everything_else.lstrip()
+#        return the_function + "(" + the_argument + ")" + " " + everything_else
+
+    everything_else = everything_else.lstrip()
+    # last case: there is just one character as the argument
+    # except that it could be x^2 or t_0
+
+    if everything_else.startswith(("\\theta", "\\var", "\\phi", "\\pi")):
+        the_argument += "\\"
+        everything_else = everything_else[1:]
+        print everything_else[:40]
+        nothing, the_letters, everything_else =  re.split('(\w+)', everything_else, 1)
+        the_argument += the_letters
+ #       return the_function + "(" + the_argument + ")" + " " + everything_else
+
+    everything_else = everything_else.lstrip()
+
+    if everything_else[:1].isalpha():
+        if the_argument and everything_else[0] == 'd':
+            #skip this case because it looks like \sin x dx
+            pass
+        else:
+            the_argument += everything_else[0]
+            everything_else = everything_else[1:]
+
+    everything_else = everything_else.lstrip()
+
+#    else:
+#        if the_argument:
+#            return the_function + "(" + the_argument + ")" + " " + everything_else
+#        else:
+#            return the_function +  everything_else
+
+    if everything_else.startswith(("^", "_")):
+       the_argument += everything_else[0]
+       everything_else = everything_else[1:]
+       everything_else = everything_else.lstrip()
+       if everything_else.startswith("{"):
+           the_arg, everything_else = utilities.first_bracketed_string(everything_else)
+           the_argument += the_arg
+       elif everything_else.startswith("\\"):
+         # repeats code from above.  does not handle \frac correctly
+            the_argument += "\\"
+            everything_else = everything_else[1:]
+            print "         exponent  :", everything_else[:40]
+            nothing, the_letters, everything_else =  re.split('(\w+)', everything_else, 1)
+            the_argument += the_letters
+       else:
+           the_argument += everything_else[0]
+           everything_else = everything_else[1:]
+
+    everything_else = everything_else.lstrip()
+
+    if the_argument:
+        return the_function + "(" + the_argument + ")" + " " + everything_else
+    else:
+        return the_function +  everything_else
 
 def replacetag(txt):
 

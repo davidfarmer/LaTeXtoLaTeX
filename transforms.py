@@ -19,9 +19,6 @@ def mbx_fix(text):
     # and to use LaTeX-style <index>theorem!three color</index>
     thetext = re.sub(r"<index>(.*?)</index>", index_fix, thetext, 0, re.DOTALL)
 
-    # maybe the author forgot that li content should be in a p
-    thetext = postprocess.wrap_li_content_in_p(thetext)
-
     return thetext
 
 ###################
@@ -33,13 +30,15 @@ def mbx_strict(text):
 
     thetext = text
 
-    # mrow start and end inline
-    thetext = postprocess.tag_before_after("mrow|intertext", "x", "", "", "x", thetext)
-    # same for p and li
-    thetext = postprocess.tag_before_after("p|li", "x", "", "", "x", thetext)
+    thetext = postprocess.tag_before_after("mrow|intertext", "\n", "", "", "\n", thetext)
+
+    # do p and li separately, and in this order, because of p in li
+    thetext = postprocess.tag_before_after("p", "x", "", "", "\n", thetext)
+    thetext = postprocess.tag_before_after("li", "x", "", "", "\n", thetext)
 
     # no white space arounf me, md, etc
-    thetext = postprocess.tag_before_after("me|men|md|mdn", "", "", "", "", thetext)
+    thetext = postprocess.tag_before_after("md|mdn", "", "x", "x", "", thetext)
+    thetext = postprocess.tag_before_after("me|men", "", "", "", "", thetext)
 
     return thetext
 

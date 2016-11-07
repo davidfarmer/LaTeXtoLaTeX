@@ -32,7 +32,7 @@ def mytransform_mbx(text):
         thetext = re.sub(r"\\" + fcn + "XXXXXXXXXX", r"\\" + fcn, thetext)
 
     # no space at end of math mode
-    thetext = re.sub(r" *</m>", r"</m>", thetext)
+    thetext = re.sub(r"(\S) </m>", r"\1</m>", thetext)
 
 #    if "xml ver" not in thetext:
 #        thetext = '<?xml version="1.0" encoding="UTF-8" ?>' + '\n' + thetext

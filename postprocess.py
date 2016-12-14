@@ -89,3 +89,138 @@ def add_space_with(txt):
 
     return(the_text)
 
+##################
+
+def add_utmost_tracking(text):
+
+    the_text = text
+
+    # javascript at end
+    thejavascript = """
+<script>
+var topsection = document.getElementsByTagName('section')[0];
+var thefocus = topsection.id;
+
+var recenthistory = '';
+
+var onpage = false;
+var timecounter = 0;
+"""
+    thejavascript += 'var dataurlbase = "http://books.aimath.org/' + component.bookidentifier + '/bbbb?";\n'
+
+    thejavascript += 'dataurlbase = dataurlbase.concat("' + component.bookidentifier + '").concat("&");\n'
+#dataurlbase = dataurlbase.concat("book=aata").concat("&");
+
+    thejavascript += """
+function timeTracker() {
+  if (onpage) {
+    timecounter++;
+    recenthistory = recenthistory.concat(thefocus).concat('.');
+    if (timecounter % 10 == 0) {
+        dataurl = dataurlbase.concat(recenthistory.slice(0, -1));  //trailing "."
+        $.get(dataurl);
+        recenthistory = '';
+    }
+  }
+}
+
+theTimer = setInterval(timeTracker, 1000);
+
+$('body').focusout(function() {
+    onpage = false;
+    if (recenthistory != '') {
+      dataurl = dataurlbase.concat(recenthistory.slice(0, -1));  //trailing "."
+      $.get(dataurl);
+      recenthistory = '';
+    }
+    timecounter = 0;
+});
+$('body').focusin(function() {
+    onpage = true;
+});
+</script>
+
+<script>
+// the hidden proof knowls have knowl="", which is like the a does not have knowl as an attribute
+$('a').on('click', function() {
+  if(this.classList.contains('active')) {
+    thefocus = this.closest('section').id;
+  } else if ($(this).attr("knowl")) {
+           if($(this).attr("id")) {
+             thefocus = this.id
+           }
+           else if (kid = this.getAttribute('knowl-id')) {
+                  thefocus = kid
+                }
+           else {
+                  thefocus = 'Unknown'
+           }
+    } else if ($(this).attr("id")) {
+             thefocus = this.id;
+  };
+  recenthistory = recenthistory.concat('click-').concat(thefocus).concat('.');
+});
+</script>
+
+<script>
+setTimeout(function(){
+    $('body').attr('tabindex',-1).focus()},
+100);
+</script>
+
+<script>
+// instead of waiting 2 seconds, it would be better to trigger on sage cell completing setup
+setTimeout(function(){
+  var allbuttons = document.getElementsByTagName('button');
+  $('button.sagecell_evalButton').on('click', function() {
+     article_id = this.closest('div.sagecell-sage').id;
+     thefocus = article_id;
+     recenthistory = recenthistory.concat('click-').concat(article_id).concat('.');
+     });
+},
+2000);
+</script>
+"""
+
+#    # add assistive link
+#    the_text = re.sub(r"(<body[^>]*>)\s*",
+#                   r'\1' + '\n<a class="assistive" href="#content">Skip to main content</a>\n', the_text)
+
+    the_text = re.sub("</body>", thejavascript + "</body>", the_text)
+
+#    counterdisplay = '\n' + '<p id="sagecounter" style="font-size: 80%;"></p>\n<p id="countertimer" style="font-size: 70%;"></p>\n'
+    counterdisplay = ""
+
+#    # temporary location for the counters
+#    if '<section class="chapter"' in the_text:
+#        the_text = re.sub(r'(permalink</a>\s*</h1></header>)',
+#                           r'\1' + counterdisplay, the_text)
+#    else:
+#        the_text = re.sub(r'(<div id="content"[^>]+>\s*<section class="section"[^>]+>)',
+#                            r'\1' + counterdisplay, the_text)
+
+    knowlcounter = 1
+    while 'knowl-id="' in the_text:
+        the_text = re.sub('knowl-id="([^"]+)"',
+                          r'id="\1' + "-" + str(knowlcounter) + '" ' + r'knowlid="\1"',
+                          the_text, 1)
+        knowlcounter += 1
+
+    the_text = re.sub('knowlid', 'knowl-id', the_text)
+
+    # rearrange the buttons
+# only needed for "old style" buttons
+#    the_text = re.sub(r'(<a class="previous-button toolbar-item button" href="[^"]+">Prev</a>)(<a class="up-button button toolbar-item" href="[^"]+">Up</a>)(<a class="next-button button toolbar-item" href="[^"]+">Next</a>)',
+#                    r'\3\2\1', the_text)
+
+    return the_text
+
+def new_sage_counter(txt, acro,new_counter):
+
+    text = txt.group(1)
+
+    component.something_changed = True
+
+    new_text = text + acro + "-" + str(new_counter) + '"'
+
+    return new_text

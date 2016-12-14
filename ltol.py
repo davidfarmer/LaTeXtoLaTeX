@@ -32,6 +32,9 @@ if component.filetype_plus not in ["mbx", "mbx_pp", "mbx_fix", "mbx_strict_tex",
     print 'Supported filetype_plus are tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, and html'
     sys.exit()
 
+component.inputname = re.sub(r"/*$","",component.inputname)  # remove trailing slash
+component.outputname = re.sub(r"/*$","",component.outputname)
+
 if component.inputname == component.outputname:
     print "must have input distinct from output"
     print "try again"
@@ -49,10 +52,8 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
         fileextension = component.filetype_plus
 
     inputdir = component.inputname
-    inputdir = re.sub(r"/*$","",inputdir)  # remove trailing slash
     outputdir = component.outputname
-    outputdir = re.sub(r"/*$","",outputdir)  # remove trailing slash
-    outputdir = outputdir + "/"              # and then put it back
+    outputdir = outputdir + "/"              # put slash back
     thefiles = glob.glob(inputdir + "/*." + fileextension)
     for inputfilename in thefiles:
         outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", inputfilename)
@@ -67,6 +68,11 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
 else:
     print "Not proper input.  Does target directory exist?"
     sys.exit()
+
+# mostly for fcla and aata
+component.bookidentifier = component.inputname
+component.bookidentifier = re.sub(".*/", "", component.bookidentifier)
+component.bookidentifier = re.sub("-.*", "", component.bookidentifier)
 
 print component.iofilepairs
 

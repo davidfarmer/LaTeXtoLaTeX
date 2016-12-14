@@ -445,6 +445,8 @@ def mytransform_html(text):
     # the white space before the end of an h5 makes a space before the "." added by CSS
     thetext = re.sub(r"\s+</h5>", "</h5>", thetext)
 
+    thetext = postprocess.add_utmost_tracking(thetext)
+
     return thetext
 
 ###################

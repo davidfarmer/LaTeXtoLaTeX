@@ -93,7 +93,7 @@ for inputfile, outputfile in component.iofilepairs:
     if component.filetype_plus == 'tex':
         component.onefile = myoperations.mytransform_tex(component.onefile)
     elif component.filetype_plus == 'html':
-        component.onefile = myoperations.mytransform_html(component.onefile)
+        component.onefile = myoperations.mytransform_html(component.onefile,component.inputstub)
     elif component.filetype_plus == 'mbx':
         component.onefile = myoperations.mytransform_mbx(component.onefile)
     elif component.filetype_plus == 'mbx_pp':

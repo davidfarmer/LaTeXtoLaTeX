@@ -438,12 +438,30 @@ def old_mytransform_mbx(text):
 
 ###################
 
-def mytransform_html(text):
+def mytransform_htmlold(text):
 
     thetext = text
 
     # the white space before the end of an h5 makes a space before the "." added by CSS
     thetext = re.sub(r"\s+</h5>", "</h5>", thetext)
+
+    return thetext
+
+###################
+
+def mytransform_html(text, filestub=""):
+
+    thetext = text
+
+    if filestub:
+        thetext = re.sub(r'<section class="exercises" id="exercises-[0-9]+"><header title="Exercises\s+Reading Questions',
+                         '<section class="exercises" id="readingquestions-' + filestub + '"><header title="Exercises Reading Questions',
+                         thetext)
+        thetext = re.sub(r'<section class="exercises" id="exercises-[0-9]+"><header title="Exercises\s+Exercises',
+                         '<section class="exercises" id="exercises-' + filestub + '"><header title="Exercises Exercises',
+                         thetext)
+
+    thetext = postprocess.make_better_ids(thetext)
 
     thetext = postprocess.add_utmost_tracking(thetext)
 

@@ -106,7 +106,7 @@ var recenthistory = '';
 var onpage = false;
 var timecounter = 0;
 """
-    thejavascript += 'var dataurlbase = "http://books.aimath.org/' + component.bookidentifier + '/bbbb?";\n'
+    thejavascript += 'var dataurlbase = "http://books.aimath.org/' + component.bookidentifier + '/cccc?";\n'
 
     thejavascript += 'dataurlbase = dataurlbase.concat("' + component.bookidentifier + '").concat("&");\n'
 #dataurlbase = dataurlbase.concat("book=aata").concat("&");
@@ -227,6 +227,26 @@ def make_better_ids(text):
 
     thetext = re.sub(r'<li>', lambda match: rename_sequentially_according_to("li", "li", "", ">", match), thetext)
 
+    # very crude way to make better ids for things like id="subsection-89"
+    try:
+        this_section_id = re.search(r'<section class="section" id="([^"]+)"', thetext).group(1)
+        component.tag_number["subsection"] = 1
+        for n in range(20):
+            thetext = re.sub(r'(<section class="subsection" id="subsection)-[0-9]+"',           
+                             r'\1' + '-' + str(component.tag_number["subsection"]) + '-' + this_section_id, thetext, 1)
+        component.tag_number["theorem"] = 1
+        for n in range(20):
+            thetext = re.sub(r'(<article class="theorem-like" id="theorem)-[0-9]+"',
+                             r'\1' + '-' + str(component.tag_number["theorem"]) + '-' + this_section_id, thetext, 1)
+  # nasty python issue: r'\1' + '0' looks for the 10th captured group, hence the "-" not in \1
+            component.tag_number["subsection"] += 1
+      
+    except AttributeError:
+        print "file with no section id"
+
+
+# need to rename proof ids
+
 
     # since exercises/exercisegroups can have introductions,
     # rename them bfore renaming the introductions
@@ -237,7 +257,14 @@ def make_better_ids(text):
 
     thetext = re.sub("IDIDID", "id", thetext)
 
-    thetext = re.sub(r'(<section class="exercises" id="(readingquestions-[^"]+)")(.*?)(</section>)', rename_exercises, thetext, 0, re.DOTALL)
+    # hack to partially deal with nested sections: XXSECTION
+    thetext = re.sub(r'(<section)( class="introduction" id="([^"]+)")(.*?)(</section>)',
+                        lambda match: rename_exercises(match, new_start="<XXSECTION", new_end="</XXSECTION>"), thetext, 0, re.DOTALL)
+    thetext = re.sub(r'(<section)( class="exercises" id="(readingquestions-[^"]+)")(.*?)(</section>)',
+                        lambda match: rename_exercises(match, new_start="<XXSECTION", new_end="</XXSECTION>"), thetext, 0, re.DOTALL)
+    thetext = re.sub(r'(<section)( class="exercises" id="([^"]+)")(.*?)(</section>)',
+                        lambda match: rename_exercises(match, new_start="<XXSECTION", new_end="</XXSECTION>"), thetext, 0, re.DOTALL)
+    thetext = re.sub(r'XXSECTION', 'section', thetext)
 
 
     component.something_changed = True
@@ -264,7 +291,7 @@ def make_better_ids(text):
     # don't use the 'hk-' par of hidden knowl ids.
     # possible problem with nested divs
     thetext = re.sub(r'(<div id="hk-([^"]+)")(.*?)(</div>)', lambda match: rename_children_of("p", match), thetext, 0, re.DOTALL)
-    for s in ["subsub", "sub", ""]:
+    for s in ["intro", "subsub", "sub", ""]:
         thetext = re.sub(r'(<section class="' + s + '[^"]+" id="([^"]+)")(.*?)(</section>)', lambda match: rename_children_of("p", match), thetext, 0, re.DOTALL)
 
     thetext = re.sub(r'(<ol id="([^"]+)")(.*?)(</ol>)', lambda match: rename_children_of("li", match), thetext, 0, re.DOTALL)
@@ -274,12 +301,17 @@ def make_better_ids(text):
 
 #################
 
-def rename_exercises(txt):
+def rename_exercises(txt, new_start="", new_end=""):
 
-    the_start = txt.group(1)
-    the_parent_id = txt.group(2)
-    the_middle = txt.group(3)
-    the_end = txt.group(4)
+    the_start_part1 = txt.group(1)
+    if new_start:
+        the_start_part1 = new_start
+    the_start = the_start_part1 + txt.group(2)
+    the_parent_id = txt.group(3)
+    the_middle = txt.group(4)
+    the_end = txt.group(5)
+    if new_end:
+        the_end = new_end
 
     tag = 'article class="exercise-like"'
     component.tag_number[tag] = 1
@@ -344,13 +376,13 @@ def renamesectionintro(txt):
     intro_start = txt.group(2)
     old_number = txt.group(3)
 
-    print "found old_number", old_number
+    print "found old_number", old_number, "in", intro_start
 
 #    print "looking for section id in ", text_before[-400:]
 #    findparentsection = r'<section class="appendix" id="(appendix-A)"'
 #    findparentsection = r'<section class="appendix" id="(appendix-[^"]+)"'
     try:
-        findparentsection = r'<section class="(section|appendix|chapter|conclusion)" id="([^"]+)"'
+        findparentsection = r'<section class="(section|exercises|appendix|chapter|conclusion)" id="([^"]+)"'
         theparent = re.search(findparentsection,text_before).group(2)
     except AttributeError:
         findparentobject = r'<div class="(exercisegroup)" id="([^"]+)"'

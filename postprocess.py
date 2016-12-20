@@ -250,7 +250,7 @@ def make_better_ids(text):
 
 
         component.tag_number["sage"] = 1
-        for n in range(20):
+        for n in range(200):
             thetext = re.sub(r'(<div class="sagecell-sage" id="sage)-[0-9]+"',
                              r'\1' + '-' + str(component.tag_number["sage"]) + '-' + this_section_id + '"', thetext, 1)
             component.tag_number["sage"] += 1
@@ -264,7 +264,7 @@ def make_better_ids(text):
         this_section_id = re.search(r'<section class="exercises" id="([^"]+)"', thetext).group(1)
 
         component.tag_number["sage"] = 1
-        for n in range(20):
+        for n in range(200):
             thetext = re.sub(r'(<div class="sagecell-sage" id="sage)-[0-9]+"',
                              r'\1' + '-' + str(component.tag_number["sage"]) + '-' + this_section_id + '"', thetext, 1)
             component.tag_number["sage"] += 1

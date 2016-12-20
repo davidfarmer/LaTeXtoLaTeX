@@ -246,7 +246,6 @@ def make_better_ids(text):
         for n in range(20):
             thetext = re.sub(r'(<article class="theorem-like" id="proposition)-[0-9]+"',
                              r'\1' + '-' + str(component.tag_number["proposition"]) + '-' + this_section_id + '"', thetext, 1)
-  # nasty python issue: r'\1' + '0' looks for the 10th captured group, hence the "-" not in \1
             component.tag_number["proposition"] += 1
 
 
@@ -254,13 +253,23 @@ def make_better_ids(text):
         for n in range(20):
             thetext = re.sub(r'(<div class="sagecell-sage" id="sage)-[0-9]+"',
                              r'\1' + '-' + str(component.tag_number["sage"]) + '-' + this_section_id + '"', thetext, 1)
-  # nasty python issue: r'\1' + '0' looks for the 10th captured group, hence the "-" not in \1
             component.tag_number["sage"] += 1
 
-      
     except AttributeError:
         print "file with no section id"
 
+# sloppy: combine with the above
+      
+    try:
+        this_section_id = re.search(r'<section class="exercises" id="([^"]+)"', thetext).group(1)
+
+        component.tag_number["sage"] = 1
+        for n in range(20):
+            thetext = re.sub(r'(<div class="sagecell-sage" id="sage)-[0-9]+"',
+                             r'\1' + '-' + str(component.tag_number["sage"]) + '-' + this_section_id + '"', thetext, 1)
+            component.tag_number["sage"] += 1
+    except AttributeError:
+        print "file with no section id"
 
 # need to rename proof ids and sage-365
 

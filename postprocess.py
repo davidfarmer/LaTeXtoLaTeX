@@ -233,19 +233,36 @@ def make_better_ids(text):
         component.tag_number["subsection"] = 1
         for n in range(20):
             thetext = re.sub(r'(<section class="subsection" id="subsection)-[0-9]+"',           
-                             r'\1' + '-' + str(component.tag_number["subsection"]) + '-' + this_section_id, thetext, 1)
+                             r'\1' + '-' + str(component.tag_number["subsection"]) + '-' + this_section_id + '"', thetext, 1)
+            component.tag_number["subsection"] += 1
+
         component.tag_number["theorem"] = 1
         for n in range(20):
             thetext = re.sub(r'(<article class="theorem-like" id="theorem)-[0-9]+"',
-                             r'\1' + '-' + str(component.tag_number["theorem"]) + '-' + this_section_id, thetext, 1)
+                             r'\1' + '-' + str(component.tag_number["theorem"]) + '-' + this_section_id + '"', thetext, 1)
   # nasty python issue: r'\1' + '0' looks for the 10th captured group, hence the "-" not in \1
-            component.tag_number["subsection"] += 1
+            component.tag_number["theorem"] += 1
+        component.tag_number["proposition"] = 1
+        for n in range(20):
+            thetext = re.sub(r'(<article class="theorem-like" id="proposition)-[0-9]+"',
+                             r'\1' + '-' + str(component.tag_number["proposition"]) + '-' + this_section_id + '"', thetext, 1)
+  # nasty python issue: r'\1' + '0' looks for the 10th captured group, hence the "-" not in \1
+            component.tag_number["proposition"] += 1
+
+
+        component.tag_number["sage"] = 1
+        for n in range(20):
+            thetext = re.sub(r'(<div class="sagecell-sage" id="sage)-[0-9]+"',
+                             r'\1' + '-' + str(component.tag_number["sage"]) + '-' + this_section_id + '"', thetext, 1)
+  # nasty python issue: r'\1' + '0' looks for the 10th captured group, hence the "-" not in \1
+            component.tag_number["sage"] += 1
+
       
     except AttributeError:
         print "file with no section id"
 
 
-# need to rename proof ids
+# need to rename proof ids and sage-365
 
 
     # since exercises/exercisegroups can have introductions,
@@ -277,6 +294,24 @@ def make_better_ids(text):
         thetext = re.sub(r'(.{1000})(<article class="introduction") id="introduction-([0-9]+)"', renamesectionintro, thetext, 1, re.DOTALL)
 
     thetext = re.sub("IDIDID", "id", thetext)
+
+# rename proof ids
+
+    separated_by_theorems = thetext.split('<article class="theorem-like" id="')
+
+    the_text_revised = separated_by_theorems.pop(0)
+    print "number of theorems:", len(separated_by_theorems)
+    for this_segment in separated_by_theorems:
+        the_text_revised  += '<article class="theorem-like" id="'
+        the_proofs = re.findall('id="proof-', this_segment)
+        print "----------",this_segment[:10]
+        if len(the_proofs) == 1:
+            theorem_id = re.sub('".*', "", this_segment, 1, re.DOTALL) 
+            print "theorem_id", theorem_id
+            this_segment = re.sub('(id="proof)-[0-9]+"', r'\1' + '-1-' + theorem_id + '"', this_segment)
+        the_text_revised += this_segment
+
+    thetext = the_text_revised
 
     # re-id ol/ul/dl in articles
     for tag in ["ol", "ul", "dl"]:

@@ -477,6 +477,11 @@ def mytransform_tex(text):
     # delete empty label arguments
     thetext = re.sub(r"\\label{[a-zA-Z]+:[a-zA-Z]+:}","",thetext)
 
+    newtext = text
+    newtext = re.sub(r"\s*{\s*(\\large)*\s*(\\bf)*\s*Exercises\s*-*\s*\\thesection\\*\s*}([^}]{2,60}\})",
+                         r"\\begin{exercises}\3" + "\n\\end{exercises}",newtext,0, re.DOTALL)
+    thetext = newtext
+
     return thetext
 
 #####################

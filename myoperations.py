@@ -12,6 +12,130 @@ def setvariables(text):
 
 ###################
 
+def fa_convert(txt):
+
+    thetext = txt.group(0)
+
+    thetext = re.sub(r"\\mathopen{}", "", thetext)
+    thetext = re.sub(r"\\mathclose{}", "", thetext)
+
+    # first we hide parentheses that definitely(?) are not the arguments of functions
+    # anything of the form non_function(x) is not a function applied to x
+    # replace ( by LPLPLPLP and ) by RPRPRP
+    non_functions = ["=", r"\\int", r"\+", r"\\cdot", r"\\times", "RPRPRP"]
+    non_functions_as_choice = "(" + "|".join(non_functions) + ")"
+    utilities.something_changed = 1
+    while utilities.something_changed:
+        utilities.something_changed = 0
+        thetext = re.sub(non_functions_as_choice + r"(|\^.|\^{[^{}]+}|\^\\[a-zA-Z]+)" +
+                                               r"\s*((\\left|\\big|\\Big)*\(.*)",
+                           #  r"\\fa{\1\2}{\3}",
+                             fa_nf_conv, thetext, 1, re.DOTALL)
+
+    trig_functions = [r"\\sin",r"\\cos",r"\\tan",r"\\sec",r"\\csc",r"\\cot"]
+    hyp_functions = [r"\\sinh",r"\\coth"]
+    log_functions = [r"\\log",r"\\ln",r"\\exp"]
+    generic_functions = [r"\\fp"]
+
+    all_functions = trig_functions + hyp_functions + log_functions + generic_functions
+    all_as_choice = "(" + "|".join(all_functions) + ")"
+
+#    # "bare" functions
+#    utilities.something_changed = 1
+#    while utilities.something_changed:
+#        utilities.something_changed = 0
+#        thetext = re.sub(all_as_choice + "()" + r"\s*((\\left|\().*)",
+#                             fa_conv, thetext, 1, re.DOTALL)
+#
+#    # simple powers
+    utilities.something_changed = 1
+    while utilities.something_changed:
+        utilities.something_changed = 0
+        thetext = re.sub(all_as_choice + r"(|\^.|\^{[^{}]+}|\^\\[a-zA-Z]+)" +
+                                               r"\s*((\\left|\\big|\\Big)*\(.*)",
+                           #  r"\\fa{\1\2}{\3}",
+                             fa_conv, thetext, 1, re.DOTALL)
+
+
+#    # "bare" functions
+#       # need to handle arguments containing parentheses
+#    thetext = re.sub(all_as_choice + r"\s*\(([^\(\)]+)\)", r"\\fa{\1}{\2}", thetext)
+#    # simple powers
+#    thetext = re.sub(all_as_choice + r"(\^.)" + r"\s*\(([^\(\)]+)\)", r"\\fa{\1\2}{\3}", thetext)
+#    # larger powers
+#    thetext = re.sub(all_as_choice + r"(\^{[^{}]+})" + r"\s*\(([^\(\)]+)\)", r"\\fa{\1\2}{\3}", thetext)
+
+    return thetext
+
+###################
+
+def fa_nf_conv(txt):
+
+    the_function = txt.group(1)
+    the_power = txt.group(2)
+    the_argument_plus = txt.group(3).lstrip()
+
+    hasleft = False
+    the_left = ""
+    utilities.something_changed += 1
+
+    if the_argument_plus.startswith(("\\left","\\big","\\Big")):
+        hasleft = True
+        the_left = re.sub(r"\(.*", "", the_argument_plus);
+        the_argument_plus = re.sub(r"^.*?\(", "(", the_argument_plus)
+
+    the_argument_orig, everything_else = utilities.first_bracketed_string(the_argument_plus, lbrack="(", rbrack=")")
+    if the_argument_orig:
+        the_argument = the_argument_orig[1:-1]
+        if hasleft:  # then remove the \right
+        #    the_argument = the_argument[:-6]
+            if "\\" not in the_argument[-6:]:
+                print "missing \\right or other size directive"
+                print txt.group(0)
+                print txt.group(1)
+                print txt.group(2)
+                print txt.group(3)
+                print the_argument_orig
+            the_argument = re.sub(r"\\.*?$", "", the_argument)
+    #        the_argument = "LLLL" + the_argument
+        return the_function + the_power + the_left + "LPLPLP" + the_argument + "RPRPRP" + everything_else
+    else:
+        return the_function + "XCXVXBXN" + the_argument_plus
+
+###################
+
+def fa_conv(txt):
+
+    the_function = txt.group(1)
+    the_power = txt.group(2)
+    the_argument_plus = txt.group(3).lstrip()
+
+    hasleft = False
+    utilities.something_changed += 1
+    if the_argument_plus.startswith(("\\left","\\big","\\Big")):
+        hasleft = True
+    #    the_argument_plus = the_argument_plus[5:]
+        the_argument_plus = re.sub(r"^.*?\(", "(", the_argument_plus)
+    the_argument_orig, everything_else = utilities.first_bracketed_string(the_argument_plus, lbrack="(", rbrack=")")
+    if the_argument_orig:
+        the_argument = the_argument_orig[1:-1]
+        if hasleft:  # then remove the \right
+        #    the_argument = the_argument[:-6]
+            if "\\" not in the_argument[-6:]:
+                print "missing \\right or other size directive"
+                print txt.group(0)
+                print txt.group(1)
+                print txt.group(2)
+                print txt.group(3)
+                print the_argument_orig
+            the_argument = re.sub(r"\\.*?$", "", the_argument)
+            the_argument = "LLLL" + the_argument
+        return r"\fa{" + the_function + the_power + "}{" + the_argument + "}" + everything_else
+    else:
+        return the_function + "XCXVXBXN" + the_argument_plus
+
+###################
+
 def mytransform_mbx(text):
 
     thetext = text

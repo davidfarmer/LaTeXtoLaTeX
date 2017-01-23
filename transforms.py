@@ -4,6 +4,7 @@ import re
 import utilities
 import component
 import postprocess
+import myoperations
 
 
 ###################
@@ -28,6 +29,8 @@ def mbx_strict(text):
 
     """
 
+    # need a big comment explaining the general ideas, pluse one for each case
+
     thetext = text
 
     thetext = postprocess.tag_before_after("mrow|intertext", "\n", "", "", "\n", thetext)
@@ -47,6 +50,8 @@ def mbx_strict(text):
 def mbx_strict_tex(text):
     # Nothing here yet
 
+    # need to worry about things like white space in paragraphs
+
     thetext = text
 
     return thetext
@@ -61,8 +66,31 @@ def mbx_strict_html(text):
     thetext = text
 
     # mathjax can cause a line feed between math and punctuation
-    thetext = re.sub("</m>\s*([,:;.!?\-]+)\s+<m>", r"\\text{\1}</m><nbsp /><m>", thetext)
-    thetext = re.sub("</m>\s*([,:;.!?\-]+)", r"\\text{\1}</m>", thetext)
+    thetext = re.sub("</m>\s*([,:;.!?\-\)]+)\s+<m>", r"\\text{\1}</m><nbsp /><m>", thetext)
+    thetext = re.sub("</m>\s*([,:;.!?\-\)]+)", r"\\text{\1}</m>", thetext)
+
+    # there can also be puntuation before math: (<m> x = 9 </m>)
+
+    # where do we rearrange the punctuation for multi-line math?
+
+    return thetext
+
+###################
+
+def mbx_fa(text):
+    """ replace f(x) by \fa{f}{x}.
+
+    """
+
+    thetext = text
+
+    # first process all of the inline math 
+    thetext = re.sub(r"<m>.*?</m>", myoperations.fa_convert, thetext, 0, re.DOTALL)
+    # and then the simple display math
+       # go back and do case of xml:id on equation
+    thetext = re.sub(r"<me>.*?</me>", myoperations.fa_convert, thetext, 0, re.DOTALL)
+    # a row of a multiline
+    thetext = re.sub(r"<mrow>.*?</mrow>", myoperations.fa_convert, thetext, 0, re.DOTALL)
 
     return thetext
 

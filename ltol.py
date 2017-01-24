@@ -100,7 +100,8 @@ for inputfile, outputfile in component.iofilepairs:
     elif component.filetype_plus in ["mbx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = transforms.mbx_fix(component.onefile)
     else:
-        print "doing nothing"
+        pass
+        # print "doing nothing"
 
     if component.filetype_plus in ["mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = transforms.mbx_strict(component.onefile)
@@ -116,6 +117,7 @@ for inputfile, outputfile in component.iofilepairs:
     with open(outputfile, 'w') as outfile:
         outfile.write(component.onefile)
 
+print component.generic_counter
 #    print component.replaced_macros
 
 sys.exit()

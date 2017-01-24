@@ -14,3 +14,4 @@ ids = []
 
 something_changed = False
 
+generic_counter = 0

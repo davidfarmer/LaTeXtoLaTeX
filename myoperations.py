@@ -12,6 +12,176 @@ def setvariables(text):
 
 ###################
 
+def fa_convert(txt):
+
+# todo:  line 425 of sec_chainrule.mbx:
+#        <mrow>\lz{y}{x} \amp = y'(u) \cdot u'(x)\amp\amp \text{XCXVXBXN(since } y=\fa{f}{u} \text{ and }u=\fa{g}{x}</mrow>
+#  does <static>5\sec^2(5x)</static> count as math mode?
+# \sum a_n(x-c)^n
+
+    thetext = txt.group(0)
+
+    thetext = re.sub(r"\\mathopen{}", "", thetext)
+    thetext = re.sub(r"\\mathclose{}", "", thetext)
+
+    # first we hide parentheses that definitely(?) are not the arguments of functions
+    # anything of the form non_function(x) is not a function applied to x
+    # replace ( by LPLPLPLP and ) by RPRPRP
+
+    # but first, the edge case of half-open interval notation: (a,b]
+    thetext = re.sub(r"\((\s*[0-9a-zA-Z/\-\\]+\s*),(\s*[0-9a-zA-Z/\-\\]+\s*)]",
+                        r"LPLPLP\1,\1]", thetext)
+
+    non_functions = [r">", "=", r"\\int", r"\+", r"-", r"/", r"\\cdots{0,1}", r"\\times", "!", "{", "RPRPRP"]
+    separators = ["arrow", r"\\to", r"\\la", ",", r"\\ "]
+             # the ">" should be a "^", except that the opening <m> is passed
+             # can;t include "}" because of \sin^{23}(x)
+             # should ) be here or later?
+    all_non_functions = non_functions + separators
+    non_functions_as_choice = "(" + "|".join(all_non_functions) + ")"
+    utilities.something_changed = 1
+    while utilities.something_changed:
+        utilities.something_changed = 0
+        thetext = re.sub(non_functions_as_choice + r"(|\^.|\^{[^{}]+}|\^\\[a-zA-Z]+)" +
+                                               r"(\s*)((\\left|\\big|\\bigg|\\Big|\\Bigg)*\(.*)",
+                           #  r"\\fa{\1\2}{\3}",
+                             fa_nf_conv, thetext, 1, re.DOTALL)
+
+    trig_functions = [r"\\sin",r"\\cos",r"\\tan",r"\\sec",r"\\csc",r"\\cot"]
+    arc_trig_functions = [r"\\arcsin",r"\\arccos",r"\\arctan",r"\\arcsec",r"\\arccsc",r"\\arccot"]
+    hyp_functions = [r"\\sinh",r"\\coth", r"\\tanh"]
+    log_functions = [r"\\log",r"\\ln",r"\\exp"]
+    generic_functions = [r"\\fp", "f", "g", "h", "p", "q", "F", "G", "P", "Q"]
+    compound_functions = [r"\\vec [a-zA-Z]", r"\\vec [a-zA-Z]\\,", r"\\vec [a-zA-Z]\\,'"]
+    occasionally_functions = ["v", r"\\ell"]
+
+    all_functions = trig_functions + arc_trig_functions + hyp_functions + log_functions + generic_functions + compound_functions + occasionally_functions
+    all_as_choice = "(" + "|".join(all_functions) + ")"
+
+    utilities.something_changed = 1
+    while utilities.something_changed:
+        utilities.something_changed = 0
+                       #  function             to a power
+        thetext = re.sub("()" + all_as_choice + r"((|\^.|\^{[^{}]+}|\^\\[a-zA-Z]+|_.|_{[0-9xyzuvw]+})(|'|''|'''))" +
+                                               # possibly resized         left paren
+                                               r"\s*((\\left|\\big|\\Big)*\(.*)",
+                           #  r"\\fa{\1\2}{\3}",
+                             fa_conv, thetext, 1, re.DOTALL)
+
+    # guess that <m>x(y)</m> is always the function x applied to the argument y
+    thetext = re.sub(r"(<m>|<mrow>)(\ds |)([a-zA-Z]_*[LMRU0-9]*(\\,)*'*)\(([a-zA-Z0-9]_*[0-9ijmn]*)\)(</m>|</mrow>)", r"\1\2\\fa{\3}{\5}\6", thetext)
+    thetext = re.sub(r"(<m>|<mrow>)(\\ds |)([a-zA-Z]_*[LMRU0-9]*(\\,)*'*)\(([a-zA-Z0-9]_*[0-9]*)\)(\s*=.*)(</m>|</mrow>)", r"\1\2\\fa{\3}{\5}\6\7", thetext)
+    thetext = re.sub(r"(<m>|<mrow>)(\ds |)([a-zA-Z]\s*)=(\s*[a-zA-Z]_*[LMRU0-9]*(\\,)*'*)\(([a-zA-Z0-9]_*[0-9]*)\)(</m>|</mrow>)", r"\1\2\3=\\fa{\4}{\6}\7", thetext)
+    thetext = re.sub(r"\b(y'*)\(([\-0-9]|x|t)\)", r"\\fa{\1}{\2}", thetext)
+    thetext = re.sub(r"\b(r'*)\(([\-0-9]|x|y|z|t)\)", r"\\fa{\1}{\2}", thetext)
+
+    thetext = re.sub(r"\b([a-zA-Z](\\,)*'+)\(([\-0-9]+|[a-zA-Z\\]+|[a-zA-A]_[0-9ijmn])\)", r"\\fa{\1}{\3}", thetext)
+    thetext = re.sub(r"(\\kappa'*)\(([a-zA-Z0-9/\\]+_*[0-9ijmn]*)\)", r"\\fa{\1}{\2}", thetext)
+    thetext = re.sub(r"(\\delta)\(([a-z, _\\]+)\)", r"\\fa{\1}{\2}", thetext)
+
+    more_non_functions = [r"[0-9]", r"{", r"}", "\)", "k", "n", "m", r"\\pi", "RPRPRP"]
+    letter_non_functions = ["x", "t"]
+    more_non_functions_as_choice = "(" + "|".join(more_non_functions + letter_non_functions) + ")"
+    utilities.something_changed = 1
+    while utilities.something_changed:
+        utilities.something_changed = 0
+        thetext = re.sub(more_non_functions_as_choice + r"(|\^.|\^{[^{}]+}|\^\\[a-zA-Z]+)" +
+                                               r"(\s*)((\\left|\\big|\\bigg|\\Big|\\Bigg)*\(.*)",
+                           #  r"\\fa{\1\2}{\3}",
+                             fa_nf_conv, thetext, 1, re.DOTALL)
+
+    if "(" in thetext and "\\(" not in thetext:
+        print thetext
+        component.generic_counter += 1
+
+    return thetext
+
+###################
+
+def fa_nf_conv(txt):
+
+    the_function = txt.group(1)
+    the_power = txt.group(2)
+    the_space = txt.group(3)
+    the_argument_plus = txt.group(4).lstrip()
+
+    utilities.something_changed += 1
+
+    hasleft = False
+    the_left = ""
+
+    if the_argument_plus.startswith(("\\left","\\big","\\Big")):
+        hasleft = True
+        the_left = re.sub(r"\(.*", "", the_argument_plus);
+        the_argument_plus = re.sub(r"^.*?\(", "(", the_argument_plus)
+
+    the_argument_orig, everything_else = utilities.first_bracketed_string(the_argument_plus, lbrack="(", rbrack=")")
+
+    if the_argument_orig:
+        the_argument = the_argument_orig[1:-1]
+        if hasleft:  # then remove the \right
+        #    the_argument = the_argument[:-6]
+            if "\\" not in the_argument[-6:]:
+                print "missing \\right or other size directive"
+                print txt.group(0)
+                print txt.group(1)
+                print txt.group(2)
+                print txt.group(3)
+                print the_argument_orig
+            the_argument = re.sub(r"\\.{0,5}$", "", the_argument)
+
+        if "\\infty" in txt.group(0) and False:
+                print "                  inftyoverline found"
+                print "everything:",txt.group(0)
+                print "the_function",txt.group(1)
+                print "the_power", txt.group(2)
+                print "original the_argument_plus", txt.group(3)
+                print "the_argument_orig", the_argument_orig
+                print "the_left", the_left
+                print "the_argument", the_argument, "\n\n"
+
+        #return the_function + the_power + the_left + "LPLPLP" + the_argument + "RPRPRP" + everything_else
+        #return the_function + the_power + "LPLPLP" + the_argument + "RPRPRP" + everything_else
+        return the_function + the_power + the_space + "LPLPLP" + the_argument + "RPRPRP" + everything_else
+    else:
+        return the_function + "XCXVXBXN" + the_argument_plus
+
+###################
+
+def fa_conv(txt):
+
+    nothing = txt.group(1)
+    the_function = txt.group(2)
+    the_power = txt.group(3)  # includes ' or ''
+    the_argument_plus = txt.group(6).lstrip()
+
+    hasleft = False
+    utilities.something_changed += 1
+    if the_argument_plus.startswith(("\\left","\\big","\\Big")):
+        hasleft = True
+    #    the_argument_plus = the_argument_plus[5:]
+        the_argument_plus = re.sub(r"^.*?\(", "(", the_argument_plus)
+    the_argument_orig, everything_else = utilities.first_bracketed_string(the_argument_plus, lbrack="(", rbrack=")")
+    if the_argument_orig:
+        the_argument = the_argument_orig[1:-1]
+        if hasleft:  # then remove the \right
+        #    the_argument = the_argument[:-6]
+            if "\\" not in the_argument[-6:]:
+                print "missing \\right or other size directive"
+                print txt.group(0)
+                print txt.group(1)
+                print txt.group(2)
+                print txt.group(3)
+                print the_argument_orig
+    # next line should specificallt target \right, \big, \Big, etc
+            the_argument = re.sub(r"\\[^\\]*$", "", the_argument)
+            the_argument = the_argument
+        return r"\fa{" + the_function + the_power + "}{" + the_argument + "}" + everything_else
+    else:
+        return the_function + "XCXVXBXN" + the_argument_plus
+
+###################
+
 def mytransform_mbx(text):
 
     thetext = text

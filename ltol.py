@@ -14,22 +14,27 @@ import myoperations
 # input and output files.
 #################################
 
+conversion_options = ["mbx", "mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
+                      "tex", "html"]
+
 if not len(sys.argv) == 4:
     print 'To convert a file to a different form, do either:'
     print './ltol.py filetype_plus inputfile outputfile'
     print 'to convert one file, or'
     print './ltol.py filetype_plus inputdirectory outputdirectory'
     print 'to convert all the "filetype" files in a directory.  The outputdirectory must already exist.'
-    print 'Supported filetype_plus:  tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, html'
+    print 'Supported filetype_plus: ' # tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, html'
+    print conversion_options
     sys.exit()
 
 component.filetype_plus = sys.argv[1]
 component.inputname = sys.argv[2]
 component.outputname = sys.argv[3]
 
-if component.filetype_plus not in ["mbx", "mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "tex", "html"]:
+if component.filetype_plus not in conversion_options:
     print "Filetype not recognized."
-    print 'Supported filetype_plus are tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, and html'
+    print 'Supported filetype_plus are:' # tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, and html'
+    print conversion_options
     sys.exit()
 
 if component.inputname == component.outputname:
@@ -43,7 +48,7 @@ if os.path.isfile(component.inputname) and not os.path.isdir(component.outputnam
 
 elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
 
-    if component.filetype_plus in ["mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html"]:
+    if component.filetype_plus in ["mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
         fileextension = "mbx"
     else:
         fileextension = component.filetype_plus
@@ -95,7 +100,8 @@ for inputfile, outputfile in component.iofilepairs:
     elif component.filetype_plus in ["mbx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = transforms.mbx_fix(component.onefile)
     else:
-        print "doing nothing"
+        pass
+        # print "doing nothing"
 
     if component.filetype_plus in ["mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = transforms.mbx_strict(component.onefile)
@@ -105,9 +111,13 @@ for inputfile, outputfile in component.iofilepairs:
     elif component.filetype_plus == "mbx_strict_html":
         component.onefile = transforms.mbx_strict_html(component.onefile)
 
+    if component.filetype_plus == "mbx_fa":
+        component.onefile = transforms.mbx_fa(component.onefile)
+
     with open(outputfile, 'w') as outfile:
         outfile.write(component.onefile)
 
+print component.generic_counter
 #    print component.replaced_macros
 
 sys.exit()

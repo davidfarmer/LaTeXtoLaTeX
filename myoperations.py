@@ -783,3 +783,30 @@ def process_exercise(txt):
 
     return the_result
 
+#################
+
+def wwmacros(text):
+
+    thetext = text
+
+    thetext = re.sub(".*loadMacros\(", "", thetext, 0, re.DOTALL)
+    thetext = re.sub("\);", "", thetext, 0, re.DOTALL)
+    thetext = thetext.strip()
+
+    known_macros = ["PGstandard.pl"]
+
+    the_macros = thetext.split(",")
+
+    macros_in_mbx = "<pg-macros>" + "\n"
+
+    for macro in the_macros:
+        macro = macro.strip()
+        if macro.startswith("#"):
+            continue
+        macro = re.sub('"', '', macro)
+        if macro not in known_macros:
+            macros_in_mbx += "<macro-file>" + macro + "</macro-file>" + "\n"
+
+    macros_in_mbx += "</pg-macros>" + "\n"
+
+    return macros_in_mbx

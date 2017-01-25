@@ -198,3 +198,18 @@ def index_fix(txt):
 
 ##################
 
+def pgtombx(text):
+
+    thetext = text
+
+    the_metadata, everything_else = thetext.split("\nDOCUMENT();")
+
+    the_metadata = re.sub("#{5,}", "", the_metadata)
+    the_metadata = the_metadata.strip()
+
+    the_macros = re.sub("#{5,}.*", "", everything_else, 0, re.DOTALL)
+    everything_else = re.sub(".*?#{5,}", "", everything_else, 1, re.DOTALL)
+
+    the_macros_mbx = myoperations.wwmacros(the_macros)
+
+    print the_macros_mbx

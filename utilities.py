@@ -273,4 +273,27 @@ def argument_of_macro(text,mac,argnum=1):
 
     return the_argument
 
+#################
 
+def magic_character_convert(text, mode):
+    """ replace & and < by 
+        &amp; or \amp or <ampersand /> or TMPAMPAMP 
+            and 
+        &lt; or \lt or <less /> or TMPLESSLESS
+            depending on whether mode is
+        code or math or text or hide
+
+    """
+
+    the_text = text
+
+    the_text = re.sub(r"&", "TMPAMPAMP", the_text)
+    the_text = re.sub(r"<", "TMPLESSLESS", the_text)
+
+    if mode == "code":
+        the_text = re.sub("TMPAMPAMP", r"&amp;", the_text)
+        the_text = re.sub("TMPLESSLESS", r"&le;", the_text)
+        
+# also need an "unhide" mode
+
+    return the_text

@@ -14,4 +14,5 @@ ids = []
 
 something_changed = False
 
+substitution_counter = 0
 generic_counter = 0

@@ -217,17 +217,14 @@ def pgtombx(text):
 
     # find the ANSwer
     re_ANS = "\nANS\((.*?)\);"
-    try:
-        the_answer = re.search(re_ANS, everything_else, re.DOTALL).group(1)
-        the_answer = the_answer.strip()
-        the_answer_variable = re.match(r"(\$[a-zA-Z0-9_]+)", the_answer).group(1)
-        everything_else = re.sub(re_ANS, "", everything_else, 0, re.DOTALL)
-    except AttributeError:
-        the_answer = "ANSWER_CODE_NOT_PARSED_CORRECTLY"
-        the_answer_variable = "ANSWER_VARIABLE_NOT_PARSED_CORRECTLY"
-        print "file does not contain an answer"
-        ERROR_MESSAGE += "ERROR: file does not contain an answer\n"
-    the_answer_mbx = "$ansevaluator = " + the_answer
+    the_answers = re.findall(re_ANS, everything_else, re.DOTALL)
+    the_answers = [answer.strip() for answer in the_answers]
+    the_answer_variables = [re.match(r"(\$[a-zA-Z0-9_]+)", answer).group(1) for answer in the_answers]
+    everything_else = re.sub(re_ANS, "", everything_else, 0, re.DOTALL)
+    the_answer_mbx = ""
+    for answer in the_answers:
+        answer = utilities.magic_character_convert(answer, "code")
+        the_answer_mbx += "$ansevaluator = " + answer + "\n"
 
     # extract the problem statement
     re_statement = "BEGIN_PGML(.*)END_PGML\n"
@@ -267,7 +264,7 @@ def pgtombx(text):
         else: # we must be starting a new paragraph
             par = "<p>" + par
             previous_par = "p"
-        par = myoperations.pgmarkup_to_mbx(par, the_answer_variable)
+        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
      #   print "par revised", par
         the_statement_p_mbx.append(par)
 
@@ -299,7 +296,7 @@ def pgtombx(text):
     the_solution_p = the_solution.split("\n\n")
     for par in the_solution_p:
         par = par.strip()
-        par = myoperations.pgmarkup_to_mbx(par, the_answer_variable)
+        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
         the_solution_mbx += "<p>" + par + "</p>" + "\n"
     the_solution_mbx += "</solution>" + "\n"
 
@@ -342,22 +339,22 @@ def pgtombx(text):
 #    print everything_else
 #    print "----------------"
 
-    the_answer = ERROR_MESSAGE
-    the_answer += '<?xml version="1.0" encoding="UTF-8" ?>' + "\n"
-    the_answer += "\n" + "<exercise>" + "\n"
-    the_answer += "<original-metadata>" + "\n"
-    the_answer += the_metadata
-    the_answer += "\n" + "</original-metadata>" + "\n"
-    the_answer += "\n"
-    the_answer += '<webwork seed="1">' + "\n"
-    the_answer += the_macros_mbx
-    the_answer += "\n"
-    the_answer += the_setup_mbx
-    the_answer += "\n"
-    the_answer += the_statement_mbx
-    the_answer += "\n"
-    the_answer += the_solution_mbx
-    the_answer += "\n" + "</webwork>" + "\n"
-    the_answer += "</exercise>" + "\n"
+    the_output = ERROR_MESSAGE
+    the_output += '<?xml version="1.0" encoding="UTF-8" ?>' + "\n"
+    the_output += "\n" + "<exercise>" + "\n"
+    the_output += "<original-metadata>" + "\n"
+    the_output += the_metadata
+    the_output += "\n" + "</original-metadata>" + "\n"
+    the_output += "\n"
+    the_output += '<webwork seed="1">' + "\n"
+    the_output += the_macros_mbx
+    the_output += "\n"
+    the_output += the_setup_mbx
+    the_output += "\n"
+    the_output += the_statement_mbx
+    the_output += "\n"
+    the_output += the_solution_mbx
+    the_output += "\n" + "</webwork>" + "\n"
+    the_output += "</exercise>" + "\n"
 
-    return the_answer
+    return the_output

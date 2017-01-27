@@ -801,6 +801,8 @@ def wwmacros(text):
 
     for macro in the_macros:
         macro = macro.strip()
+        if not macro:
+            continue
         if macro.startswith("#"):
             continue
         macro = re.sub('"', '', macro)
@@ -813,13 +815,15 @@ def wwmacros(text):
 
 ################
 
-def pgmarkup_to_mbx(text, the_answer_variable):
+def pgmarkup_to_mbx(text, the_answer_variables):
     """ Change one paragrapf from pg-style markup to mbx-style.
 
     """
 
     the_text = text.strip()
 
+    the_text = re.sub(r"\[``", "<me>", the_text)
+    the_text = re.sub(r"``\]", "</me>", the_text)
     the_text = re.sub(r"\[`", "<m>", the_text)
     the_text = re.sub(r"`\]", "</m>", the_text)
 
@@ -828,7 +832,8 @@ def pgmarkup_to_mbx(text, the_answer_variable):
 #    if "_____" in the_text:
 #        print "          found  ____________ ", the_text
 
-    the_text = re.sub(r"(\[_+\])", lambda match: pg_input_fields(match, the_answer_variable), the_text)
+    component.substitution_counter = 0
+    the_text = re.sub(r"(\[_+\])((\{\$[a-zA-Z0-9_]*\}){0,1})", lambda match: pg_input_fields(match, the_answer_variables), the_text)
 
     while "*" in the_text:
         the_text = re.sub(r"\*", "<em>", the_text, 1)
@@ -838,18 +843,31 @@ def pgmarkup_to_mbx(text, the_answer_variable):
 
 #------------------#
 
-def pg_input_fields(txt, the_answer_variable):
-    """ Convert [___________] to mbx format.
+def pg_input_fields(txt, the_answer_variables):
+    """ Convert [___________]  and [___________]{$foo} to mbx format.
 
     """
 
     the_text = txt.group(1)
+    the_variable = txt.group(2)
 
+    if len(the_answer_variables) > 1:
+        print "multiple answers", the_answer_variables
     # should add an error check that the_text is of the form [___________]
 
     width = len(the_text) - 2
 
-    the_answer = '<var name="' + the_answer_variable + '" evaluator="$ansevaluator" width="' + str(width) + '" />'
+    print "the_variable", the_variable, "and the_answer_variables", the_answer_variables
+    if the_variable:
+        this_variable = the_variable
+    else:
+        try:
+            this_variable = the_answer_variables[component.substitution_counter]
+        except IndexError:
+            this_variable = "VARIABLE_NOT_FOUND_IN_ORIGINAL_SOURCE"
+            print "ERROR: name of variable not found"
+    component.substitution_counter += 1
+    the_answer = '<var name="' + this_variable + '" evaluator="$ansevaluator" width="' + str(width) + '" />'
 
     return the_answer
 

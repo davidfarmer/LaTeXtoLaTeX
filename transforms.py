@@ -202,14 +202,162 @@ def pgtombx(text):
 
     thetext = text
 
+    ERROR_MESSAGE = ""
+    # extract the metadata
     the_metadata, everything_else = thetext.split("\nDOCUMENT();")
 
     the_metadata = re.sub("#{5,}", "", the_metadata)
     the_metadata = the_metadata.strip()
 
+    # extract the macros
     the_macros = re.sub("#{5,}.*", "", everything_else, 0, re.DOTALL)
     everything_else = re.sub(".*?#{5,}", "", everything_else, 1, re.DOTALL)
 
     the_macros_mbx = myoperations.wwmacros(the_macros)
 
-    print the_macros_mbx
+    # find the ANSwer
+    re_ANS = "\nANS\((.*?)\);"
+    try:
+        the_answer = re.search(re_ANS, everything_else, re.DOTALL).group(1)
+        the_answer = the_answer.strip()
+        the_answer_variable = re.match(r"(\$[a-zA-Z0-9_]+)", the_answer).group(1)
+        everything_else = re.sub(re_ANS, "", everything_else, 0, re.DOTALL)
+    except AttributeError:
+        the_answer = "ANSWER_CODE_NOT_PARSED_CORRECTLY"
+        the_answer_variable = "ANSWER_VARIABLE_NOT_PARSED_CORRECTLY"
+        print "file does not contain an answer"
+        ERROR_MESSAGE += "ERROR: file does not contain an answer\n"
+    the_answer_mbx = "$ansevaluator = " + the_answer
+
+    # extract the problem statement
+    re_statement = "BEGIN_PGML(.*)END_PGML\n"
+    try:
+        the_statement = re.search(re_statement, everything_else, re.DOTALL).group(1)
+        everything_else = re.sub(re_statement, "", everything_else, 0, re.DOTALL)
+    except AttributeError:
+        the_statement = "STATEMENT_NOT_PARSED_CORRECTLY"
+        ERROR_MESSAGE += "ERROR: file does not contain a statement\n"
+        print "file does not contain a statement"
+
+            # extract the variables in the statement
+    vars_in_statement = re.findall(r"(\$[a-zA-Z0-9_]+)", the_statement)
+    vars_in_statement = list(set(vars_in_statement))  # remove duplicates
+#    print "vars1: ", vars_in_statement
+
+    the_statement_p = the_statement.split("\n")
+    previous_par = ""
+    the_statement_p_mbx = []
+    for par in the_statement_p:
+     #   print "THIS par", par
+        par = par.strip()
+        if not par:
+            if previous_par == "p":
+                the_statement_p_mbx[-1] += "</p>"
+            elif previous_par == "li":
+                the_statement_p_mbx[-1] += "\n</ul>\n</p>"
+            previous_par = ""
+            continue
+        if par.startswith("* "):
+            par = "<li><p>" + par[2:].strip() + "</p></li>"
+            if previous_par != "li":
+                par = "<p>\n<ul>" + "\n" + par
+                previous_par = "li"
+        elif previous_par == "p":  # this line is a continuation of the previous paragraph
+            pass # do nothing, because we are just processing another ine in the current paragraph
+        else: # we must be starting a new paragraph
+            par = "<p>" + par
+            previous_par = "p"
+        par = myoperations.pgmarkup_to_mbx(par, the_answer_variable)
+     #   print "par revised", par
+        the_statement_p_mbx.append(par)
+
+    the_statement_mbx = "<statement>" + "\n"
+    the_statement_mbx += "\n".join(the_statement_p_mbx)
+    the_statement_mbx += "\n</statement>" + "\n"
+
+
+
+    # extract the solution
+    re_solution = "BEGIN_PGML_SOLUTION(.*)END_PGML_SOLUTION"
+    try:
+        the_solution = re.search(re_solution, everything_else, re.DOTALL).group(1)
+        everything_else = re.sub(re_solution, "", everything_else, 0, re.DOTALL)
+    except AttributeError:
+        the_solution = "SOLUTION_NOT_PARSED_CORRECTLY"
+        ERROR_MESSAGE += "ERROR: file does not contain a solution\n"
+        print "file does not contain a solution\n"
+
+    the_solution = the_solution.strip()
+
+        # extract the variables in the solution
+    vars_in_solution = re.findall(r"(\$[a-zA-Z0-9_]+)", the_solution)
+#    print "vars2: ", vars_in_solution
+    vars_in_solution = list(set(vars_in_solution))  # remove duplicates
+#    print "vars: ", vars_in_solution
+
+    the_solution_mbx = "<solution>" + "\n"
+    the_solution_p = the_solution.split("\n\n")
+    for par in the_solution_p:
+        par = par.strip()
+        par = myoperations.pgmarkup_to_mbx(par, the_answer_variable)
+        the_solution_mbx += "<p>" + par + "</p>" + "\n"
+    the_solution_mbx += "</solution>" + "\n"
+
+    #throw away things that are not needed in the mbx version
+    things_to_throw_away = [
+           r"TEXT\(beginproblem\(\)\);",
+           r"ENDDOCUMENT\(\);",
+           r"#{5,}"
+           ]
+    for junk in things_to_throw_away:
+        everything_else = re.sub("\s*" + junk + "\s*", "\n", everything_else)
+
+    # now everything_else contains the pg-code.  In there, we convert
+    # < or & to &lt; or &amp;
+    everything_else = re.sub("&", "&amp;", everything_else)
+    everything_else = re.sub("<", "&lt;", everything_else)
+
+    the_pgcode_mbx = "<pg-code>" + "\n"
+    the_pgcode_mbx += everything_else.strip()
+    the_pgcode_mbx += "\n\n" + the_answer_mbx
+    the_pgcode_mbx += "\n" + "</pg-code>" + "\n"
+
+    all_vars = list(set(vars_in_statement + vars_in_solution))
+
+    the_setup_mbx = "<setup>" + "\n"
+    for var in all_vars:
+        the_setup_mbx += '<var name="' + var + '">' + "\n"
+        the_setup_mbx += '  <!--<static></static>-->' + "\n"
+        the_setup_mbx += '</var>' + "\n"
+
+    the_setup_mbx += the_pgcode_mbx
+    the_setup_mbx += "</setup>" + "\n"
+#    print the_macros_mbx
+#    print the_statement_mbx
+#    print the_answer_mbx
+#    print the_solution_mbx
+#    print the_setup_mbx
+
+#    print "----------------"
+#    print everything_else
+#    print "----------------"
+
+    the_answer = ERROR_MESSAGE
+    the_answer += '<?xml version="1.0" encoding="UTF-8" ?>' + "\n"
+    the_answer += "\n" + "<exercise>" + "\n"
+    the_answer += "<original-metadata>" + "\n"
+    the_answer += the_metadata
+    the_answer += "\n" + "</original-metadata>" + "\n"
+    the_answer += "\n"
+    the_answer += '<webwork seed="1">' + "\n"
+    the_answer += the_macros_mbx
+    the_answer += "\n"
+    the_answer += the_setup_mbx
+    the_answer += "\n"
+    the_answer += the_statement_mbx
+    the_answer += "\n"
+    the_answer += the_solution_mbx
+    the_answer += "\n" + "</webwork>" + "\n"
+    the_answer += "</exercise>" + "\n"
+
+    return the_answer

@@ -810,3 +810,46 @@ def wwmacros(text):
     macros_in_mbx += "</pg-macros>" + "\n"
 
     return macros_in_mbx
+
+################
+
+def pgmarkup_to_mbx(text, the_answer_variable):
+    """ Change one paragrapf from pg-style markup to mbx-style.
+
+    """
+
+    the_text = text.strip()
+
+    the_text = re.sub(r"\[`", "<m>", the_text)
+    the_text = re.sub(r"`\]", "</m>", the_text)
+
+    the_text = re.sub(r"\[\s*(\$[a-zA-Z0-9_]+)\s*\]", r'<var name="\1" />', the_text)
+
+#    if "_____" in the_text:
+#        print "          found  ____________ ", the_text
+
+    the_text = re.sub(r"(\[_+\])", lambda match: pg_input_fields(match, the_answer_variable), the_text)
+
+    while "*" in the_text:
+        the_text = re.sub(r"\*", "<em>", the_text, 1)
+        the_text = re.sub(r"\*", "</em>", the_text, 1)
+
+    return the_text
+
+#------------------#
+
+def pg_input_fields(txt, the_answer_variable):
+    """ Convert [___________] to mbx format.
+
+    """
+
+    the_text = txt.group(1)
+
+    # should add an error check that the_text is of the form [___________]
+
+    width = len(the_text) - 2
+
+    the_answer = '<var name="' + the_answer_variable + '" evaluator="$ansevaluator" width="' + str(width) + '" />'
+
+    return the_answer
+

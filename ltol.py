@@ -130,7 +130,8 @@ for inputfile, outputfile in component.iofilepairs:
     with open(outputfile, 'w') as outfile:
         outfile.write(component.onefile)
 
-print component.generic_counter
+if component.generic_counter:
+    print component.generic_counter
 #    print component.replaced_macros
 
 sys.exit()

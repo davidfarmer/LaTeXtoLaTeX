@@ -202,6 +202,10 @@ def pgtombx(text):
 
     thetext = text
 
+# to do:
+# HINTs
+# multiple solutions: BasicAlgebra/SystemsOfLinearEquations/SystemEquation40.pg
+
     ERROR_MESSAGE = ""
     # extract the metadata
     the_metadata, everything_else = thetext.split("\nDOCUMENT();")
@@ -214,6 +218,16 @@ def pgtombx(text):
     everything_else = re.sub(".*?#{5,}", "", everything_else, 1, re.DOTALL)
 
     the_macros_mbx = myoperations.wwmacros(the_macros)
+
+    if "BEGIN_HINT" in everything_else:
+        ERROR_MESSAGE += "ERROR: HINTs not implemented properly\n"
+        print "file contains non-PGML HINTs, which are not implemented yet"
+    if "BEGIN_TEXT" in everything_else:
+        ERROR_MESSAGE += "ERROR: TEXT not implemented properly\n"
+        print "file contains non-PGML TEXT, which is not implemented yet"
+    if "BEGIN_SOLUTION" in everything_else:
+        ERROR_MESSAGE += "ERROR: SOLUTION not implemented properly\n"
+        print "file contains non-PGML SOLUTION, which is not implemented yet"
 
     # find the ANSwer
     re_ANS = "\nANS\((.*?)\);"

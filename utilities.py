@@ -285,14 +285,23 @@ def magic_character_convert(text, mode):
 
     """
 
+ ### need "hide" as a 3rd parameter, so we can get TMPmathAMPAMP for example
+ ### that way we can hide math first, and then do text that includes math
+
     the_text = text
 
-    the_text = re.sub(r"&", "TMPAMPAMP", the_text)
-    the_text = re.sub(r"<", "TMPLESSLESS", the_text)
+    the_text = re.sub(r"&", "TMPhideAMPAMP", the_text)
+    the_text = re.sub(r"<", "TMPhideLESSLESS", the_text)
 
     if mode == "code":
-        the_text = re.sub("TMPAMPAMP", r"&amp;", the_text)
-        the_text = re.sub("TMPLESSLESS", r"&le;", the_text)
+        the_text = re.sub("TMPhideAMPAMP", r"&amp;", the_text)
+        the_text = re.sub("TMPhideLESSLESS", r"&le;", the_text)
+    elif mode == "math":
+        the_text = re.sub("TMPhideAMPAMP", r"\\amp", the_text)
+        the_text = re.sub("TMPhideLESSLESS", r"\\le", the_text)
+    elif mode == "text":
+        the_text = re.sub("TMPhideAMPAMP", r"<ampersand />", the_text)
+        the_text = re.sub("TMPhideLESSLESS", r"<less />", the_text)
         
 # also need an "unhide" mode
 

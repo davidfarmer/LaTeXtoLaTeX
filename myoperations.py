@@ -822,10 +822,16 @@ def pgmarkup_to_mbx(text, the_answer_variables):
 
     the_text = text.strip()
 
-    the_text = re.sub(r"\[``", "<me>", the_text)
-    the_text = re.sub(r"``\]", "</me>", the_text)
-    the_text = re.sub(r"\[`", "<m>", the_text)
-    the_text = re.sub(r"`\]", "</m>", the_text)
+#    the_text = re.sub(r"\[``", "<me>", the_text)
+#    the_text = re.sub(r"``\]", "</me>", the_text)
+#    the_text = re.sub(r"\[`", "<m>", the_text)
+#    the_text = re.sub(r"`\]", "</m>", the_text)
+
+#    the_text = utilities.magic_character_convert(the_text, "text")
+
+    the_text = re.sub(r"\[`(.*?)`\]", pg_math_environments, the_text, 0, re.DOTALL)
+
+    the_text = re.sub(r">>\[@image\((.*?)\)\s*@\]\*<<", pg_image_environments, the_text, 0, re.DOTALL)
 
     the_text = re.sub(r"\[\s*(\$[a-zA-Z0-9_]+)\s*\]", r'<var name="\1" />', the_text)
 
@@ -835,12 +841,83 @@ def pgmarkup_to_mbx(text, the_answer_variables):
     component.substitution_counter = 0
     the_text = re.sub(r"(\[_+\])((\{\$[a-zA-Z0-9_]*\}){0,1})", lambda match: pg_input_fields(match, the_answer_variables), the_text)
 
+    # crude way to capture *emphasized words*.
     while "*" in the_text:
         the_text = re.sub(r"\*", "<em>", the_text, 1)
         the_text = re.sub(r"\*", "</em>", the_text, 1)
 
     return the_text
 
+#------------------#
+
+def pg_image_environments(txt):
+
+    the_text = txt.group(1)
+
+    if not the_text.startswith("insertGraph"):
+        print "ERROR: malformed image markup"
+        return "<figure>" + "ERROR" + the_text + "</figure>"
+
+    the_name = re.match(r"insertGraph\(([^)]+)\)", the_text).group(1)
+    the_width = re.search(r"width\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1)
+    the_height = re.search(r"height\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1)
+    the_tex_size = re.search(r"tex_size\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1)
+    #is alt the right thing to grab for the description?
+    the_alt = re.search(r"alt\s*=\s*([^, ]+)(,| |\b)", the_text).group(1)
+    the_alt = the_alt[1:-1]   # remove surrounding quotes
+
+    the_image_short = '<image pg-name="' + the_name + '" />' + "\n"
+
+    the_image_long = '<image pg-name="' + the_name + '" '
+    the_image_long += 'width="' + the_width + '" '
+    the_image_long += 'height="' + the_height + '" '
+    the_image_long += 'tex_size="' + the_tex_size + '" '
+    the_image_long += '>' + "\n"
+    the_image_long += "<description>"
+    the_image_long += '<var name="' + the_alt + '" />'
+    the_image_long += "</description>" + "\n"
+    the_image_long += "</image>" + "\n"
+
+    the_answer = "<figure>" + "\n" + the_image_long + "</figure>" + "\n"
+
+    return the_answer
+#------------------#
+
+def pg_math_environments(txt):
+    """ Convert [`*`], [``*``], [``\begin{align}*``], etc to mbx markup.
+
+    """
+
+    the_text = txt.group(1)
+
+    if not the_text.startswith("`"):
+        return "<m>" + the_text + "</m>"
+
+    # so it should start and end with `
+    the_text = the_text[1:-1].strip()
+
+    if not the_text.startswith("\\begin{aligned}"):
+        return "<me>" + the_text + "</me>"
+
+    # remove the begin and end align
+    the_text = the_text[15:-13].strip()
+
+#    print "xx"+the_text[:10]+"yy", the_text.startswith(r"[t]")
+
+    if the_text.startswith(r"[t]"):
+        the_text = the_text[3:].strip()
+
+    the_output = "<md>" + "\n"
+    the_mrows = the_text.split("\\\\")
+    for row in the_mrows:
+ #       print "row : ", row
+        row = row.strip()
+        row = utilities.magic_character_convert(row, "math")
+        the_output += "<mrow>" + row + "</mrow>" + "\n"
+
+    the_output += "</md>"
+
+    return the_output
 #------------------#
 
 def pg_input_fields(txt, the_answer_variables):
@@ -850,16 +927,19 @@ def pg_input_fields(txt, the_answer_variables):
 
     the_text = txt.group(1)
     the_variable = txt.group(2)
+    the_variable = the_variable[1:-1]
 
-    if len(the_answer_variables) > 1:
-        print "multiple answers", the_answer_variables
+#    if len(the_answer_variables) > 1:
+#        print "multiple answers", the_answer_variables
     # should add an error check that the_text is of the form [___________]
 
     width = len(the_text) - 2
 
+    style = "externalvar"
     print "the_variable", the_variable, "and the_answer_variables", the_answer_variables
     if the_variable:
         this_variable = the_variable
+        style = "internalvar"
     else:
         try:
             this_variable = the_answer_variables[component.substitution_counter]
@@ -867,7 +947,10 @@ def pg_input_fields(txt, the_answer_variables):
             this_variable = "VARIABLE_NOT_FOUND_IN_ORIGINAL_SOURCE"
             print "ERROR: name of variable not found"
     component.substitution_counter += 1
-    the_answer = '<var name="' + this_variable + '" evaluator="$ansevaluator" width="' + str(width) + '" />'
+    the_answer = '<var name="' + this_variable + '" '
+    if style == "externalvar":
+        the_answer += 'evaluator="$ansevaluator" '
+    the_answer += 'width="' + str(width) + '" />'
 
     return the_answer
 

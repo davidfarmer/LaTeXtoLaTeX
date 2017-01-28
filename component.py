@@ -9,6 +9,7 @@ iofilepairs = []
 
 error_messages = []
 replaced_macros = []
+defined_variables = {}
 
 ids = []
 

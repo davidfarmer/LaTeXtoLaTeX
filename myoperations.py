@@ -831,7 +831,7 @@ def pgmarkup_to_mbx(text, the_answer_variables):
 
     the_text = re.sub(r"\[`(.*?)`\]", pg_math_environments, the_text, 0, re.DOTALL)
 
-    the_text = re.sub(r">>\[@image\((.*?)\)\s*@\]\*<<", pg_image_environments, the_text, 0, re.DOTALL)
+    the_text = re.sub(r">>\[\s*@\s*image\((.*?)\)\s*@\]\*<<", pg_image_environments, the_text, 0, re.DOTALL)
 
     the_text = re.sub(r"\[\s*(\$[a-zA-Z0-9_]+)\s*\]", r'<var name="\1" />', the_text)
 
@@ -853,17 +853,18 @@ def pgmarkup_to_mbx(text, the_answer_variables):
 def pg_image_environments(txt):
 
     the_text = txt.group(1)
+    the_text = the_text.strip()
 
     if not the_text.startswith("insertGraph"):
         print "ERROR: malformed image markup"
         return "<figure>" + "ERROR" + the_text + "</figure>"
 
-    the_name = re.match(r"insertGraph\(([^)]+)\)", the_text).group(1)
-    the_width = re.search(r"width\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1)
-    the_height = re.search(r"height\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1)
-    the_tex_size = re.search(r"tex_size\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1)
+    the_name = re.match(r"insertGraph\(([^)]+)\)", the_text).group(1).strip()
+    the_width = re.search(r"width\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
+    the_height = re.search(r"height\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
+    the_tex_size = re.search(r"tex_size\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
     #is alt the right thing to grab for the description?
-    the_alt = re.search(r"alt\s*=\s*([^, ]+)(,| |\b)", the_text).group(1)
+    the_alt = re.search(r"alt\s*=\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
     the_alt = the_alt[1:-1]   # remove surrounding quotes
 
     the_image_short = '<image pg-name="' + the_name + '" />' + "\n"
@@ -944,12 +945,15 @@ def pg_input_fields(txt, the_answer_variables):
         try:
             this_variable = the_answer_variables[component.substitution_counter]
         except IndexError:
-            this_variable = "VARIABLE_NOT_FOUND_IN_ORIGINAL_SOURCE"
+            this_variable = "ERROR_VARIABLE_NOT_FOUND_IN_ORIGINAL_SOURCE"
             print "ERROR: name of variable not found"
     component.substitution_counter += 1
     the_answer = '<var name="' + this_variable + '" '
     if style == "externalvar":
         the_answer += 'evaluator="$ansevaluator" '
+    elif this_variable in component.defined_variables:
+        print "found", this_variable, "in", component.defined_variables
+        the_answer += 'evaluator="' + component.defined_variables[this_variable] + '" '
     the_answer += 'width="' + str(width) + '" />'
 
     return the_answer

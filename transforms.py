@@ -207,6 +207,17 @@ def pgtombx(text):
 # multiple solutions: BasicAlgebra/SystemsOfLinearEquations/SystemEquation40.pg
 
     ERROR_MESSAGE = ""
+
+    # find the defined variables, for later interpreting [________]{$var}
+    predefined_variables = re.findall(r"(\$[a-zA-Z0-9_]+\s*=\s*\$[a-zA-Z0-9_]+)\s*->\s*cmp", thetext)
+    # print "predefined_variables", predefined_variables
+    for varpair in predefined_variables:
+        var, evaluator = varpair.split("=")
+        var = var.strip()
+        evaluator = evaluator.strip()
+        component.defined_variables[var] = evaluator
+    # need to do the same for PopUp and RadioButtons
+
     # extract the metadata
     the_metadata, everything_else = thetext.split("\nDOCUMENT();")
 
@@ -325,8 +336,9 @@ def pgtombx(text):
 
     # now everything_else contains the pg-code.  In there, we convert
     # < or & to &lt; or &amp;
-    everything_else = re.sub("&", "&amp;", everything_else)
-    everything_else = re.sub("<", "&lt;", everything_else)
+#    everything_else = re.sub("&", "&amp;", everything_else)
+#    everything_else = re.sub("<", "&lt;", everything_else)
+    everything_else = utilities.magic_character_convert(everything_else, "code")
 
     the_pgcode_mbx = "<pg-code>" + "\n"
     the_pgcode_mbx += everything_else.strip()

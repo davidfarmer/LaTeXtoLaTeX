@@ -114,7 +114,7 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("dt", "\n\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
     thetext = postprocess.tag_before_after("li", "\n\n", "", "", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("ul|ol|dl", "\n\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("ul|ol|dl", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("theorem|proposition|lemma|conjecture|corollary",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("algorithm",
@@ -223,6 +223,8 @@ def pgtombx(text):
 
     the_metadata = re.sub("#{5,}", "", the_metadata)
     the_metadata = the_metadata.strip()
+
+    the_metadata = utilities.magic_character_convert(the_metadata, "text")
 
     # extract the macros
     the_macros = re.sub("#{5,}.*", "", everything_else, 0, re.DOTALL)
@@ -382,5 +384,7 @@ def pgtombx(text):
     the_output += the_solution_mbx
     the_output += "\n" + "</webwork>" + "\n"
     the_output += "</exercise>" + "\n"
+
+    the_output = mbx_pp(the_output)
 
     return the_output

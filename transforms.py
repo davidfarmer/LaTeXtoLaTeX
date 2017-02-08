@@ -66,8 +66,8 @@ def mbx_strict_html(text):
     thetext = text
 
     # mathjax can cause a line feed between math and punctuation
-    thetext = re.sub("</m>\s*([,:;.!?\-\)]+)\s+<m>", r"\\text{\1}</m><nbsp /><m>", thetext)
-    thetext = re.sub("</m>\s*([,:;.!?\-\)]+)", r"\\text{\1}</m>", thetext)
+    thetext = re.sub("</m>\s*([,:;.!?\-\)'\"]+)\s+<m>", r"\\text{\1}</m><nbsp /><m>", thetext)
+    thetext = re.sub("</m>\s*([,:;.!?\-\)'\"]+)", r"\\text{\1}</m>", thetext)
 
     # there can also be puntuation before math: (<m> x = 9 </m>)
 
@@ -123,6 +123,7 @@ def mbx_pp(text):
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("definition|example|insight|exploration|activity|remark|proof",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("problem", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("figure|table",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n", thetext)
@@ -160,6 +161,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("exercises", thetext)
     thetext = postprocess.add_space_within("exercisegroup", thetext)
     thetext = postprocess.add_space_within("exercise", thetext)
+    thetext = postprocess.add_space_within("problem", thetext)
     thetext = postprocess.add_space_within("webwork", thetext)
     thetext = postprocess.add_space_within("setup", thetext)
  #   thetext = postprocess.add_space_within("var", thetext)

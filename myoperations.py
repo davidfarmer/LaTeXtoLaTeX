@@ -619,6 +619,16 @@ def mytransform_html(text):
 
 ###################
 
+def mytransform_txt(text):
+
+    thetext = text
+
+    thetext = re.sub(r"^Hint for.*", "", thetext)
+    thetext = re.sub(r".$", "", thetext,1,re.DOTALL)
+    return thetext
+
+###################
+
 def mytransform_tex(text):
 
     thetext = text
@@ -641,20 +651,73 @@ def mytransform_tex(text):
     # so we convert these to \begin{example} \end{example}.
     # Labels and references still need to be added by hand.
 
-    thetext = re.sub(r"\\noindent\s*{\\bf\s+Example\s+[0-9.]+\s*}",r"\\begin{example}",thetext)
-    thetext = re.sub(r"\\hspace{\\fill}\s*\$\\blacksquare\$",r"\\end{example}",thetext)
+#    thetext = re.sub(r"\\noindent\s*{\\bf\s+Example\s+[0-9.]+\s*}",r"\\begin{example}",thetext)
+#    thetext = re.sub(r"\\hspace{\\fill}\s*\$\\blacksquare\$",r"\\end{example}",thetext)
+#
+#    # delete empty label arguments
+#    thetext = re.sub(r"\\label{[a-zA-Z]+:[a-zA-Z]+:}","",thetext)
+#
+#    newtext = text
+#    newtext = re.sub(r"\s*{\s*(\\large)*\s*(\\bf)*\s*Exercises\s*-*\s*\\thesection\\*\s*}([^}]{2,60}\})",
+#                         r"\\begin{exercises}\3" + "\n\\end{exercises}",newtext,0, re.DOTALL)
+#    thetext = newtext
 
-    # delete empty label arguments
-    thetext = re.sub(r"\\label{[a-zA-Z]+:[a-zA-Z]+:}","",thetext)
+    # from Bogart's IBL combinatorics book
 
-    newtext = text
-    newtext = re.sub(r"\s*{\s*(\\large)*\s*(\\bf)*\s*Exercises\s*-*\s*\\thesection\\*\s*}([^}]{2,60}\})",
-                         r"\\begin{exercises}\3" + "\n\\end{exercises}",newtext,0, re.DOTALL)
-    thetext = newtext
+    thetext = re.sub(r"\\bp\s(.*?)\\ep\s", myt_tex, thetext, 0, re.DOTALL)
 
     return thetext
 
 #####################
+
+def myt_tex(txt):
+
+    thetext = txt.group(1)
+
+    #\item is confusing when it is at the top level, so at least
+    # catch it at the start of a problem
+    thetext = re.sub(r"^\s*\\item\s+", r"\\itemx ", thetext)
+    thetext = re.sub(r"(^|\n) *\\item(m|e|s|i|ei|es|esi|si|h|ih|x)\s", r"\nSPLIT\2DIVVV", thetext)
+
+    problem_type = {'m':'motivation',
+                    'e':'essential',
+                    's':'summary',
+                    'i':'interesting',
+                    'ei':'essential and interesting',
+                    'es':'essential for this or the next section',
+                    'esi':'essential for this or the next section, and interesting',
+                    'h':'difficult',
+                    'ih':'interesting and difficult',
+                    'x':'',
+                    '':''}
+
+    the_problems = thetext.split("SPLIT")
+    the_answer = ""
+
+    for problem in the_problems:
+        problem = problem.strip()
+        if not problem:
+            continue
+        try:
+            the_type, the_statement = problem.split("DIVVV")
+            this_problem_type = problem_type[the_type]
+        except ValueError:
+            if problem.startswith(r"\item "):
+                the_statement = problem[:6]
+                this_problem_type = ""
+            else:
+                print "WEIRD", problem
+        #    print "the_type",the_type
+                print "ERR:", problem[:50]
+        the_answer += r"\begin{problem}"
+        if this_problem_type:
+            the_answer += r"(" + this_problem_type + ")" 
+        the_answer += "\n"
+        the_answer += the_statement + "\n"
+        the_answer += r"\end{problem}" + "\n\n"
+
+    return the_answer
+
 #####################
 
 def process_figure(txt):

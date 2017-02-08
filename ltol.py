@@ -15,7 +15,7 @@ import myoperations
 #################################
 
 conversion_options = ["mbx", "mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
-                      "tex", "html", "pgtombx"]
+                      "txt", "tex", "html", "pgtombx"]
 
 if not len(sys.argv) == 4:
     print 'To convert a file to a different form, do either:'
@@ -101,6 +101,8 @@ for inputfile, outputfile in component.iofilepairs:
 
     if component.filetype_plus == 'tex':
         component.onefile = myoperations.mytransform_tex(component.onefile)
+    elif component.filetype_plus == 'txt':
+        component.onefile = myoperations.mytransform_txt(component.onefile)
     elif component.filetype_plus == 'html':
         component.onefile = myoperations.mytransform_html(component.onefile)
     elif component.filetype_plus == 'mbx':

@@ -66,8 +66,8 @@ def mbx_strict_html(text):
     thetext = text
 
     # mathjax can cause a line feed between math and punctuation
-    thetext = re.sub("</m>\s*([,:;.!?\-\)]+)\s+<m>", r"\\text{\1}</m><nbsp /><m>", thetext)
-    thetext = re.sub("</m>\s*([,:;.!?\-\)]+)", r"\\text{\1}</m>", thetext)
+    thetext = re.sub("</m>\s*([,:;.!?\-\)'\"]+)\s+<m>", r"\\text{\1}</m><nbsp /><m>", thetext)
+    thetext = re.sub("</m>\s*([,:;.!?\-\)'\"]+)", r"\\text{\1}</m>", thetext)
 
     # there can also be puntuation before math: (<m> x = 9 </m>)
 
@@ -114,15 +114,16 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("dt", "\n\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
     thetext = postprocess.tag_before_after("li", "\n\n", "", "", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("ul|ol|dl", "\n\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("ul|ol|dl", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("theorem|proposition|lemma|conjecture|corollary",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("algorithm",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("objectives",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("definition|example|insight|exploration|activity|remark|proof",
+    thetext = postprocess.tag_before_after("definition|axiom|example|insight|exploration|activity|remark|proof",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("problem", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("figure|table",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n", thetext)
@@ -146,7 +147,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("sidebyside", thetext)
     thetext = postprocess.add_space_within("aside", thetext)
     thetext = postprocess.add_space_within("latex-image-code", thetext)
-    thetext = postprocess.add_space_within("definition|theorem|example|insight|exploration|activity", thetext)
+    thetext = postprocess.add_space_within("definition|axiom|theorem|example|insight|exploration|activity", thetext)
     thetext = postprocess.add_space_within("algorithm|objectives", thetext)
     thetext = postprocess.add_space_within("proposition|lemma|remark|conjecture|corollary", thetext)
     thetext = postprocess.add_space_within("statement|solution|answer|hint|proof", thetext)
@@ -160,6 +161,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("exercises", thetext)
     thetext = postprocess.add_space_within("exercisegroup", thetext)
     thetext = postprocess.add_space_within("exercise", thetext)
+    thetext = postprocess.add_space_within("problem", thetext)
     thetext = postprocess.add_space_within("webwork", thetext)
     thetext = postprocess.add_space_within("setup", thetext)
  #   thetext = postprocess.add_space_within("var", thetext)
@@ -198,3 +200,193 @@ def index_fix(txt):
 
 ##################
 
+def pgtombx(text):
+
+    thetext = text
+
+# to do:
+# HINTs
+# multiple solutions: BasicAlgebra/SystemsOfLinearEquations/SystemEquation40.pg
+
+    ERROR_MESSAGE = ""
+
+    # find the defined variables, for later interpreting [________]{$var}
+    predefined_variables = re.findall(r"(\$[a-zA-Z0-9_]+\s*=\s*\$[a-zA-Z0-9_]+)\s*->\s*cmp", thetext)
+    # print "predefined_variables", predefined_variables
+    for varpair in predefined_variables:
+        var, evaluator = varpair.split("=")
+        var = var.strip()
+        evaluator = evaluator.strip()
+        component.defined_variables[var] = evaluator
+    # need to do the same for PopUp and RadioButtons
+
+    # extract the metadata
+    the_metadata, everything_else = thetext.split("\nDOCUMENT();")
+
+    the_metadata = re.sub("#{5,}", "", the_metadata)
+    the_metadata = the_metadata.strip()
+
+    the_metadata = utilities.magic_character_convert(the_metadata, "text")
+
+    # extract the macros
+    the_macros = re.sub("#{5,}.*", "", everything_else, 0, re.DOTALL)
+    everything_else = re.sub(".*?#{5,}", "", everything_else, 1, re.DOTALL)
+
+    the_macros_mbx = myoperations.wwmacros(the_macros)
+
+    if "BEGIN_HINT" in everything_else:
+        ERROR_MESSAGE += "ERROR: HINTs not implemented properly\n"
+        print "file contains non-PGML HINTs, which are not implemented yet"
+    if "BEGIN_TEXT" in everything_else:
+        ERROR_MESSAGE += "ERROR: TEXT not implemented properly\n"
+        print "file contains non-PGML TEXT, which is not implemented yet"
+    if "BEGIN_SOLUTION" in everything_else:
+        ERROR_MESSAGE += "ERROR: SOLUTION not implemented properly\n"
+        print "file contains non-PGML SOLUTION, which is not implemented yet"
+
+    # find the ANSwer
+    re_ANS = "\nANS\((.*?)\);"
+    the_answers = re.findall(re_ANS, everything_else, re.DOTALL)
+    the_answers = [answer.strip() for answer in the_answers]
+    the_answer_variables = [re.match(r"(\$[a-zA-Z0-9_]+)", answer).group(1) for answer in the_answers]
+    everything_else = re.sub(re_ANS, "", everything_else, 0, re.DOTALL)
+    the_answer_mbx = ""
+    for answer in the_answers:
+        answer = utilities.magic_character_convert(answer, "code")
+        the_answer_mbx += "$ansevaluator = " + answer + "\n"
+
+    # extract the problem statement
+    re_statement = "BEGIN_PGML(.*)END_PGML\n"
+    try:
+        the_statement = re.search(re_statement, everything_else, re.DOTALL).group(1)
+        everything_else = re.sub(re_statement, "", everything_else, 0, re.DOTALL)
+    except AttributeError:
+        the_statement = "STATEMENT_NOT_PARSED_CORRECTLY"
+        ERROR_MESSAGE += "ERROR: file does not contain a statement\n"
+        print "file does not contain a statement"
+
+            # extract the variables in the statement
+    vars_in_statement = re.findall(r"(\$[a-zA-Z0-9_]+)", the_statement)
+    vars_in_statement = list(set(vars_in_statement))  # remove duplicates
+#    print "vars1: ", vars_in_statement
+
+    the_statement_p = the_statement.split("\n")
+    previous_par = ""
+    the_statement_p_mbx = []
+    for par in the_statement_p:
+     #   print "THIS par", par
+        par = par.strip()
+        if not par:
+            if previous_par == "p":
+                the_statement_p_mbx[-1] += "</p>"
+            elif previous_par == "li":
+                the_statement_p_mbx[-1] += "\n</ul>\n</p>"
+            previous_par = ""
+            continue
+        if par.startswith("* "):
+            par = "<li><p>" + par[2:].strip() + "</p></li>"
+            if previous_par != "li":
+                par = "<p>\n<ul>" + "\n" + par
+                previous_par = "li"
+        elif previous_par == "p":  # this line is a continuation of the previous paragraph
+            pass # do nothing, because we are just processing another ine in the current paragraph
+        else: # we must be starting a new paragraph
+            par = "<p>" + par
+            previous_par = "p"
+        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
+     #   print "par revised", par
+        the_statement_p_mbx.append(par)
+
+    the_statement_mbx = "<statement>" + "\n"
+    the_statement_mbx += "\n".join(the_statement_p_mbx)
+    the_statement_mbx += "\n</statement>" + "\n"
+
+
+
+    # extract the solution
+    re_solution = "BEGIN_PGML_SOLUTION(.*)END_PGML_SOLUTION"
+    try:
+        the_solution = re.search(re_solution, everything_else, re.DOTALL).group(1)
+        everything_else = re.sub(re_solution, "", everything_else, 0, re.DOTALL)
+    except AttributeError:
+        the_solution = "SOLUTION_NOT_PARSED_CORRECTLY"
+        ERROR_MESSAGE += "ERROR: file does not contain a solution\n"
+        print "file does not contain a solution\n"
+
+    the_solution = the_solution.strip()
+
+        # extract the variables in the solution
+    vars_in_solution = re.findall(r"(\$[a-zA-Z0-9_]+)", the_solution)
+#    print "vars2: ", vars_in_solution
+    vars_in_solution = list(set(vars_in_solution))  # remove duplicates
+#    print "vars: ", vars_in_solution
+
+    the_solution_mbx = "<solution>" + "\n"
+    the_solution_p = the_solution.split("\n\n")
+    for par in the_solution_p:
+        par = par.strip()
+        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
+        the_solution_mbx += "<p>" + par + "</p>" + "\n"
+    the_solution_mbx += "</solution>" + "\n"
+
+    #throw away things that are not needed in the mbx version
+    things_to_throw_away = [
+           r"TEXT\(beginproblem\(\)\);",
+           r"ENDDOCUMENT\(\);",
+           r"#{5,}"
+           ]
+    for junk in things_to_throw_away:
+        everything_else = re.sub("\s*" + junk + "\s*", "\n", everything_else)
+
+    # now everything_else contains the pg-code.  In there, we convert
+    # < or & to &lt; or &amp;
+#    everything_else = re.sub("&", "&amp;", everything_else)
+#    everything_else = re.sub("<", "&lt;", everything_else)
+    everything_else = utilities.magic_character_convert(everything_else, "code")
+
+    the_pgcode_mbx = "<pg-code>" + "\n"
+    the_pgcode_mbx += everything_else.strip()
+    the_pgcode_mbx += "\n\n" + the_answer_mbx
+    the_pgcode_mbx += "\n" + "</pg-code>" + "\n"
+
+    all_vars = list(set(vars_in_statement + vars_in_solution))
+
+    the_setup_mbx = "<setup>" + "\n"
+    for var in all_vars:
+        the_setup_mbx += '<var name="' + var + '">' + "\n"
+        the_setup_mbx += '  <!--<static></static>-->' + "\n"
+        the_setup_mbx += '</var>' + "\n"
+
+    the_setup_mbx += the_pgcode_mbx
+    the_setup_mbx += "</setup>" + "\n"
+#    print the_macros_mbx
+#    print the_statement_mbx
+#    print the_answer_mbx
+#    print the_solution_mbx
+#    print the_setup_mbx
+
+#    print "----------------"
+#    print everything_else
+#    print "----------------"
+
+    the_output = ERROR_MESSAGE
+    the_output += '<?xml version="1.0" encoding="UTF-8" ?>' + "\n"
+    the_output += "\n" + "<exercise>" + "\n"
+    the_output += "<original-metadata>" + "\n"
+    the_output += the_metadata
+    the_output += "\n" + "</original-metadata>" + "\n"
+    the_output += "\n"
+    the_output += '<webwork seed="1">' + "\n"
+    the_output += the_macros_mbx
+    the_output += "\n"
+    the_output += the_setup_mbx
+    the_output += "\n"
+    the_output += the_statement_mbx
+    the_output += "\n"
+    the_output += the_solution_mbx
+    the_output += "\n" + "</webwork>" + "\n"
+    the_output += "</exercise>" + "\n"
+
+    the_output = mbx_pp(the_output)
+
+    return the_output

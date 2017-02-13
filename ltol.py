@@ -15,7 +15,7 @@ import myoperations
 #################################
 
 conversion_options = ["mbx", "mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
-                      "tex", "html"]
+                      "txt", "tex", "html", "pgtombx"]
 
 if not len(sys.argv) == 4:
     print 'To convert a file to a different form, do either:'
@@ -30,6 +30,9 @@ if not len(sys.argv) == 4:
 component.filetype_plus = sys.argv[1]
 component.inputname = sys.argv[2]
 component.outputname = sys.argv[3]
+
+print component.inputname
+print component.outputname
 
 if component.filetype_plus not in conversion_options:
     print "Filetype not recognized."
@@ -49,18 +52,25 @@ if os.path.isfile(component.inputname) and not os.path.isdir(component.outputnam
 elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
 
     if component.filetype_plus in ["mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
-        fileextension = "mbx"
+        fileextension_in = "mbx"
+        fileextension_out = "mbx"
+    elif component.filetype_plus in ["pgtombx"]:
+        fileextension_in = "pg"
+        fileextension_out = "mbx"
     else:
-        fileextension = component.filetype_plus
+        fileextension_in = component.filetype_plus
+        fileextension_out = component.filetype_plus
 
     inputdir = component.inputname
     inputdir = re.sub(r"/*$","",inputdir)  # remove trailing slash
     outputdir = component.outputname
     outputdir = re.sub(r"/*$","",outputdir)  # remove trailing slash
     outputdir = outputdir + "/"              # and then put it back
-    thefiles = glob.glob(inputdir + "/*." + fileextension)
+    thefiles = glob.glob(inputdir + "/*." + fileextension_in)
     for inputfilename in thefiles:
         outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", inputfilename)
+        if fileextension_in != fileextension_out:
+            outputfilename = re.sub(fileextension_in + "$", fileextension_out, outputfilename)
         if inputfilename == outputfilename:
             print "big problem, quitting"
         component.iofilepairs.append([inputfilename, outputfilename])
@@ -91,6 +101,8 @@ for inputfile, outputfile in component.iofilepairs:
 
     if component.filetype_plus == 'tex':
         component.onefile = myoperations.mytransform_tex(component.onefile)
+    elif component.filetype_plus == 'txt':
+        component.onefile = myoperations.mytransform_txt(component.onefile)
     elif component.filetype_plus == 'html':
         component.onefile = myoperations.mytransform_html(component.onefile)
     elif component.filetype_plus == 'mbx':
@@ -114,10 +126,14 @@ for inputfile, outputfile in component.iofilepairs:
     if component.filetype_plus == "mbx_fa":
         component.onefile = transforms.mbx_fa(component.onefile)
 
+    if component.filetype_plus == "pgtombx":
+        component.onefile = transforms.pgtombx(component.onefile)
+
     with open(outputfile, 'w') as outfile:
         outfile.write(component.onefile)
 
-print component.generic_counter
+if component.generic_counter:
+    print component.generic_counter
 #    print component.replaced_macros
 
 sys.exit()

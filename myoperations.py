@@ -619,6 +619,16 @@ def mytransform_html(text):
 
 ###################
 
+def mytransform_txt(text):
+
+    thetext = text
+
+    thetext = re.sub(r"^Hint for.*", "", thetext)
+    thetext = re.sub(r".$", "", thetext,1,re.DOTALL)
+    return thetext
+
+###################
+
 def mytransform_tex(text):
 
     thetext = text
@@ -641,20 +651,73 @@ def mytransform_tex(text):
     # so we convert these to \begin{example} \end{example}.
     # Labels and references still need to be added by hand.
 
-    thetext = re.sub(r"\\noindent\s*{\\bf\s+Example\s+[0-9.]+\s*}",r"\\begin{example}",thetext)
-    thetext = re.sub(r"\\hspace{\\fill}\s*\$\\blacksquare\$",r"\\end{example}",thetext)
+#    thetext = re.sub(r"\\noindent\s*{\\bf\s+Example\s+[0-9.]+\s*}",r"\\begin{example}",thetext)
+#    thetext = re.sub(r"\\hspace{\\fill}\s*\$\\blacksquare\$",r"\\end{example}",thetext)
+#
+#    # delete empty label arguments
+#    thetext = re.sub(r"\\label{[a-zA-Z]+:[a-zA-Z]+:}","",thetext)
+#
+#    newtext = text
+#    newtext = re.sub(r"\s*{\s*(\\large)*\s*(\\bf)*\s*Exercises\s*-*\s*\\thesection\\*\s*}([^}]{2,60}\})",
+#                         r"\\begin{exercises}\3" + "\n\\end{exercises}",newtext,0, re.DOTALL)
+#    thetext = newtext
 
-    # delete empty label arguments
-    thetext = re.sub(r"\\label{[a-zA-Z]+:[a-zA-Z]+:}","",thetext)
+    # from Bogart's IBL combinatorics book
 
-    newtext = text
-    newtext = re.sub(r"\s*{\s*(\\large)*\s*(\\bf)*\s*Exercises\s*-*\s*\\thesection\\*\s*}([^}]{2,60}\})",
-                         r"\\begin{exercises}\3" + "\n\\end{exercises}",newtext,0, re.DOTALL)
-    thetext = newtext
+    thetext = re.sub(r"\\bp\s(.*?)\\ep\s", myt_tex, thetext, 0, re.DOTALL)
 
     return thetext
 
 #####################
+
+def myt_tex(txt):
+
+    thetext = txt.group(1)
+
+    #\item is confusing when it is at the top level, so at least
+    # catch it at the start of a problem
+    thetext = re.sub(r"^\s*\\item\s+", r"\\itemx ", thetext)
+    thetext = re.sub(r"(^|\n) *\\item(m|e|s|i|ei|es|esi|si|h|ih|x)\s", r"\nSPLIT\2DIVVV", thetext)
+
+    problem_type = {'m':'motivation',
+                    'e':'essential',
+                    's':'summary',
+                    'i':'interesting',
+                    'ei':'essential and interesting',
+                    'es':'essential for this or the next section',
+                    'esi':'essential for this or the next section, and interesting',
+                    'h':'difficult',
+                    'ih':'interesting and difficult',
+                    'x':'',
+                    '':''}
+
+    the_problems = thetext.split("SPLIT")
+    the_answer = ""
+
+    for problem in the_problems:
+        problem = problem.strip()
+        if not problem:
+            continue
+        try:
+            the_type, the_statement = problem.split("DIVVV")
+            this_problem_type = problem_type[the_type]
+        except ValueError:
+            if problem.startswith(r"\item "):
+                the_statement = problem[:6]
+                this_problem_type = ""
+            else:
+                print "WEIRD", problem
+        #    print "the_type",the_type
+                print "ERR:", problem[:50]
+        the_answer += r"\begin{problem}"
+        if this_problem_type:
+            the_answer += r"(" + this_problem_type + ")" 
+        the_answer += "\n"
+        the_answer += the_statement + "\n"
+        the_answer += r"\end{problem}" + "\n\n"
+
+    return the_answer
+
 #####################
 
 def process_figure(txt):
@@ -782,4 +845,179 @@ def process_exercise(txt):
     the_result += '  </exercise>' + '\n'
 
     return the_result
+
+#################
+
+def wwmacros(text):
+
+    thetext = text
+
+    thetext = re.sub(".*loadMacros\(", "", thetext, 0, re.DOTALL)
+    thetext = re.sub("\);", "", thetext, 0, re.DOTALL)
+    thetext = thetext.strip()
+
+    known_macros = ["PGstandard.pl"]
+
+    the_macros = thetext.split(",")
+
+    macros_in_mbx = "<pg-macros>" + "\n"
+
+    for macro in the_macros:
+        macro = macro.strip()
+        if not macro:
+            continue
+        if macro.startswith("#"):
+            continue
+        macro = re.sub('"', '', macro)
+        if macro not in known_macros:
+            macros_in_mbx += "<macro-file>" + macro + "</macro-file>" + "\n"
+
+    macros_in_mbx += "</pg-macros>" + "\n"
+
+    return macros_in_mbx
+
+################
+
+def pgmarkup_to_mbx(text, the_answer_variables):
+    """ Change one paragrapf from pg-style markup to mbx-style.
+
+    """
+
+    the_text = text.strip()
+
+#    the_text = re.sub(r"\[``", "<me>", the_text)
+#    the_text = re.sub(r"``\]", "</me>", the_text)
+#    the_text = re.sub(r"\[`", "<m>", the_text)
+#    the_text = re.sub(r"`\]", "</m>", the_text)
+
+#    the_text = utilities.magic_character_convert(the_text, "text")
+
+    the_text = re.sub(r"\[`(.*?)`\]", pg_math_environments, the_text, 0, re.DOTALL)
+
+    the_text = re.sub(r">>\[\s*@\s*image\((.*?)\)\s*@\]\*<<", pg_image_environments, the_text, 0, re.DOTALL)
+
+    the_text = re.sub(r"\[\s*(\$[a-zA-Z0-9_]+)\s*\]", r'<var name="\1" />', the_text)
+
+#    if "_____" in the_text:
+#        print "          found  ____________ ", the_text
+
+    component.substitution_counter = 0
+    the_text = re.sub(r"(\[_+\])((\{\$[a-zA-Z0-9_]*\}){0,1})", lambda match: pg_input_fields(match, the_answer_variables), the_text)
+
+    # crude way to capture *emphasized words*.
+    while "*" in the_text:
+        the_text = re.sub(r"\*", "<em>", the_text, 1)
+        the_text = re.sub(r"\*", "</em>", the_text, 1)
+
+    return the_text
+
+#------------------#
+
+def pg_image_environments(txt):
+
+    the_text = txt.group(1)
+    the_text = the_text.strip()
+
+    if not the_text.startswith("insertGraph"):
+        print "ERROR: malformed image markup"
+        return "<figure>" + "ERROR" + the_text + "</figure>"
+
+    the_name = re.match(r"insertGraph\(([^)]+)\)", the_text).group(1).strip()
+    the_width = re.search(r"width\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
+    the_height = re.search(r"height\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
+    the_tex_size = re.search(r"tex_size\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
+    #is alt the right thing to grab for the description?
+    the_alt = re.search(r"alt\s*=\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
+    the_alt = the_alt[1:-1]   # remove surrounding quotes
+
+    the_image_short = '<image pg-name="' + the_name + '" />' + "\n"
+
+    the_image_long = '<image pg-name="' + the_name + '" '
+    the_image_long += 'width="' + the_width + '" '
+    the_image_long += 'height="' + the_height + '" '
+    the_image_long += 'tex_size="' + the_tex_size + '" '
+    the_image_long += '>' + "\n"
+    the_image_long += "<description>"
+    the_image_long += '<var name="' + the_alt + '" />'
+    the_image_long += "</description>" + "\n"
+    the_image_long += "</image>" + "\n"
+
+    the_answer = "<figure>" + "\n" + the_image_long + "</figure>" + "\n"
+
+    return the_answer
+#------------------#
+
+def pg_math_environments(txt):
+    """ Convert [`*`], [``*``], [``\begin{align}*``], etc to mbx markup.
+
+    """
+
+    the_text = txt.group(1)
+
+    if not the_text.startswith("`"):
+        return "<m>" + the_text + "</m>"
+
+    # so it should start and end with `
+    the_text = the_text[1:-1].strip()
+
+    if not the_text.startswith("\\begin{aligned}"):
+        return "<me>" + the_text + "</me>"
+
+    # remove the begin and end align
+    the_text = the_text[15:-13].strip()
+
+#    print "xx"+the_text[:10]+"yy", the_text.startswith(r"[t]")
+
+    if the_text.startswith(r"[t]"):
+        the_text = the_text[3:].strip()
+
+    the_output = "<md>" + "\n"
+    the_mrows = the_text.split("\\\\")
+    for row in the_mrows:
+ #       print "row : ", row
+        row = row.strip()
+        row = utilities.magic_character_convert(row, "math")
+        the_output += "<mrow>" + row + "</mrow>" + "\n"
+
+    the_output += "</md>"
+
+    return the_output
+#------------------#
+
+def pg_input_fields(txt, the_answer_variables):
+    """ Convert [___________]  and [___________]{$foo} to mbx format.
+
+    """
+
+    the_text = txt.group(1)
+    the_variable = txt.group(2)
+    the_variable = the_variable[1:-1]
+
+#    if len(the_answer_variables) > 1:
+#        print "multiple answers", the_answer_variables
+    # should add an error check that the_text is of the form [___________]
+
+    width = len(the_text) - 2
+
+    style = "externalvar"
+    print "the_variable", the_variable, "and the_answer_variables", the_answer_variables
+    if the_variable:
+        this_variable = the_variable
+        style = "internalvar"
+    else:
+        try:
+            this_variable = the_answer_variables[component.substitution_counter]
+        except IndexError:
+            this_variable = "ERROR_VARIABLE_NOT_FOUND_IN_ORIGINAL_SOURCE"
+            print "ERROR: name of variable not found"
+    component.substitution_counter += 1
+    the_answer = '<var name="' + this_variable + '" '
+    if style == "externalvar":
+        the_answer += 'evaluator="$ansevaluator" '
+    elif this_variable in component.defined_variables:
+        print "found", this_variable, "in", component.defined_variables
+        the_answer += 'evaluator="' + component.defined_variables[this_variable] + '" '
+    the_answer += 'width="' + str(width) + '" />'
+
+    return the_answer
 

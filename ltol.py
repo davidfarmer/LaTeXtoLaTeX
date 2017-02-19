@@ -15,7 +15,10 @@ import myoperations
 #################################
 
 conversion_options = ["mbx", "mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
-                      "txt", "tex", "html", "pgtombx"]
+                      "txt",
+                      "tex",
+                      "html",
+                      "pgtombx"]
 
 if not len(sys.argv) == 4:
     print 'To convert a file to a different form, do either:'
@@ -23,7 +26,7 @@ if not len(sys.argv) == 4:
     print 'to convert one file, or'
     print './ltol.py filetype_plus inputdirectory outputdirectory'
     print 'to convert all the "filetype" files in a directory.  The outputdirectory must already exist.'
-    print 'Supported filetype_plus: ' # tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, html'
+    print 'Supported filetype_plus: '
     print conversion_options
     sys.exit()
 
@@ -36,7 +39,7 @@ print component.outputname
 
 if component.filetype_plus not in conversion_options:
     print "Filetype not recognized."
-    print 'Supported filetype_plus are:' # tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, and html'
+    print 'Supported filetype_plus are:'
     print conversion_options
     sys.exit()
 

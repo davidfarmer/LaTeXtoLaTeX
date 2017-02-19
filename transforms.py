@@ -103,6 +103,20 @@ def mbx_pp(text):
 
     thetext = text
 
+    # first a hack to handle 2-level lists.
+    thetext = re.sub(r"<li>\s*<p>", "<lip>", thetext)
+    thetext = re.sub(r"</p>\s*</li>", "</lip>", thetext)
+    component.lipcounter = 0
+    component.something_changed = True
+    while component.something_changed:
+        component.something_changed = False
+        thetext = re.sub(r"<lip>(.*?)</lip>", liprename, thetext, 0, re.DOTALL)
+
+    print "found", component.lipcounter, "li/p pairs"
+    for n in range(component.lipcounter):
+        thetext = postprocess.tag_before_after("lip" + str(n), "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("lip", "\n\n", "\n", "\n", "\n\n", thetext)
+
     # first remove extraneous spaces and put in appropriate carriage returns
 
     thetext = postprocess.tag_before_after("p", "\n\n", "\n", "\n", "\n\n", thetext)
@@ -136,6 +150,10 @@ def mbx_pp(text):
 #    thetext = re.sub("\n +", "\n", thetext)
 
     # then put it back
+    for n in range(component.lipcounter):
+        thetext = postprocess.add_space_within("lip" + str(n), thetext)
+        thetext = postprocess.add_space_within("lip" + str(n), thetext)  # twice, because we will separate into li and p
+
     thetext = postprocess.add_space_within("chapter", thetext)
     thetext = postprocess.add_space_within("section", thetext)
     thetext = postprocess.add_space_within("subsection", thetext)
@@ -172,7 +190,31 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("row", thetext)
     thetext = postprocess.add_space_within("pre", thetext)
 
+    # now separate the li and p
+    for n in range(component.lipcounter):
+        thetext = re.sub(r"(\n *)  <lip" + str(n) + ">",r"\1  <li>\1    <p>", thetext)
+        thetext = re.sub(r"(\n *)</lip" + str(n) + ">",r"\1  </p>\1</li>", thetext)
+    # for some reason there can be extra </lip>.  Not sure why.
+    thetext = re.sub(r"(\n *)</lip>",r"\1  </p>\1</li>", thetext)
+
     return thetext
+
+##################
+
+def liprename(txt):
+
+    the_inside = txt.group(1)
+
+    component.something_changed = True
+    current_counter = component.lipcounter
+    component.lipcounter += 1
+
+    if "<lip>" in the_inside:  # replace the last <lip> by <lipN>
+        the_inside_start, the_inside_end = the_inside.rsplit("<lip>", 1)
+        the_inside = the_inside_start + "<lip" + str(current_counter) + ">" + the_inside_end
+        return "<lip>" + the_inside + "</lip" + str(current_counter) + ">"
+    else:
+        return "<lip" + str(current_counter) + ">" + the_inside + "</lip" + str(current_counter) + ">"
 
 ##################
 

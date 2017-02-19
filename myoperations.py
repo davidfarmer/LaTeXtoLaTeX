@@ -662,9 +662,21 @@ def mytransform_tex(text):
 #                         r"\\begin{exercises}\3" + "\n\\end{exercises}",newtext,0, re.DOTALL)
 #    thetext = newtext
 
-    # from Bogart's IBL combinatorics book
+#    # from Bogart's IBL combinatorics book
+#
+#    thetext = re.sub(r"\\bp\s(.*?)\\ep\s", myt_tex, thetext, 0, re.DOTALL)
 
-    thetext = re.sub(r"\\bp\s(.*?)\\ep\s", myt_tex, thetext, 0, re.DOTALL)
+    thetext = re.sub(r".*\\section\*", r"\\section", thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\\begin{ex}", r"\\begin{example}", thetext)
+    thetext = re.sub(r"\\end{ex}", r"\\end{example}", thetext)
+    thetext = re.sub(r"\\begin{framed}", r"\\begin{aside}", thetext)
+    thetext = re.sub(r"\\end{framed}", r"\\end{aside}", thetext)
+    thetext = re.sub(r"\\end{document}.*", "", thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\s*\\\\\s*~\\\\\s*", "\n\n", thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\\\\\n\n", "\n\n", thetext, 0, re.DOTALL)
+    # incorrect use of ``smart quotes"
+    # don't try to make this perfect
+    thetext = re.sub(r'``([^`\'"\n]{,50})"', r"``\1''", thetext)
 
     return thetext
 

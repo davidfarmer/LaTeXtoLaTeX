@@ -16,6 +16,7 @@ import myoperations
 
 conversion_options = ["mbx", "mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
                       "txt",
+                      "pfp",
                       "tex",
                       "html",
                       "pgtombx"]
@@ -60,6 +61,9 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
     elif component.filetype_plus in ["pgtombx"]:
         fileextension_in = "pg"
         fileextension_out = "mbx"
+    elif component.filetype_plus in ["pfp"]:
+        fileextension_in = "txt"
+        fileextension_out = "tex"
     else:
         fileextension_in = component.filetype_plus
         fileextension_out = component.filetype_plus
@@ -106,6 +110,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_tex(component.onefile)
     elif component.filetype_plus == 'txt':
         component.onefile = myoperations.mytransform_txt(component.onefile)
+    elif component.filetype_plus == 'pfp':
+        component.onefile = myoperations.mytransform_pfp(component.onefile)
     elif component.filetype_plus == 'html':
         component.onefile = myoperations.mytransform_html(component.onefile)
     elif component.filetype_plus == 'mbx':

@@ -648,6 +648,7 @@ def mytransform_pfp(text):
     the_answer += r"\setlength{\topmargin}{-.60in}" + "\n"
 
     the_answer += r"\begin{document}" + "\n\n"
+    the_answer += r"\thispagestyle{empty}" + "\n"
     # assume the spreadsheet has everyone in the correct order
     component.numberof = 0
     for app in theappslist[1:]:
@@ -709,9 +710,11 @@ def mytransform_pfp(text):
         the_others_text = re.sub('\n{2,}',"\n",the_others_text)
         the_others = r"\noindent\textit{Other Interests:} {\small " + the_others_text + "}\n\\vskip 0.1in\n"
 
-        essay_length = len(thisapp[5].strip().split())
-
         essay_text = thisapp[5].strip()
+
+        essay_text_wc = re.sub("-","",essay_text)
+        essay_length = len(essay_text_wc.split())
+
         essay_text = re.sub(r'^"',"",essay_text)
         essay_text = re.sub(r'"$',"",essay_text)
         essay_text = re.sub(r'""','"',essay_text)

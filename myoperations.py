@@ -638,11 +638,13 @@ def mytransform_pfp(text):
     
     the_answer = r"\documentclass[11pt]{amsart}" + "\n"
     the_answer += r"\usepackage{tgtermes}" + "\n"
+ #  not available the_answer += r"\usepackage{librecaslon}" + "\n"
     the_answer += r"\textwidth=6.5in" + "\n"
     the_answer += r" \hoffset=-.75in" + "\n"
     the_answer += r"\parskip 0.05in" + "\n"
     the_answer += r"\parindent 0in" + "\n"
-    the_answer += r"\setlength{\textheight}{9.5 true in}" + "\n"
+    the_answer += r"\pagestyle{empty}" + "\n"
+    the_answer += r"\setlength{\textheight}{9.7 true in}" + "\n"
     the_answer += r"\setlength{\topmargin}{-.60in}" + "\n"
 
     the_answer += r"\begin{document}" + "\n\n"
@@ -657,6 +659,7 @@ def mytransform_pfp(text):
         app = re.sub(r'\x0d',"\n\n",app)
         app = re.sub('\t'," ",app)
         app = re.sub(r' {2,}'," ",app)
+        app = re.sub(r'\s\x5f\s',r" -- ",app)
         app = re.sub(r'(^|\s)\x5f',r"\1'",app)
         app = re.sub(r'\x5f(\s|$)',r"'\1",app)
         app = re.sub(r'\x5f(.{1,2})(\)|\.|,|\s|$)',r"'\1\2",app)
@@ -676,35 +679,45 @@ def mytransform_pfp(text):
         app = re.sub(r'\x92',r"'",app)
 
         thisapp = app.split("Brrrrk")
-        the_name = r"{\large \textbf{" + str(component.numberof) + ". "
-        the_name += thisapp[0].strip() + " "
-        the_name += r"\textsc{" + thisapp[2].strip() + "}" + r"}}\\" + "\n"
+        the_number = str(thisapp[0].strip())
+  #      the_name = r"{\large \textbf{" + str(component.numberof) + ". "
+        the_name = r"{\Large \textbf{" + the_number + ". "
+        the_name += thisapp[1].strip() + " "
+    #    the_name += r"\textsc{" + thisapp[2].strip() + "}" + r"}}\\" + "\n"
+        the_name += r"{" + thisapp[2].strip().upper() + "}" + r"}}\\" + "\n"
         the_email_address = re.sub(r"_", "\\_", thisapp[3].strip())
-        the_email = r"\textit{Email:} " + the_email_address + r"\\" + "\n\n"
+        the_email = r"\textit{Email:} " + the_email_address + r"\\" + "\n"
 
-        the_academics_text = thisapp[5].strip()
+        the_phone_number = re.sub(r"_", "\\_", thisapp[4].strip())
+        the_phone = r"\textit{Mobile:} " + the_phone_number + r"\\" + "\n\n"
+
+        the_academics_text = thisapp[6].strip()
         the_academics_text = re.sub(r'^"',"",the_academics_text)
         the_academics_text = re.sub(r'"$',"",the_academics_text)
         the_academics_text = re.sub(r'""','"',the_academics_text)
-        the_academics_text = re.sub(r'(^|\s)"(.+?)"(\s|$|,|\.)',r"\1``\2''\3",the_academics_text)
-        the_academics_text = re.sub(r"(^|\s)'(.+?)'(\s|$|,|\.)",r"\1`\2'\3",the_academics_text)
-        the_academics_text = re.sub('\n{2,}',"\n",the_academics_text)
-        the_academics = r"\noindent\textit{Academic Interests:} " + the_academics_text + "\n\\vskip 0.1in\n"
+        the_academics_text = utilities.fix_smart_quotes(the_academics_text)
 
-        the_others_text = thisapp[6].strip()
+   #     the_academics_text = re.sub(r'(^|\s)"(.+?)"(\s|$|,|\.)',r"\1``\2''\3",the_academics_text)
+   #     the_academics_text = re.sub(r"(^|\s)'(.+?)'(\s|$|,|\.)",r"\1`\2'\3",the_academics_text)
+        the_academics_text = re.sub('\n{2,}',"\n",the_academics_text)
+        the_academics = r"\noindent\textit{Academic Interests:} {\small " + the_academics_text + "}\n\\vskip 0.1in\n"
+
+        the_others_text = thisapp[7].strip()
         the_others_text = re.sub(r'^"',"",the_others_text)
         the_others_text = re.sub(r'"$',"",the_others_text)
+        the_others_text = utilities.fix_smart_quotes(the_others_text)
         the_others_text = re.sub('\n{2,}',"\n",the_others_text)
-        the_others = r"\noindent\textit{Other Interests:} " + the_others_text + "\n\\vskip 0.1in\n"
+        the_others = r"\noindent\textit{Other Interests:} {\small " + the_others_text + "}\n\\vskip 0.1in\n"
 
-        essay_length = len(thisapp[4].strip().split())
+        essay_length = len(thisapp[5].strip().split())
 
-        essay_text = thisapp[4].strip()
+        essay_text = thisapp[5].strip()
         essay_text = re.sub(r'^"',"",essay_text)
         essay_text = re.sub(r'"$',"",essay_text)
         essay_text = re.sub(r'""','"',essay_text)
-        essay_text = re.sub(r'(^|\s)"(.+?)"(\s|$|,|\.)',r"\1``\2''\3",essay_text)
-        essay_text = re.sub(r"(^|\s)'(.+?)'(\s|$|,|\.)",r"\1`\2'\3",essay_text)
+        essay_text = utilities.fix_smart_quotes(essay_text)
+     #   essay_text = re.sub(r'(^|\s)"(.+?)"(\s|$|,|\.)',r"\1``\2''\3",essay_text)
+     #   essay_text = re.sub(r"(^|\s)'(.+?)'(\s|$|,|\.)",r"\1`\2'\3",essay_text)
         essay_text = re.sub(r'\x0d',"\n\n",essay_text)
         essay_text = re.sub(r'\x00\x90',r"\\'E",essay_text)
         essay_text = re.sub(r'\x00ff',r" ",essay_text)
@@ -713,12 +726,12 @@ def mytransform_pfp(text):
         essay_text = re.sub(r'Õ',r"'",essay_text)
 #        essay_text = re.sub(r'\x0d',"\n\n",essay_text)
 
-        the_essay = r"\noindent\textit{Essay:}\\" + "\n" + essay_text + r"\\" + "\n"
-        the_essay += r"\phantom{x}\hfill " + "[" + str(essay_length) + "]"
+        the_essay = r"\noindent\textit{Essay:}\\" + "\n" + essay_text + "\n"
+        the_essay += r"\phantom{xxxxxxxxxxxxxx} \phantom{xxxxxxxx} \phantom{x} \phantom{x} \phantom{x} \phantom{x} \phantom{x} \phantom{x} \phantom{x}\hfill " + "[" + str(essay_length) + "]"
         
 
 
-        this_person = the_name + the_email + the_academics + the_others + the_essay
+        this_person = the_name + the_email + the_phone +  the_academics + the_others + the_essay
         this_person += "\n\n" + r"\newpage" + "\n\n"
 
         the_answer += this_person

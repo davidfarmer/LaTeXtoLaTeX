@@ -306,3 +306,17 @@ def magic_character_convert(text, mode):
 # also need an "unhide" mode
 
     return the_text
+
+###############
+
+def fix_smart_quotes(text):
+
+    the_text = text
+
+    the_text = re.sub(r'""','"',the_text)
+    the_text = re.sub(r"\s'([a-zA-Z ]+[,\.?!]*)'\s",r" `\1' ",the_text)
+    the_text = re.sub(r'\s"([a-zA-Z ]+[,\.?!]*)"\s',r" ``\1'' ",the_text)
+    the_text = re.sub(r'(^|\s)"(.+?)"(\s|$|,|\.|!|\?)',r"\1``\2''\3",the_text)
+    the_text = re.sub(r"(^|\s)'(.+?)'(\s|$|,|\.|!|\?)",r"\1`\2'\3",the_text)
+
+    return the_text

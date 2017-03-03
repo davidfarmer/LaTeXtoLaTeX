@@ -6,6 +6,7 @@ outputname = ""
 indentamount = "  "
 
 iofilepairs = []
+filestubs = []
 
 error_messages = []
 replaced_macros = []
@@ -17,3 +18,6 @@ something_changed = False
 
 substitution_counter = 0
 generic_counter = 0
+
+extra_macros = []
+

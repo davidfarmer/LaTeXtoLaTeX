@@ -94,6 +94,7 @@ for inputfile, outputfile in component.iofilepairs:
     component.inputstub = re.sub(".*/","",component.inputstub)
     component.inputstub = re.sub("\..*","",component.inputstub)
     print "file stub is ",component.inputstub
+    component.filestubs.append(component.inputstub)
 
     with open(inputfile) as infile:
         component.onefile = infile.read()
@@ -135,9 +136,30 @@ for inputfile, outputfile in component.iofilepairs:
     with open(outputfile, 'w') as outfile:
         outfile.write(component.onefile)
 
+tmpcount=0
+if component.filetype_plus == "pgtombx":
+    with open(outputdir + 'compilation.mbx', 'w') as f:
+        f.write('<?xml version="1.0" encoding="UTF-8" ?>\n\n')
+        f.write('<mathbook xmlns:xi="http://www.w3.org/2001/XInclude" xml:lang="en-US">\n')
+        f.write('<docinfo>\n')
+        f.write('</docinfo>\n')
+        f.write('<article>\n')
+        f.write('  <section>\n')
+        f.write('    <exercises>\n')
+        for stub in component.filestubs:
+     #       if tmpcount > 30: continue
+            tmpcount += 1
+            f.write('      <xi:include href="./' + stub + '.mbx' + '" />' + '\n\n')
+        f.write('    </exercises>\n')
+        f.write('  </section>\n')
+        f.write('</article>\n')
+        f.write('</mathbook>\n')
+
 if component.generic_counter:
     print component.generic_counter
 #    print component.replaced_macros
 
+if component.extra_macros:
+    print "component.extra_macros", component.extra_macros
 sys.exit()
 

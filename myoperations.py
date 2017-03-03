@@ -666,17 +666,23 @@ def mytransform_tex(text):
 #
 #    thetext = re.sub(r"\\bp\s(.*?)\\ep\s", myt_tex, thetext, 0, re.DOTALL)
 
-    thetext = re.sub(r".*\\section\*", r"\\section", thetext, 0, re.DOTALL)
-    thetext = re.sub(r"\\begin{ex}", r"\\begin{example}", thetext)
-    thetext = re.sub(r"\\end{ex}", r"\\end{example}", thetext)
-    thetext = re.sub(r"\\begin{framed}", r"\\begin{aside}", thetext)
-    thetext = re.sub(r"\\end{framed}", r"\\end{aside}", thetext)
+#    thetext = re.sub(r".*\\section\*", r"\\section", thetext, 0, re.DOTALL)
+#    thetext = re.sub(r"\\begin{ex}", r"\\begin{example}", thetext)
+#    thetext = re.sub(r"\\end{ex}", r"\\end{example}", thetext)
+#    thetext = re.sub(r"\\begin{framed}", r"\\begin{aside}", thetext)
+#    thetext = re.sub(r"\\end{framed}", r"\\end{aside}", thetext)
+    thetext = re.sub(r".*\\input table", "", thetext, 0, re.DOTALL)
     thetext = re.sub(r"\\end{document}.*", "", thetext, 0, re.DOTALL)
-    thetext = re.sub(r"\s*\\\\\s*~\\\\\s*", "\n\n", thetext, 0, re.DOTALL)
-    thetext = re.sub(r"\\\\\n\n", "\n\n", thetext, 0, re.DOTALL)
+
+    thetext = "\n\n" + r"\begin{solution}" + "\n" + thetext.strip() + "\n" + r"\end{solution}" + "\n\n"
+
+    thetext = re.sub("\r\n", "\n", thetext, 0, re.DOTALL)
+
+#    thetext = re.sub(r"\s*\\\\\s*~\\\\\s*", "\n\n", thetext, 0, re.DOTALL)
+#    thetext = re.sub(r"\\\\\n\n", "\n\n", thetext, 0, re.DOTALL)
     # incorrect use of ``smart quotes"
     # don't try to make this perfect
-    thetext = re.sub(r'``([^`\'"\n]{,50})"', r"``\1''", thetext)
+#    thetext = re.sub(r'``([^`\'"\n]{,50})"', r"``\1''", thetext)
 
     return thetext
 
@@ -868,7 +874,7 @@ def wwmacros(text):
     thetext = re.sub("\);", "", thetext, 0, re.DOTALL)
     thetext = thetext.strip()
 
-    known_macros = ["PGstandard.pl"]
+    known_macros = ["PGstandard.pl", "MathObjects.pl", "PGML.pl"]
 
     the_macros = thetext.split(",")
 
@@ -883,7 +889,9 @@ def wwmacros(text):
         macro = re.sub('"', '', macro)
         if macro not in known_macros:
             macros_in_mbx += "<macro-file>" + macro + "</macro-file>" + "\n"
-
+    for macro in component.extra_macros:
+        if macro not in the_macros:
+            macros_in_mbx += "<macro-file>" + macro + "</macro-file>" + "\n"
     macros_in_mbx += "</pg-macros>" + "\n"
 
     return macros_in_mbx
@@ -917,9 +925,12 @@ def pgmarkup_to_mbx(text, the_answer_variables):
     the_text = re.sub(r"(\[_+\])((\{\$[a-zA-Z0-9_]*\}){0,1})", lambda match: pg_input_fields(match, the_answer_variables), the_text)
 
     # crude way to capture *emphasized words*.
-    while "*" in the_text:
-        the_text = re.sub(r"\*", "<em>", the_text, 1)
-        the_text = re.sub(r"\*", "</em>", the_text, 1)
+ #   while "*" in the_text:
+ #       the_text = re.sub(r"\*", "<em>", the_text, 1)
+ #       the_text = re.sub(r"\*", "</em>", the_text, 1)
+    the_text = re.sub(r"\*([a-zA-Z :]+)\*", r"<em>\1</em>", the_text)
+
+    the_text = re.sub("<multiplication />", "*", the_text)
 
     return the_text
 
@@ -933,6 +944,8 @@ def pg_image_environments(txt):
     if not the_text.startswith("insertGraph"):
         print "ERROR: malformed image markup"
         return "<figure>" + "ERROR" + the_text + "</figure>"
+    else:
+        print "processing pg_image_environments", the_text[:20]
 
     the_name = re.match(r"insertGraph\(([^)]+)\)", the_text).group(1).strip()
     the_width = re.search(r"width\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
@@ -965,15 +978,22 @@ def pg_math_environments(txt):
     """
 
     the_text = txt.group(1)
+    the_text = the_text.strip()
+
+    the_text = re.sub(r"\*", "<multiplication />", the_text)
 
     if not the_text.startswith("`"):
+        if "align" in the_text:
+            print "What we found:", the_text[:30]
         return "<m>" + the_text + "</m>"
 
     # so it should start and end with `
     the_text = the_text[1:-1].strip()
 
     if not the_text.startswith("\\begin{aligned}"):
-        return "<me>" + the_text + "</me>"
+     #   return "<me>" + the_text + "</me>"
+        return "<m>" + "\\displaystyle" + the_text + "</m>"
+      #  return "<m>" + the_text + "</m>"
 
     # remove the begin and end align
     the_text = the_text[15:-13].strip()
@@ -1012,7 +1032,7 @@ def pg_input_fields(txt, the_answer_variables):
     width = len(the_text) - 2
 
     style = "externalvar"
-    print "the_variable", the_variable, "and the_answer_variables", the_answer_variables
+ #   print "the_variable", the_variable, "and the_answer_variables", the_answer_variables
     if the_variable:
         this_variable = the_variable
         style = "internalvar"
@@ -1027,9 +1047,21 @@ def pg_input_fields(txt, the_answer_variables):
     if style == "externalvar":
         the_answer += 'evaluator="$ansevaluator" '
     elif this_variable in component.defined_variables:
-        print "found", this_variable, "in", component.defined_variables
+ #       print "found", this_variable, "in", component.defined_variables
         the_answer += 'evaluator="' + component.defined_variables[this_variable] + '" '
     the_answer += 'width="' + str(width) + '" />'
 
     return the_answer
 
+########################
+
+def pgpreprocess(text):
+
+# fix some anomalies
+
+    thetext = text
+
+    thetext = re.sub(r"\[`\s*\\begin{aligned", r"[``\\begin{aligned", thetext)
+    thetext = re.sub(r"\\end{aligned}\s*`\]", r"\\end{aligned}``]", thetext)
+    
+    return thetext

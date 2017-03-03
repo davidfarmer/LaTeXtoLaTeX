@@ -5,6 +5,7 @@ import utilities
 import component
 import postprocess
 import myoperations
+import mapping
 
 
 ###################
@@ -112,7 +113,7 @@ def mbx_pp(text):
         component.something_changed = False
         thetext = re.sub(r"<lip>(.*?)</lip>", liprename, thetext, 0, re.DOTALL)
 
-    print "found", component.lipcounter, "li/p pairs"
+#    print "found", component.lipcounter, "li/p pairs"
     for n in range(component.lipcounter):
         thetext = postprocess.tag_before_after("lip" + str(n), "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("lip", "\n\n", "\n", "\n", "\n\n", thetext)
@@ -246,6 +247,7 @@ def pgtombx(text):
 
     thetext = text
 
+    thetext = myoperations.pgpreprocess(thetext)
 # to do:
 # HINTs
 # multiple solutions: BasicAlgebra/SystemsOfLinearEquations/SystemEquation40.pg
@@ -290,7 +292,7 @@ def pgtombx(text):
     re_ANS = "\nANS\((.*?)\);"
     the_answers = re.findall(re_ANS, everything_else, re.DOTALL)
     the_answers = [answer.strip() for answer in the_answers]
-    the_answer_variables = [re.match(r"(\$[a-zA-Z0-9_]+)", answer).group(1) for answer in the_answers]
+    the_answer_variables = [re.search(r"(\$[a-zA-Z0-9_]+)", answer).group(1) for answer in the_answers]
     everything_else = re.sub(re_ANS, "", everything_else, 0, re.DOTALL)
     the_answer_mbx = ""
     for answer in the_answers:
@@ -302,6 +304,7 @@ def pgtombx(text):
     try:
         the_statement = re.search(re_statement, everything_else, re.DOTALL).group(1)
         everything_else = re.sub(re_statement, "", everything_else, 0, re.DOTALL)
+   #     print "the_statement is", the_statement[:30]
     except AttributeError:
         the_statement = "STATEMENT_NOT_PARSED_CORRECTLY"
         ERROR_MESSAGE += "ERROR: file does not contain a statement\n"
@@ -312,7 +315,7 @@ def pgtombx(text):
     vars_in_statement = list(set(vars_in_statement))  # remove duplicates
 #    print "vars1: ", vars_in_statement
 
-    the_statement_p = the_statement.split("\n")
+    the_statement_p = the_statement.split("\n\n")
     previous_par = ""
     the_statement_p_mbx = []
     for par in the_statement_p:
@@ -384,7 +387,13 @@ def pgtombx(text):
     # < or & to &lt; or &amp;
 #    everything_else = re.sub("&", "&amp;", everything_else)
 #    everything_else = re.sub("<", "&lt;", everything_else)
-    everything_else = utilities.magic_character_convert(everything_else, "code")
+
+    for str in mapping.pg_macro_files:
+        if str in everything_else:
+            if mapping.pg_macro_files[str] not in component.extra_macros:
+                component.extra_macros.append(mapping.pg_macro_files[str])
+
+    everything_else = utilities.magic_character_convert(everything_else, "text")
 
     the_pgcode_mbx = "<pg-code>" + "\n"
     the_pgcode_mbx += everything_else.strip()
@@ -411,7 +420,8 @@ def pgtombx(text):
 #    print everything_else
 #    print "----------------"
 
-    the_output = ERROR_MESSAGE
+ #   the_output = ERROR_MESSAGE
+    the_output = ""
     the_output += '<?xml version="1.0" encoding="UTF-8" ?>' + "\n"
     the_output += "\n" + "<exercise>" + "\n"
     the_output += "<original-metadata>" + "\n"

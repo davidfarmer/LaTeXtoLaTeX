@@ -15,6 +15,7 @@ import myoperations
 #################################
 
 conversion_options = ["mbx", "mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
+                      "mbx_transclude",
                       "txt",
                       "tex",
                       "html",
@@ -54,7 +55,8 @@ if os.path.isfile(component.inputname) and not os.path.isdir(component.outputnam
 
 elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
 
-    if component.filetype_plus in ["mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
+    if component.filetype_plus in ["mbx_pp", "mbx_fix", "mbx_strict_tex",
+                                   "mbx_strict_html", "mbx_fa", "mbx_transclude"]:
         fileextension_in = "mbx"
         fileextension_out = "mbx"
     elif component.filetype_plus in ["pgtombx"]:
@@ -121,6 +123,9 @@ for inputfile, outputfile in component.iofilepairs:
 
     if component.filetype_plus in ["mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = transforms.mbx_strict(component.onefile)
+
+    if component.filetype_plus in ["mbx_transclude"]:
+        component.onefile = transforms.mbx_transclude(component.onefile)
 
     if component.filetype_plus == "mbx_strict_tex":
         component.onefile = transforms.mbx_strict_tex(component.onefile)

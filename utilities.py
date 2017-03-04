@@ -308,3 +308,18 @@ def magic_character_convert(text, mode):
 # also need an "unhide" mode
 
     return the_text
+
+#################
+
+def environment_by_id(theid, text):
+
+    the_text = text
+
+    try:
+        the_answer = re.search(r'(<([a-z_\-]+)[^>]*xml:id="' + theid + r'">(.*?)</\2>)',the_text,re.DOTALL).group(1)
+   #     the_answer = re.search(r'(<([a-z_\-]+)[^>]*xml:id=("\')' + theid + r'("|\')[^>]*>(.*?)</\s*\2>)',the_text,re.DOTALL).group(1)
+    except AttributeError:
+        print "failed to find environemnt with xml:id", theid
+        return ""
+
+    return the_answer

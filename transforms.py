@@ -442,3 +442,55 @@ def pgtombx(text):
     the_output = mbx_pp(the_output)
 
     return the_output
+
+######################
+
+def mbx_transclude(text):
+
+    thetext = text
+
+    thetext = re.sub(r"<transclude\s*(.*?)\s*/>", mbx_transcl, thetext)
+
+    return thetext
+
+#--------------------#
+
+def mbx_transcl(txt):
+
+    thedata = txt.group(1)
+
+    parameters = ["src", "id-postfix", "id-include", "wrapper"]
+    paramval = {}
+
+    for param in parameters:
+        try:
+            paramval[param] = re.search(param + '=("|\')([^ /]+)("|\')', thedata).group(2)
+        except AttributeError:
+            paramval[param] = ""
+
+    the_referenced_item = utilities.environment_by_id(paramval["src"], component.onefile)
+    the_referenced_item = the_referenced_item.strip()
+
+    if "<transclude " in the_referenced_item:
+        the_referenced_item = mbx_transclude(the_referenced_item)
+
+    if paramval["wrapper"] == "no":   # remove starting and ending tags
+        the_referenced_item = re.sub("^<[^>]+>", "", the_referenced_item, 1)
+        the_referenced_item = re.sub("</[^>]+>$", "", the_referenced_item, 1)
+        the_referenced_item = the_referenced_item.strip()
+        # and remove the title
+        the_referenced_item = re.sub("^<title>.*?</title>\s*", "", the_referenced_item, 1)
+
+    if paramval["id-postfix"]:
+        new_postfix = paramval["id-postfix"]
+        print "new_postfix", new_postfix
+        the_referenced_item = re.sub(r'xml:id=("|\')([^ "\']+)\1', r"xml:id=\1\2" + new_postfix + r"\1", the_referenced_item)
+
+    elif not paramval["id-include"] or paramval["id-include"] == 'no':
+        the_referenced_item = re.sub('xml:id=("|\')[^"\']+("|\')\s*', "", the_referenced_item)
+
+    # remove a possible space before > in the starting tag
+    the_referenced_item = re.sub("\s*<([a-z_\-]+)\s+>", r"<\1>", the_referenced_item)
+
+    return the_referenced_item
+

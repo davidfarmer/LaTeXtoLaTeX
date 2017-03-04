@@ -445,17 +445,17 @@ def pgtombx(text):
 
 ######################
 
-def mbx_transclude(text):
+def mbx_transclude(text, recursive=False):
 
     thetext = text
 
-    thetext = re.sub(r"<transclude\s*(.*?)\s*/>", mbx_transcl, thetext)
+    thetext = re.sub(r"<transclude\s*(.*?)\s*/>", lambda match: mbx_transcl(match, recursive), thetext)
 
     return thetext
 
 #--------------------#
 
-def mbx_transcl(txt):
+def mbx_transcl(txt, recursive):
 
     thedata = txt.group(1)
 
@@ -469,10 +469,13 @@ def mbx_transcl(txt):
             paramval[param] = ""
 
     the_referenced_item = utilities.environment_by_id(paramval["src"], component.onefile)
-    the_referenced_item = the_referenced_item.strip()
+    the_referenced_item = the_referenced_item.strip()  # can that ever do anything?
 
     if "<transclude " in the_referenced_item:
-        the_referenced_item = mbx_transclude(the_referenced_item)
+        the_referenced_item = mbx_transclude(the_referenced_item, recursive=True)
+
+    if recursive:
+        return the_referenced_item
 
     if paramval["wrapper"] == "no":   # remove starting and ending tags
         the_referenced_item = re.sub("^<[^>]+>", "", the_referenced_item, 1)

@@ -278,16 +278,6 @@ def pgtombx(text):
 
     the_macros_mbx = myoperations.wwmacros(the_macros)
 
-    if "BEGIN_HINT" in everything_else:
-        ERROR_MESSAGE += "ERROR: HINTs not implemented properly\n"
-        print "file contains non-PGML HINTs, which are not implemented yet"
-    if "BEGIN_TEXT" in everything_else:
-        ERROR_MESSAGE += "ERROR: TEXT not implemented properly\n"
-        print "file contains non-PGML TEXT, which is not implemented yet"
-    if "BEGIN_SOLUTION" in everything_else:
-        ERROR_MESSAGE += "ERROR: SOLUTION not implemented properly\n"
-        print "file contains non-PGML SOLUTION, which is not implemented yet"
-
     # find the ANSwer
     re_ANS = "\nANS\((.*?)\);"
     the_answers = re.findall(re_ANS, everything_else, re.DOTALL)
@@ -300,15 +290,25 @@ def pgtombx(text):
         the_answer_mbx += "$ansevaluator = " + answer + "\n"
 
     # extract the problem statement
-    re_statement = "BEGIN_PGML(.*)END_PGML\n"
+#    re_statement = "BEGIN_PGML\s(.*)END_PGML\n"
+    re_statement = r"BEGIN_(PGML|TEXT)\s(.*?)END_\1" + "\n"
+    the_statement = ""
     try:
-        the_statement = re.search(re_statement, everything_else, re.DOTALL).group(1)
+        the_statement_parts = re.findall(re_statement, everything_else, re.DOTALL)
         everything_else = re.sub(re_statement, "", everything_else, 0, re.DOTALL)
+        for part in the_statement_parts:
+            this_part = part[1]
+            this_part = re.sub(" *\$PAR *\n", "", this_part)
+            # here is where to convert DataTable, as in AdditionSubtractionApplications30
+            the_statement += this_part
+   #     the_statement = re.search(re_statement, everything_else, re.DOTALL).group(1)
+   #     everything_else = re.sub(re_statement, "", everything_else, 0, re.DOTALL)
    #     print "the_statement is", the_statement[:30]
     except AttributeError:
         the_statement = "STATEMENT_NOT_PARSED_CORRECTLY"
         ERROR_MESSAGE += "ERROR: file does not contain a statement\n"
         print "file does not contain a statement"
+        print the_statement_parts
 
             # extract the variables in the statement
     vars_in_statement = re.findall(r"(\$[a-zA-Z0-9_]+)", the_statement)
@@ -334,7 +334,8 @@ def pgtombx(text):
                 par = "<p>\n<ul>" + "\n" + par
                 previous_par = "li"
         elif previous_par == "p":  # this line is a continuation of the previous paragraph
-            pass # do nothing, because we are just processing another ine in the current paragraph
+     #       pass # do nothing, because we are just processing another ine in the current paragraph
+            par = "</p>\n<p>" + par
         else: # we must be starting a new paragraph
             par = "<p>" + par
             previous_par = "p"
@@ -354,11 +355,28 @@ def pgtombx(text):
         the_solution = re.search(re_solution, everything_else, re.DOTALL).group(1)
         everything_else = re.sub(re_solution, "", everything_else, 0, re.DOTALL)
     except AttributeError:
-        the_solution = "SOLUTION_NOT_PARSED_CORRECTLY"
-        ERROR_MESSAGE += "ERROR: file does not contain a solution\n"
-        print "file does not contain a solution\n"
+        re_solution = "BEGIN_SOLUTION(.*)END_SOLUTION"
+        try:
+            the_solution = re.search(re_solution, everything_else, re.DOTALL).group(1)
+            the_solution = re.sub(" *\$PAR *\n", "", the_solution)
+            everything_else = re.sub(re_solution, "", everything_else, 0, re.DOTALL)
+
+        except AttributeError:
+            the_solution = "SOLUTION_NOT_PARSED_CORRECTLY"
+            ERROR_MESSAGE += "ERROR: file does not contain a solution\n"
+            print "file does not contain a solution\n"
 
     the_solution = the_solution.strip()
+
+    if "BEGIN_HINT" in everything_else:
+        ERROR_MESSAGE += "ERROR: HINTs not implemented properly\n"
+        print "file contains non-PGML HINTs, which are not implemented yet"
+    if "BEGIN_TEXT" in everything_else:
+        ERROR_MESSAGE += "ERROR: TEXT not implemented properly\n"
+        print "file contains non-PGML TEXT, which is not implemented yet"
+    if "BEGIN_SOLUTION" in everything_else:
+        ERROR_MESSAGE += "ERROR: SOLUTION not implemented properly\n"
+        print "file contains non-PGML SOLUTION, which is not implemented yet"
 
         # extract the variables in the solution
     vars_in_solution = re.findall(r"(\$[a-zA-Z0-9_]+)", the_solution)
@@ -425,6 +443,7 @@ def pgtombx(text):
     the_output += '<?xml version="1.0" encoding="UTF-8" ?>' + "\n"
     the_output += "\n" + "<exercise>" + "\n"
     the_output += "<original-metadata>" + "\n"
+    the_output += "<original-file>" + component.inputstub + "</original-file>" + "\n"
     the_output += the_metadata
     the_output += "\n" + "</original-metadata>" + "\n"
     the_output += "\n"

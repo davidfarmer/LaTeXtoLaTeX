@@ -929,6 +929,8 @@ def pgmarkup_to_mbx(text, the_answer_variables):
  #       the_text = re.sub(r"\*", "<em>", the_text, 1)
  #       the_text = re.sub(r"\*", "</em>", the_text, 1)
     the_text = re.sub(r"\*([a-zA-Z :]+)\*", r"<em>\1</em>", the_text)
+    # also can have *mi/hr*
+    the_text = re.sub(r"\*([a-zA-Z]+/[a-zA-Z]+)\*", r"<em>\1</em>", the_text)
 
     the_text = re.sub("<multiplication />", "*", the_text)
 
@@ -992,7 +994,7 @@ def pg_math_environments(txt):
 
     if not the_text.startswith("\\begin{aligned}"):
      #   return "<me>" + the_text + "</me>"
-        return "<m>" + "\\displaystyle" + the_text + "</m>"
+        return "<m>" + "\\displaystyle{" + the_text + "}</m>"
       #  return "<m>" + the_text + "</m>"
 
     # remove the begin and end align

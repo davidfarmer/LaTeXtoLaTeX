@@ -5,7 +5,7 @@ import utilities
 import component
 import postprocess
 import myoperations
-import mapping
+# import mapping
 
 
 ###################

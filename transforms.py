@@ -104,23 +104,30 @@ def mbx_pp(text):
 
     thetext = text
 
-    # first a hack to handle 2-level lists.
-    thetext = re.sub(r"<li>\s*<p>", "<lip>", thetext)
-    thetext = re.sub(r"</p>\s*</li>", "</lip>", thetext)
-    component.lipcounter = 0
-    component.something_changed = True
-    while component.something_changed:
-        component.something_changed = False
-        thetext = re.sub(r"<lip>(.*?)</lip>", liprename, thetext, 0, re.DOTALL)
+#    # first a hack to handle 2-level lists.
+#    thetext = re.sub(r"<li>\s*<p>", "<lip>", thetext)
+#    thetext = re.sub(r"</p>\s*</li>", "</lip>", thetext)
+    
+    # sort-of a hack to handle tags that can occur withing themselves (like li and p)
+    # (does not handle the case of opening tag with parameters)
+    for lip_tag in ["li", "p"]:
+        component.lipcounter[lip_tag] = 0
+        this_tag_start = "<" + lip_tag + ">"
+        this_tag_end = "</" + lip_tag + ">"
+        the_search_string = this_tag_start + "(.*?)" + this_tag_end
+        component.something_changed = True
+        while component.something_changed:
+            component.something_changed = False
+            thetext = re.sub(the_search_string, lambda match: liprename(match, lip_tag), thetext, 0, re.DOTALL)
 
 #    print "found", component.lipcounter, "li/p pairs"
-    for n in range(component.lipcounter):
-        thetext = postprocess.tag_before_after("lip" + str(n), "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("lip", "\n\n", "\n", "\n", "\n\n", thetext)
+        for n in range(component.lipcounter[lip_tag]):
+            thetext = postprocess.tag_before_after(lip_tag + str(n), "\n\n", "\n", "\n", "\n\n", thetext)
+        thetext = postprocess.tag_before_after(lip_tag, "\n\n", "\n", "\n", "\n\n", thetext)
 
     # first remove extraneous spaces and put in appropriate carriage returns
 
-    thetext = postprocess.tag_before_after("p", "\n\n", "\n", "\n", "\n\n", thetext)
+#    thetext = postprocess.tag_before_after("p", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("row|tabular|image|latex-image-code|asymptote", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("me|men|md|mdn", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("exercises|exercisegroup|exercise", "\n", "\n", "\n", "\n", thetext)
@@ -128,7 +135,7 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("mrow|intertext", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dt", "\n\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("li", "\n\n", "", "", "\n\n", thetext)
+#    thetext = postprocess.tag_before_after("li", "\n\n", "", "", "\n\n", thetext)
     thetext = postprocess.tag_before_after("ul|ol|dl", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("theorem|proposition|lemma|conjecture|corollary",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
@@ -151,9 +158,10 @@ def mbx_pp(text):
 #    thetext = re.sub("\n +", "\n", thetext)
 
     # then put it back
-    for n in range(component.lipcounter):
-        thetext = postprocess.add_space_within("lip" + str(n), thetext)
-        thetext = postprocess.add_space_within("lip" + str(n), thetext)  # twice, because we will separate into li and p
+    for lip_tag in ["li", "p"]:
+        for n in range(component.lipcounter):
+            thetext = postprocess.add_space_within(lip_tag + str(n), thetext)
+      #      thetext = postprocess.add_space_within(lip_tag + str(n), thetext)  # twice, because we will separate into li and p
 
     thetext = postprocess.add_space_within("chapter", thetext)
     thetext = postprocess.add_space_within("section", thetext)
@@ -170,12 +178,12 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("algorithm|objectives", thetext)
     thetext = postprocess.add_space_within("proposition|lemma|remark|conjecture|corollary", thetext)
     thetext = postprocess.add_space_within("statement|solution|answer|hint|proof", thetext)
-    thetext = postprocess.add_space_within("p", thetext)
+#    thetext = postprocess.add_space_within("p", thetext)
     thetext = postprocess.add_space_within("paragraphs", thetext)
     thetext = postprocess.add_space_within("ul", thetext)
     thetext = postprocess.add_space_within("ol", thetext)
     thetext = postprocess.add_space_within("dl", thetext)
-    thetext = postprocess.add_space_within("li", thetext)
+#    thetext = postprocess.add_space_within("li", thetext)
     thetext = postprocess.add_space_within("me|men|md|mdn", thetext)
     thetext = postprocess.add_space_within("exercises", thetext)
     thetext = postprocess.add_space_within("exercisegroup", thetext)
@@ -192,30 +200,41 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("pre", thetext)
 
     # now separate the li and p
-    for n in range(component.lipcounter):
-        thetext = re.sub(r"(\n *)  <lip" + str(n) + ">",r"\1  <li>\1    <p>", thetext)
-        thetext = re.sub(r"(\n *)</lip" + str(n) + ">",r"\1  </p>\1</li>", thetext)
-    # for some reason there can be extra </lip>.  Not sure why.
-    thetext = re.sub(r"(\n *)</lip>",r"\1  </p>\1</li>", thetext)
+#    for n in range(component.lipcounter):
+#        thetext = re.sub(r"(\n *)  <lip" + str(n) + ">",r"\1  <li>\1    <p>", thetext)
+#        thetext = re.sub(r"(\n *)</lip" + str(n) + ">",r"\1  </p>\1</li>", thetext)
+#    # for some reason there can be extra </lip>.  Not sure why.
+#    thetext = re.sub(r"(\n *)</lip>",r"\1  </p>\1</li>", thetext)
 
     return thetext
 
 ##################
 
-def liprename(txt):
+def liprename(txt, tag="lip"):
 
     the_inside = txt.group(1)
 
     component.something_changed = True
-    current_counter = component.lipcounter
-    component.lipcounter += 1
+    current_counter = component.lipcounter[tag]
+    component.lipcounter[tag] += 1
 
-    if "<lip>" in the_inside:  # replace the last <lip> by <lipN>
-        the_inside_start, the_inside_end = the_inside.rsplit("<lip>", 1)
-        the_inside = the_inside_start + "<lip" + str(current_counter) + ">" + the_inside_end
-        return "<lip>" + the_inside + "</lip" + str(current_counter) + ">"
+    the_tag = "<" + tag + ">"
+    the_ta = "<" + tag 
+    the_ag = "</" + tag 
+
+    if the_tag in the_inside:  # replace the last <lip> by <lipN>
+        the_inside_start, the_inside_end = the_inside.rsplit(the_tag, 1)
+        the_inside = the_inside_start + the_ta + str(current_counter) + ">" + the_inside_end
+        return the_tag + the_inside + the_ag + str(current_counter) + ">"
     else:
-        return "<lip" + str(current_counter) + ">" + the_inside + "</lip" + str(current_counter) + ">"
+        return the_ta + str(current_counter) + ">" + the_inside + the_ag + str(current_counter) + ">"
+
+#    if "<lip>" in the_inside:  # replace the last <lip> by <lipN>
+#        the_inside_start, the_inside_end = the_inside.rsplit("<lip>", 1)
+#        the_inside = the_inside_start + "<lip" + str(current_counter) + ">" + the_inside_end
+#        return "<lip>" + the_inside + "</lip" + str(current_counter) + ">"
+#    else:
+#        return "<lip" + str(current_counter) + ">" + the_inside + "</lip" + str(current_counter) + ">"
 
 ##################
 

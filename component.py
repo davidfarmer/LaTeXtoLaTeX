@@ -21,3 +21,4 @@ generic_counter = 0
 
 extra_macros = []
 
+lipcounter = {}

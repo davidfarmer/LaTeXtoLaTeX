@@ -122,7 +122,10 @@ def mbx_pp(text):
 
 #    print "found", component.lipcounter, "li/p pairs"
         for n in range(component.lipcounter[lip_tag]):
-            thetext = postprocess.tag_before_after(lip_tag + str(n), "\n\n", "\n", "\n", "\n\n", thetext)
+            if lip_tag == "li":
+                thetext = postprocess.tag_before_after(lip_tag + str(n), "\n\n", "", "", "\n\n", thetext)
+            else:
+                thetext = postprocess.tag_before_after(lip_tag + str(n), "\n\n", "\n", "\n", "\n\n", thetext)
         thetext = postprocess.tag_before_after(lip_tag, "\n\n", "\n", "\n", "\n\n", thetext)
 
     # first remove extraneous spaces and put in appropriate carriage returns
@@ -154,12 +157,8 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("chapter|section", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
 
-#    # first remove all the spaces at the beginning of a line
-#    thetext = re.sub("\n +", "\n", thetext)
-
-    # then put it back
     for lip_tag in ["li", "p"]:
-        for n in range(component.lipcounter):
+        for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_space_within(lip_tag + str(n), thetext)
       #      thetext = postprocess.add_space_within(lip_tag + str(n), thetext)  # twice, because we will separate into li and p
 
@@ -199,12 +198,19 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("row", thetext)
     thetext = postprocess.add_space_within("pre", thetext)
 
-    # now separate the li and p
-#    for n in range(component.lipcounter):
-#        thetext = re.sub(r"(\n *)  <lip" + str(n) + ">",r"\1  <li>\1    <p>", thetext)
-#        thetext = re.sub(r"(\n *)</lip" + str(n) + ">",r"\1  </p>\1</li>", thetext)
+    # now put back the li and p
+    for lip_tag in ["li", "p"]:
+        for n in range(component.lipcounter[lip_tag]):
+   #     thetext = re.sub(r"(\n *)<" + lip_tag + str(n) + ">",r"\1<" + lip_tag + ">", thetext)
+   #     thetext = re.sub(r"(\n *)</" + lip_tag + str(n) + ">",r"\1</" + lip_tag + ">", thetext)
+            thetext = re.sub(r"<" + lip_tag + str(n) + ">", "<" + lip_tag + ">", thetext)
+            thetext = re.sub(r"</" + lip_tag + str(n) + ">", "</" + lip_tag + ">", thetext)
 #    # for some reason there can be extra </lip>.  Not sure why.
 #    thetext = re.sub(r"(\n *)</lip>",r"\1  </p>\1</li>", thetext)
+
+    # special case of p inside li
+    thetext = re.sub(r"(<li>\n)\n( *<p>)", r"\1\2", thetext)
+    thetext = re.sub(r"(</p>\n)\n( *</li>)", r"\1\2", thetext)
 
     return thetext
 

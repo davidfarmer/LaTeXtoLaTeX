@@ -5,7 +5,7 @@ import utilities
 import component
 import postprocess
 import myoperations
-# import mapping
+import mapping
 
 
 ###################
@@ -270,6 +270,7 @@ def index_fix(txt):
 
 def pgtombx(text):
 
+    component.product1 = False
     thetext = text
 
     thetext = myoperations.pgpreprocess(thetext)
@@ -338,41 +339,43 @@ def pgtombx(text):
             # extract the variables in the statement
     vars_in_statement = re.findall(r"(\$[a-zA-Z0-9_]+)", the_statement)
     vars_in_statement = list(set(vars_in_statement))  # remove duplicates
+    vars_in_statement.sort()
 #    print "vars1: ", vars_in_statement
 
-    the_statement_p = the_statement.split("\n\n")
-    previous_par = ""
-    the_statement_p_mbx = []
-    for par in the_statement_p:
-     #   print "THIS par", par
-        par = par.strip()
-        if not par:
-            if previous_par == "p":
-                the_statement_p_mbx[-1] += "</p>"
-            elif previous_par == "li":
-                the_statement_p_mbx[-1] += "\n</ul>\n</p>"
-            previous_par = ""
-            continue
-        if par.startswith("* "):
-            par = "<li><p>" + par[2:].strip() + "</p></li>"
-            if previous_par != "li":
-                par = "<p>\n<ul>" + "\n" + par
-                previous_par = "li"
-        elif previous_par == "p":  # this line is a continuation of the previous paragraph
-     #       pass # do nothing, because we are just processing another ine in the current paragraph
-            par = "</p>\n<p>" + par
-        else: # we must be starting a new paragraph
-            par = "<p>" + par
-            previous_par = "p"
-        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
-     #   print "par revised", par
-        the_statement_p_mbx.append(par)
+#    the_statement_p = the_statement.split("\n\n")
+#    previous_par = ""
+#    the_statement_p_mbx = []
+#    for par in the_statement_p:
+#     #   print "THIS par", par
+#        par = par.strip()
+#        if not par:
+#            if previous_par == "p":
+#                the_statement_p_mbx[-1] += "</p>"
+#            elif previous_par == "li":
+#                the_statement_p_mbx[-1] += "\n</ul>\n</p>"
+#            previous_par = ""
+#            continue
+#        if par.startswith("* "):
+#            par = "<li><p>" + par[2:].strip() + "</p></li>"
+#            if previous_par != "li":
+#                par = "<p>\n<ul>" + "\n" + par
+#                previous_par = "li"
+#        elif previous_par == "p":  # this line is a continuation of the previous paragraph
+#     #       pass # do nothing, because we are just processing another ine in the current paragraph
+#            par = "</p>\n<p>" + par
+#        else: # we must be starting a new paragraph
+#            par = "<p>" + par
+#            previous_par = "p"
+#        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
+#     #   print "par revised", par
+#        the_statement_p_mbx.append(par)
+#
+#    the_statement_mbx = "<statement>" + "\n"
+#    the_statement_mbx += "\n".join(the_statement_p_mbx)
+#    the_statement_mbx += "\n</statement>" + "\n"
 
-    the_statement_mbx = "<statement>" + "\n"
-    the_statement_mbx += "\n".join(the_statement_p_mbx)
-    the_statement_mbx += "\n</statement>" + "\n"
-
-
+    the_statement = myoperations.pgmarkup_to_mbx(the_statement, the_answer_variables)
+    the_statement_mbx = text_to_p_ul_ol(the_statement, the_answer_variables, "statement")
 
     # extract the solution
     re_solution = "BEGIN_PGML_SOLUTION(.*)END_PGML_SOLUTION"
@@ -409,13 +412,24 @@ def pgtombx(text):
     vars_in_solution = list(set(vars_in_solution))  # remove duplicates
 #    print "vars: ", vars_in_solution
 
-    the_solution_mbx = "<solution>" + "\n"
-    the_solution_p = the_solution.split("\n\n")
-    for par in the_solution_p:
-        par = par.strip()
-        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
-        the_solution_mbx += "<p>" + par + "</p>" + "\n"
-    the_solution_mbx += "</solution>" + "\n"
+    if "product1" in the_solution:
+        print "oooooooooooo"
+        print '"product1" in the_solution'
+        print the_solution
+        print "ppppppppppp"
+        component.product1 = True
+
+    the_solution = myoperations.pgmarkup_to_mbx(the_solution, the_answer_variables)
+    the_solution_mbx = text_to_p_ul_ol(the_solution, the_answer_variables, "solution")
+    component.product1 = False
+
+#    the_solution_mbx = "<solution>" + "\n"
+#    the_solution_p = the_solution.split("\n\n")
+#    for par in the_solution_p:
+#        par = par.strip()
+#        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
+#        the_solution_mbx += "<p>" + par + "</p>" + "\n"
+#    the_solution_mbx += "</solution>" + "\n"
 
     #throw away things that are not needed in the mbx version
     things_to_throw_away = [
@@ -444,11 +458,12 @@ def pgtombx(text):
     the_pgcode_mbx += "\n" + "</pg-code>" + "\n"
 
     all_vars = list(set(vars_in_statement + vars_in_solution))
+    all_vars.sort()
 
     the_setup_mbx = "<setup>" + "\n"
     for var in all_vars:
         the_setup_mbx += '<var name="' + var + '">' + "\n"
-        the_setup_mbx += '  <!--<static></static>-->' + "\n"
+        the_setup_mbx += '  <static></static>' + "\n"
         the_setup_mbx += '</var>' + "\n"
 
     the_setup_mbx += the_pgcode_mbx
@@ -486,3 +501,71 @@ def pgtombx(text):
     the_output = mbx_pp(the_output)
 
     return the_output
+
+#######################
+
+def text_to_p_ul_ol(the_statement, the_answer_variables, wrapper):
+
+    the_statement = the_statement.strip()
+#    if the_statement.startswith("a)"):
+#        print "found it:", the_statement
+    the_statement_p = the_statement.split("\n")
+#    else:
+#        the_statement_p = the_statement.split("\n\n")
+    previous_par = ""
+    ulol_mode = ""
+    the_statement_p_mbx = []
+    for par in the_statement_p:
+     #   print "THIS par", par
+        par = par.strip()
+        if not par:
+            if previous_par == "p":
+                the_statement_p_mbx[-1] += "</p>"
+                previous_par = ""
+            elif previous_par == "li":
+              #  the_statement_p_mbx[-1] += "\n</ul>\n</p>"
+              #  the_statement_p_mbx[-1] += "\n</" + ulol_mode + ">\n</p>"
+                pass  # because we don't know yet if the ol/ul has finished
+            continue
+
+        if par.startswith("* "):
+            ulol_mode = "ul"
+            par = "<li><p>" + par[2:].strip() + "</p></li>"
+            if previous_par == "p":
+                par = "</p>" + "<p>\n<ul>" + "\n" + par
+                previous_par = "li"
+            elif previous_par != "li":
+                par = "<p>\n<ul>" + "\n" + par
+                previous_par = "li"
+        elif par[1] == ")":   # as in    a) .... or b)..., for a list
+            ulol_mode = "ol"
+            par = "<li><p>" + par[2:].strip() + "</p></li>"
+            if previous_par == "p":
+                par = '</p>' + '<p>\n<ol label="a">' + '\n' + par
+                previous_par = "li"
+            if previous_par != "li":
+                par = '<p>\n<ol label="a">' + '\n' + par
+                previous_par = "li"
+        elif previous_par == "p":  # this line is a continuation of the previous paragraph
+            pass # do nothing, because we are just processing another ine in the current paragraph
+     #       par = "</p>\n<p>" + par
+        else: # we must be starting a new paragraph
+            par = "<p>" + par
+            if previous_par == "li":  # then end the previous list
+                par = "\n</" + ulol_mode + ">\n</p>" + par
+            previous_par = "p"
+       
+
+#        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
+     #   print "par revised", par
+        the_statement_p_mbx.append(par)
+
+    if previous_par == "li":   # unfinished list to be completed
+        the_statement_p_mbx[-1] += "\n</" + ulol_mode + ">\n</p>"
+
+    the_statement_mbx = "<" + wrapper + ">" + "\n"
+    the_statement_mbx += "\n".join(the_statement_p_mbx)
+    the_statement_mbx += "\n</" + wrapper + ">" + "\n"
+  
+    return the_statement_mbx
+

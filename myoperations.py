@@ -874,7 +874,7 @@ def wwmacros(text):
     thetext = re.sub("\);", "", thetext, 0, re.DOTALL)
     thetext = thetext.strip()
 
-    known_macros = ["PGstandard.pl", "MathObjects.pl", "PGML.pl"]
+    known_macros = ["PGstandard.pl", "MathObjects.pl", "PGML.pl", "PGcourse.pl"]
 
     the_macros = thetext.split(",")
 
@@ -912,6 +912,9 @@ def pgmarkup_to_mbx(text, the_answer_variables):
 
 #    the_text = utilities.magic_character_convert(the_text, "text")
 
+
+    if component.product1:
+        print "aaa" + the_text + "bbb"
     the_text = re.sub(r"\[`(.*?)`\]", pg_math_environments, the_text, 0, re.DOTALL)
 
     the_text = re.sub(r">>\[\s*@\s*image\((.*?)\)\s*@\]\*<<", pg_image_environments, the_text, 0, re.DOTALL)
@@ -982,7 +985,11 @@ def pg_math_environments(txt):
     the_text = txt.group(1)
     the_text = the_text.strip()
 
-    the_text = re.sub(r"\*", "<multiplication />", the_text)
+#    the_text = re.sub(r"\*", "<multiplication />", the_text)
+
+    
+    if component.product1:
+        print "vvv" + the_text + "www"
 
     if not the_text.startswith("`"):
         if "align" in the_text:
@@ -1014,6 +1021,9 @@ def pg_math_environments(txt):
         the_output += "<mrow>" + row + "</mrow>" + "\n"
 
     the_output += "</md>"
+
+    # delete empty mrows  (alternative is to skip empty rows in previous loop)
+    the_output = re.sub("<mrow>\s*</mrow>\s*", "", the_output)
 
     return the_output
 #------------------#

@@ -300,6 +300,7 @@ def magic_character_convert(text, mode):
         the_text = re.sub("TMPhideLESSLESS", r"<less />", the_text)
     elif mode == "math":
         the_text = re.sub("TMPhideAMPAMP", r"\\amp", the_text)
+        the_text = re.sub("TMPhideLESSLESSvar", r"<var", the_text)
         the_text = re.sub("TMPhideLESSLESS", r"\\le", the_text)
     elif mode == "text":
         the_text = re.sub("TMPhideAMPAMP", r"&amp;", the_text)

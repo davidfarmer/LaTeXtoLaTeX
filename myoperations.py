@@ -204,37 +204,6 @@ def mytransform_mbx(text):
     # no space at end of math mode
     thetext = re.sub(r"(\S) </m>", r"\1</m>", thetext)
 
-#    if "xml ver" not in thetext:
-#        thetext = '<?xml version="1.0" encoding="UTF-8" ?>' + '\n' + thetext
-#
-#    thetext = re.sub(r"(<pg-code>(.*?)</pg-code>)", replacepgcode, thetext, 0, re.DOTALL)
-
- #   for tag in ["p"]:
-#    for tag in ["pg-code"]:
-#        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
-#        thetext = re.sub(the_search, replacetag, thetext, 0, re.DOTALL)
-
-#    thetext = re.sub(r"\\ds\s*\\lim_", r"\\lim\\limits_", thetext)
-#    thetext = re.sub(r"\\displaystyle\s*\\lim_", r"\\lim\\limits_", thetext)
-
-#    for tag in ["cell","mrow","title","li"]:
-#        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
-#        thetext = re.sub(the_search, replacetag, thetext, 0, re.DOTALL)
-
-#    for tag in ["mrow"]:
-#        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
-#        thetext = re.sub(the_search, replacetag, thetext, 0, re.DOTALL)
-
-#    for tag in ["p"]:
-#        the_search = "(<" + tag + r"\b.*?</" + tag + ">)"
-#        thetext = re.sub(the_search, fixp, thetext, 0, re.DOTALL)
-
-#    thetext = mytransform_mbx_figure(thetext)
-
-#    thetext = process_fig_mult(thetext)
-
-#    thetext = re.sub(r'<image xml:id="([^"]+)" >', deduplicate_id, thetext,0,re.DOTALL)
-
     return thetext
 
 def wrap_in_parentheses(txt):
@@ -874,7 +843,7 @@ def wwmacros(text):
     thetext = re.sub("\);", "", thetext, 0, re.DOTALL)
     thetext = thetext.strip()
 
-    known_macros = ["PGstandard.pl", "MathObjects.pl", "PGML.pl"]
+    known_macros = ["PGstandard.pl", "MathObjects.pl", "PGML.pl", "PGcourse.pl"]
 
     the_macros = thetext.split(",")
 
@@ -898,24 +867,30 @@ def wwmacros(text):
 
 ################
 
-def pgmarkup_to_mbx(text, the_answer_variables):
+def pgmarkup_to_mbx(text, the_answer_variables=[]):
     """ Change one paragrapf from pg-style markup to mbx-style.
 
     """
 
     the_text = text.strip()
 
-#    the_text = re.sub(r"\[``", "<me>", the_text)
-#    the_text = re.sub(r"``\]", "</me>", the_text)
-#    the_text = re.sub(r"\[`", "<m>", the_text)
-#    the_text = re.sub(r"`\]", "</m>", the_text)
+#    for TAG in ["$PAR", "$BCENTER", "$ECENTER"]:
+#        the_text = re.sub(" *\$" + TAG + " *", "", the_text)
 
-#    the_text = utilities.magic_character_convert(the_text, "text")
+    # one blank line to indicate a paragraph break
+    the_text = re.sub("\n{3,}", "\n\n", the_text)
+
+    # convert all [complicated math stuff] to [$something]
+    the_text = re.sub(r"\[([^_@\$\'\"\[\]]*\$[^\[\]]+)\]", lambda match: rename_vars(match, the_answer_variables), the_text)
 
     the_text = re.sub(r"\[`(.*?)`\]", pg_math_environments, the_text, 0, re.DOTALL)
 
-    the_text = re.sub(r">>\[\s*@\s*image\((.*?)\)\s*@\]\*<<", pg_image_environments, the_text, 0, re.DOTALL)
+    the_text = re.sub(r">>\s*\[\s*@\s*image\((.*?)\)\s*@\]\*\s*<<", pg_image_environments, the_text, 0, re.DOTALL)
+    the_text = re.sub(r"\\{\s*image\((.*?)\)\s*\\}", pg_image_environments, the_text, 0, re.DOTALL)
 
+    the_text = re.sub(r"\\{\s*DataTable\((.*?)\);\s*\\}", pg_table_environments, the_text, 0, re.DOTALL)
+
+    # can this happen, or is it already done by pg_math_environments ?
     the_text = re.sub(r"\[\s*(\$[a-zA-Z0-9_]+)\s*\]", r'<var name="\1" />', the_text)
 
 #    if "_____" in the_text:
@@ -932,11 +907,66 @@ def pgmarkup_to_mbx(text, the_answer_variables):
     # also can have *mi/hr*
     the_text = re.sub(r"\*([a-zA-Z]+/[a-zA-Z]+)\*", r"<em>\1</em>", the_text)
 
-    the_text = re.sub("<multiplication />", "*", the_text)
+    the_text = re.sub(" PERLmultiplicationPERL ", "*", the_text)
 
     return the_text
 
 #------------------#
+
+def rename_vars(txt, the_answer_variables):
+
+    the_var = txt.group(1)
+    # next line should be handled earlier?
+    the_var = re.sub(" PERLmultiplicationPERL ", "*", the_var)
+    the_var = the_var.strip()
+
+    if not re.match(r"\$[a-zA-Z0-9\-]+$", the_var):
+        if the_var in component.supplementary_variables:
+            the_var = component.supplementary_variables[the_var]
+            print "     re-used ", the_var
+        else:
+            new_var = component.supplementary_variable_stub + str(component.supplementary_variable_counter)
+            component.supplementary_variable_counter += 1
+            component.supplementary_variables[the_var] = new_var
+            print "made the new var:",new_var, "=", the_var
+            the_var = new_var
+
+    return "[" + the_var + "]"
+
+#------------------#
+
+def extract_ans(txt):
+
+    the_text = txt.group(1)
+
+    this_ans, what_remains = utilities.first_bracketed_string(the_text, depth=1, lbrack="(", rbrack=")")
+
+    this_ans = this_ans[:-1]  # take off the ) at the end
+    this_ans = this_ans.strip()
+    if not this_ans:
+        print "no answer before", what_remains
+    component.the_answers.append(this_ans)
+
+    return what_remains
+
+#------------------#
+
+def pg_table_environments(txt):
+
+    the_text = txt.group(1)
+    the_text = the_text.strip()
+
+    # here is where to process the_text and then return it inside table tags
+
+    # as a placeholder, just return the original
+    the_answer = "\{\n"
+    the_answer += "DataTable("
+    the_answer += the_text
+    the_answer += ");\n"
+
+    return the_answer
+
+#-----------------#
 
 def pg_image_environments(txt):
 
@@ -946,16 +976,18 @@ def pg_image_environments(txt):
     if not the_text.startswith("insertGraph"):
         print "ERROR: malformed image markup"
         return "<figure>" + "ERROR" + the_text + "</figure>"
-    else:
-        print "processing pg_image_environments", the_text[:20]
+#    else:
+#        print "processing pg_image_environments", the_text[:20]
 
     the_name = re.match(r"insertGraph\(([^)]+)\)", the_text).group(1).strip()
     the_width = re.search(r"width\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
     the_height = re.search(r"height\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
     the_tex_size = re.search(r"tex_size\s*=>\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
     #is alt the right thing to grab for the description?
-    the_alt = re.search(r"alt\s*=\s*([^, ]+)(,| |\b)", the_text).group(1).strip()
-    the_alt = the_alt[1:-1]   # remove surrounding quotes
+    try:
+        the_alt = re.search(r'alt\s*=\s*(\"|\')([^\"\']*)\1', the_text).group(2).strip()
+    except AttributeError:
+        the_alt = re.search(r'alt\s*=\s*(\"|\')(.*?)\1\s*(,|$)', the_text, re.DOTALL).group(2).strip()
 
     the_image_short = '<image pg-name="' + the_name + '" />' + "\n"
 
@@ -965,7 +997,8 @@ def pg_image_environments(txt):
     the_image_long += 'tex_size="' + the_tex_size + '" '
     the_image_long += '>' + "\n"
     the_image_long += "<description>"
-    the_image_long += '<var name="' + the_alt + '" />'
+    the_alt = re.sub(r"(\$[a-zA-Z0-9_]+)", r'<var name="\1" />', the_alt)
+    the_image_long += the_alt
     the_image_long += "</description>" + "\n"
     the_image_long += "</image>" + "\n"
 
@@ -982,8 +1015,11 @@ def pg_math_environments(txt):
     the_text = txt.group(1)
     the_text = the_text.strip()
 
-    the_text = re.sub(r"\*", "<multiplication />", the_text)
+    the_text = re.sub(r"\*", " PERLmultiplicationPERL ", the_text)
 
+    the_text = re.sub(r"\[\s*(\$[a-zA-Z0-9_]+)\s*]", r'<var name="\1" />', the_text)
+
+    
     if not the_text.startswith("`"):
         if "align" in the_text:
             print "What we found:", the_text[:30]
@@ -1014,6 +1050,9 @@ def pg_math_environments(txt):
         the_output += "<mrow>" + row + "</mrow>" + "\n"
 
     the_output += "</md>"
+
+    # delete empty mrows  (alternative is to skip empty rows in previous loop)
+    the_output = re.sub("<mrow>\s*</mrow>\s*", "", the_output)
 
     return the_output
 #------------------#
@@ -1062,6 +1101,9 @@ def pgpreprocess(text):
 # fix some anomalies
 
     thetext = text
+
+    for TAG in [r"\$PAR", r"\$BCENTER", r"\$ECENTER"]:
+        thetext = re.sub(" *" + TAG + " *", "", thetext)
 
     thetext = re.sub(r"\[`\s*\\begin{aligned", r"[``\\begin{aligned", thetext)
     thetext = re.sub(r"\\end{aligned}\s*`\]", r"\\end{aligned}``]", thetext)

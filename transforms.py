@@ -5,7 +5,7 @@ import utilities
 import component
 import postprocess
 import myoperations
-# import mapping
+import mapping
 
 
 ###################
@@ -273,6 +273,9 @@ def pgtombx(text):
 
     thetext = text
 
+    component.supplementary_variable_counter = 0
+    component.supplementary_variables = {}
+    component.the_answers = []
     thetext = myoperations.pgpreprocess(thetext)
 # to do:
 # HINTs
@@ -304,16 +307,25 @@ def pgtombx(text):
 
     the_macros_mbx = myoperations.wwmacros(the_macros)
 
-    # find the ANSwer
-    re_ANS = "\nANS\((.*?)\);"
-    the_answers = re.findall(re_ANS, everything_else, re.DOTALL)
-    the_answers = [answer.strip() for answer in the_answers]
-    the_answer_variables = [re.search(r"(\$[a-zA-Z0-9_]+)", answer).group(1) for answer in the_answers]
-    everything_else = re.sub(re_ANS, "", everything_else, 0, re.DOTALL)
+    # kill commented out lines that are not in the metadata section.
+    everything_else = re.sub("\n#.*", "", everything_else)
+
+    # find the ANSwers and save them in component.the_answers
+    while "ANS(" in everything_else:
+        everything_else = re.sub(r"ANS\((.*)", myoperations.extract_ans, everything_else, 1, re.DOTALL)
+ #   re_ANS = "\nANS\((.*?)\);"  # wrong: could be complicated, so use first bracketed string
+ #   the_answers = re.findall(re_ANS, everything_else, re.DOTALL)
+ #   the_answers = [answer.strip() for answer in the_answers]
+    try:
+        the_answer_variables = [re.search(r"(\$[a-zA-Z0-9_]+)", answer).group(1) for answer in component.the_answers]
+    except AttributeError:
+        print "no variables in", component.the_answers
+
+ #   everything_else = re.sub(re_ANS, "", everything_else, 0, re.DOTALL)
     the_answer_mbx = ""
-    for answer in the_answers:
+    for answer in component.the_answers:
         answer = utilities.magic_character_convert(answer, "code")
-        the_answer_mbx += "$ansevaluator = " + answer + "\n"
+        the_answer_mbx += "$ansevaluator = " + answer + ";\n"
 
     # extract the problem statement
 #    re_statement = "BEGIN_PGML\s(.*)END_PGML\n"
@@ -324,7 +336,7 @@ def pgtombx(text):
         everything_else = re.sub(re_statement, "", everything_else, 0, re.DOTALL)
         for part in the_statement_parts:
             this_part = part[1]
-            this_part = re.sub(" *\$PAR *\n", "", this_part)
+ #           this_part = re.sub(" *\$PAR *\n", "", this_part)
             # here is where to convert DataTable, as in AdditionSubtractionApplications30
             the_statement += this_part
    #     the_statement = re.search(re_statement, everything_else, re.DOTALL).group(1)
@@ -339,41 +351,10 @@ def pgtombx(text):
             # extract the variables in the statement
     vars_in_statement = re.findall(r"(\$[a-zA-Z0-9_]+)", the_statement)
     vars_in_statement = list(set(vars_in_statement))  # remove duplicates
-#    print "vars1: ", vars_in_statement
+    vars_in_statement.sort()
 
-    the_statement_p = the_statement.split("\n\n")
-    previous_par = ""
-    the_statement_p_mbx = []
-    for par in the_statement_p:
-     #   print "THIS par", par
-        par = par.strip()
-        if not par:
-            if previous_par == "p":
-                the_statement_p_mbx[-1] += "</p>"
-            elif previous_par == "li":
-                the_statement_p_mbx[-1] += "\n</ul>\n</p>"
-            previous_par = ""
-            continue
-        if par.startswith("* "):
-            par = "<li><p>" + par[2:].strip() + "</p></li>"
-            if previous_par != "li":
-                par = "<p>\n<ul>" + "\n" + par
-                previous_par = "li"
-        elif previous_par == "p":  # this line is a continuation of the previous paragraph
-     #       pass # do nothing, because we are just processing another ine in the current paragraph
-            par = "</p>\n<p>" + par
-        else: # we must be starting a new paragraph
-            par = "<p>" + par
-            previous_par = "p"
-        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
-     #   print "par revised", par
-        the_statement_p_mbx.append(par)
-
-    the_statement_mbx = "<statement>" + "\n"
-    the_statement_mbx += "\n".join(the_statement_p_mbx)
-    the_statement_mbx += "\n</statement>" + "\n"
-
-
+    the_statement_p = text_to_p_ul_ol(the_statement, the_answer_variables, "statement")
+    the_statement_mbx = myoperations.pgmarkup_to_mbx(the_statement_p, the_answer_variables)
 
     # extract the solution
     re_solution = "BEGIN_PGML_SOLUTION(.*)END_PGML_SOLUTION"
@@ -384,7 +365,7 @@ def pgtombx(text):
         re_solution = "BEGIN_SOLUTION(.*)END_SOLUTION"
         try:
             the_solution = re.search(re_solution, everything_else, re.DOTALL).group(1)
-            the_solution = re.sub(" *\$PAR *\n", "", the_solution)
+     #       the_solution = re.sub(" *\$PAR *\n", "", the_solution)
             everything_else = re.sub(re_solution, "", everything_else, 0, re.DOTALL)
 
         except AttributeError:
@@ -410,13 +391,8 @@ def pgtombx(text):
     vars_in_solution = list(set(vars_in_solution))  # remove duplicates
 #    print "vars: ", vars_in_solution
 
-    the_solution_mbx = "<solution>" + "\n"
-    the_solution_p = the_solution.split("\n\n")
-    for par in the_solution_p:
-        par = par.strip()
-        par = myoperations.pgmarkup_to_mbx(par, the_answer_variables)
-        the_solution_mbx += "<p>" + par + "</p>" + "\n"
-    the_solution_mbx += "</solution>" + "\n"
+    the_solution_mbx = myoperations.pgmarkup_to_mbx(the_solution, the_answer_variables)
+    the_solution_mbx = text_to_p_ul_ol(the_solution_mbx, the_answer_variables, "solution")
 
     #throw away things that are not needed in the mbx version
     things_to_throw_away = [
@@ -427,11 +403,6 @@ def pgtombx(text):
     for junk in things_to_throw_away:
         everything_else = re.sub("\s*" + junk + "\s*", "\n", everything_else)
 
-    # now everything_else contains the pg-code.  In there, we convert
-    # < or & to &lt; or &amp;
-#    everything_else = re.sub("&", "&amp;", everything_else)
-#    everything_else = re.sub("<", "&lt;", everything_else)
-
     for str in mapping.pg_macro_files:
         if str in everything_else:
             if mapping.pg_macro_files[str] not in component.extra_macros:
@@ -439,17 +410,30 @@ def pgtombx(text):
 
     everything_else = utilities.magic_character_convert(everything_else, "text")
 
+    all_vars = list(set(vars_in_statement + vars_in_solution))
+    all_vars.sort()
+
     the_pgcode_mbx = "<pg-code>" + "\n"
     the_pgcode_mbx += everything_else.strip()
     the_pgcode_mbx += "\n\n" + the_answer_mbx
+    the_pgcode_mbx += "if($envir{problemSeed}==10) {\n"
+    for var in all_vars:
+        the_pgcode_mbx += "  " + var + "=1;" + "\n"
+    for pre_var in component.supplementary_variables:
+        new_var = component.supplementary_variables[pre_var]
+        the_pgcode_mbx += "  " + new_var + "=" + pre_var + "1;" + "\n"
+    the_pgcode_mbx += "}\n"
     the_pgcode_mbx += "\n" + "</pg-code>" + "\n"
-
-    all_vars = list(set(vars_in_statement + vars_in_solution))
 
     the_setup_mbx = "<setup>" + "\n"
     for var in all_vars:
         the_setup_mbx += '<var name="' + var + '">' + "\n"
         the_setup_mbx += '  <static></static>' + "\n"
+        the_setup_mbx += '</var>' + "\n"
+    for pre_var in component.supplementary_variables:
+        new_var = component.supplementary_variables[pre_var]
+        the_setup_mbx += '<var name="' + new_var + '">' + "\n"
+        the_setup_mbx += '  <static>' + pre_var + '</static>' + "\n"
         the_setup_mbx += '</var>' + "\n"
 
     the_setup_mbx += the_pgcode_mbx
@@ -484,6 +468,104 @@ def pgtombx(text):
     the_output += "\n" + "</webwork>" + "\n"
     the_output += "</exercise>" + "\n"
 
+    component.indentamount = "    "
     the_output = mbx_pp(the_output)
 
     return the_output
+
+#######################
+
+def text_to_p_ul_ol(the_statement, the_answer_variables, wrapper):
+
+    the_statement = the_statement.strip()
+#    if the_statement.startswith("a)"):
+#        print "found it:", the_statement
+    the_statement_p = the_statement.split("\n")
+#    else:
+#        the_statement_p = the_statement.split("\n\n")
+    current_par = ""
+    previous_par = ""
+    ulol_mode = ""
+    in_list = False
+    the_statement_p_mbx = []
+    for par in the_statement_p:
+     #   print "THIS par", par
+        par = par.strip()
+        if not par:
+            if current_par == "p":
+                the_statement_p_mbx[-1] += "</p>"
+                current_par = ""
+                previous_par = ""
+            elif current_par == "li":
+                the_statement_p_mbx[-1] += "</p></li>\n"
+      #          the_statement_p_mbx[-1] += "</" + ulol_mode + ">\n"
+                current_par = ""
+                previous_par = "li"
+              #  the_statement_p_mbx[-1] += "\n</ul>\n</p>"
+               # the_statement_p_mbx[-1] += "\n</" + ulol_mode + ">\n</p>"
+             #   pass  # because we don't know yet if the ol/ul has finished
+            continue
+
+        elif par.startswith("* "):
+            ulol_mode = "ul"
+            in_list = True
+            par = "<li><p>" + par[2:].strip() 
+            if current_par == "p":
+                par = "</p>" + "<p>\n<ul>" + "\n" + par
+                current_par = "li"
+                previous_par = "p"
+            elif current_par == "li":
+                par = "</p>\n</li>" + "\n" + par
+                current_par = "li"
+                previous_par = "li"
+            elif previous_par != "li":
+                par =  '<p>\n<ul>' + '\n' + par
+                current_par = "li"
+                previous_par = ""
+            else:
+                current_par = "li"
+
+        elif par[1] == ")":   # as in    a) .... or b)..., for a list
+            ulol_mode = "ol"
+            in_list = True
+            par = "<li><p>" + par[2:].strip() # + "</p></li>"
+            if current_par == "p":
+                par = '</p>' + '<p>\n<ol label="a">' + '\n' + par
+                current_par = "li"
+                previous_par = "p"
+            elif current_par == "li":
+                par = "</p>\n</li>" + "\n" + par
+                current_par = "li"
+                previous_par = "li"
+            elif previous_par != "li":
+                par =  '<p>\n<ol label="a">' + '\n' + par
+                current_par = "li"
+                previous_par = ""
+            else:
+                current_par = "li"
+
+        elif current_par == "p":  # this line is a continuation of the previous paragraph
+            pass # do nothing, because we are just processing another ine in the current paragraph
+     #       par = "</p>\n<p>" + par
+        elif current_par == "li":
+            pass
+        else: # starting a new p?
+            par = "<p>" + par
+            if previous_par == "li":  # then end the previous list
+                par = "\n</" + ulol_mode + ">\n</p>" + par
+            current_par = "p"
+            previous_par = ""
+       
+        the_statement_p_mbx.append(par)
+
+    if current_par == "li":   # unfinished list to be completed
+        the_statement_p_mbx[-1] += "\n</p></li>\n</" + ulol_mode + ">\n</p>"
+    elif current_par == "p":
+        the_statement_p_mbx[-1] += "</p>" + "\n"
+
+    the_statement_mbx = "<" + wrapper + ">" + "\n"
+    the_statement_mbx += "\n".join(the_statement_p_mbx)
+    the_statement_mbx += "\n</" + wrapper + ">" + "\n"
+  
+    return the_statement_mbx
+

@@ -11,6 +11,11 @@ filestubs = []
 error_messages = []
 replaced_macros = []
 defined_variables = {}
+supplementary_variable_counter = 0
+supplementary_variable_stub = "$tMvR"
+supplementary_variables = {}
+
+the_answers = []
 
 ids = []
 

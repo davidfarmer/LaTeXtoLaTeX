@@ -77,18 +77,20 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
         if inputfilename == outputfilename:
             print "big problem, quitting"
         component.iofilepairs.append([inputfilename, outputfilename])
-    print thefiles
-    print inputdir 
-    print component.iofilepairs
+  #  print thefiles
+  #  print inputdir 
+  #  print component.iofilepairs
 #    sys.exit()
 
 else:
     print "Not proper input.  Does target directory exist?"
     sys.exit()
 
-print component.iofilepairs
+# print component.iofilepairs
 
 for inputfile, outputfile in component.iofilepairs:
+
+    component.extra_macros = []
 
     component.inputstub = inputfile
     component.inputstub = re.sub(".*/","",component.inputstub)

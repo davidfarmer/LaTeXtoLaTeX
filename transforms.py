@@ -134,7 +134,7 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("row|tabular|image|latex-image-code|asymptote", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("me|men|md|mdn", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("exercises|exercisegroup|exercise", "\n", "\n", "\n", "\n", thetext)
-    thetext = postprocess.tag_before_after("webwork|setup|set|pg-code", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("webwork|setup|set|pg-code|pg-macros", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("mrow|intertext", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dt", "\n\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
@@ -193,6 +193,7 @@ def mbx_pp(text):
  #   thetext = postprocess.add_space_within("var", thetext)
     thetext = postprocess.add_space_within("set", thetext)
     thetext = postprocess.add_space_within("pg-code", thetext)
+    thetext = postprocess.add_space_within("pg-macros", thetext)
     thetext = postprocess.add_space_within("table", thetext)
     thetext = postprocess.add_space_within("tabular", thetext)
     thetext = postprocess.add_space_within("row", thetext)
@@ -448,7 +449,7 @@ def pgtombx(text):
     the_setup_mbx = "<setup>" + "\n"
     for var in all_vars:
         the_setup_mbx += '<var name="' + var + '">' + "\n"
-        the_setup_mbx += '  <!--<static></static>-->' + "\n"
+        the_setup_mbx += '  <static></static>' + "\n"
         the_setup_mbx += '</var>' + "\n"
 
     the_setup_mbx += the_pgcode_mbx

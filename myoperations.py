@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import re
 
@@ -602,6 +603,70 @@ def mytransform_tex(text):
 
     thetext = text
 
+# delete page numbers
+    thetext = utilities.replacemacro(thetext,"rightline",1,"")
+    thetext = utilities.replacemacro(thetext,"leftline",1,"")
+
+# kill hard spaces
+    thetext = re.sub(r" \\ ", "   ", thetext)
+    thetext = re.sub(r" \\ ", "   ", thetext)
+    thetext = re.sub(r" \\ ", "   ", thetext)
+    thetext = re.sub(r" \\" + "\n", "\n", thetext)
+    thetext = re.sub(r"(}|\)|\])\\ ", r"\1  ", thetext)
+    thetext = re.sub(r"\\vspace{[^{}]+} *", "", thetext)
+    thetext = re.sub(r"\\vs{[^{}]+} *", "", thetext)
+
+    for thm in ["Lemma", "Proposition", "Theorem", "Corollary", "Problem"]:
+        thmlower = thm.lower()
+        thetext = re.sub(r"{\\bf\s+" + thm + "\s+[A-Z0-9.]{,8}}",
+                  r"\\begin{" + thmlower + "}", thetext)
+        thetext = re.sub(r"{\\bf\s+" + thm + "\s+[0-9.]{,8}}",
+                  r"\\begin{" + thmlower + "}", thetext)
+
+    for env in ["lemma", "proposition", "theorem", "corollary", "problem"]:
+        separated_thms = thetext.split("\\begin{" + env + "}")
+
+        print "------------------" + env
+        thetext = separated_thms[0]
+        separated_thms.pop(0)
+
+        for sthm in separated_thms:
+            print sthm[:50]
+        print "================"
+
+        for sthm in separated_thms:
+            this_sthm = sthm
+            this_sthm = re.sub(r"{\\sl\s", r"\\thmbody{", this_sthm, 1)
+            this_sthm = utilities.replacemacro(this_sthm,"thmbody",1,
+                        "#1" + "\n" + "\\end{" + env + "}" + "\n")
+            thetext += "\\begin{" + env + "}" + this_sthm
+            print this_sthm[:50]
+
+    for env in ["lemma", "proposition", "theorem", "corollary"]:
+        thetext = re.sub(r"(\\begin{" + env + "})" + r"\s*" + r"\(([^()]+)\)",
+                   r"\1[\2]", thetext)
+        thetext = re.sub(r"(\\begin{" + env + "})" + r"\s*" + r"\{\\rm\b\s*([^{}]+)\}",
+                   r"\1[\2]", thetext)
+        thetext = re.sub(r"(\\begin{" + env + "})" + r"\s*" + r"\{\\rm\b\s*([^{}]+\\cite{[^{}]+})\}",
+                   r"\1[\2]", thetext)
+
+# subsections?
+    thetext = re.sub(r"{\s*\\large\s*\\bf\s*[0-9.]+\s+", r"\\section{", thetext)
+    thetext = re.sub(r"{\s*\\bf\s*[0-9.]+\s*", r"\\subsection{", thetext)
+    thetext = re.sub(r"\\centerline\s*{\\Large{\\bf ", r"\\title{{", thetext)
+
+    for tag in ["newpage", "linebreak", "noindent", "indent", "bigskip", "footnoterule", "medskip"]:
+        thetext = re.sub(r"\\" + tag + r"\b", "", thetext)
+
+    # cases?
+
+    thetext = re.sub(r"{\\bf 경우 (.)}\s*:\s*", r"\\paragraph{Case \1} ", thetext)
+
+    thetext = re.sub(r"\\item\[[^\[\]]+\]\s*", r"\\item ", thetext)
+    thetext = re.sub(r"\\bold\s+(H|L)", r"\\mathbf \1", thetext)
+
+
+
     # replace \begin{prop}{the_label} by
     # \begin{prop}\label{proposition:chaptername:the_label}
 #    thetext = utilities.replacemacro(thetext,r"\begin{prop}",1,
@@ -640,11 +705,12 @@ def mytransform_tex(text):
 #    thetext = re.sub(r"\\end{ex}", r"\\end{example}", thetext)
 #    thetext = re.sub(r"\\begin{framed}", r"\\begin{aside}", thetext)
 #    thetext = re.sub(r"\\end{framed}", r"\\end{aside}", thetext)
-    thetext = re.sub(r".*\\input table", "", thetext, 0, re.DOTALL)
-    thetext = re.sub(r"\\end{document}.*", "", thetext, 0, re.DOTALL)
 
-    thetext = "\n\n" + r"\begin{solution}" + "\n" + thetext.strip() + "\n" + r"\end{solution}" + "\n\n"
-
+#    thetext = re.sub(r".*\\input table", "", thetext, 0, re.DOTALL)
+#    thetext = re.sub(r"\\end{document}.*", "", thetext, 0, re.DOTALL)
+#
+#    thetext = "\n\n" + r"\begin{solution}" + "\n" + thetext.strip() + "\n" + r"\end{solution}" + "\n\n"
+#
     thetext = re.sub("\r\n", "\n", thetext, 0, re.DOTALL)
 
 #    thetext = re.sub(r"\s*\\\\\s*~\\\\\s*", "\n\n", thetext, 0, re.DOTALL)

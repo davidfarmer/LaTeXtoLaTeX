@@ -89,51 +89,50 @@ def replacemacro(text,macroname,numargs,replacementtext):
     """
 
     if text == "":
-##        print "ERROR?: replacing macro", macroname, "in empty string"
+        print "replacing macro", macroname, "in an empty string"
         return ""
 
-##    print "in replacemacro, macroname",macroname
-##    print text[:150]
-##    print "------------------"
+    if "\\"+macroname not in text:
+        return text
+
+    # there is a tricky situation when a macro is being replaced by nothing.  if it is
+    # alone on a line, then you just introduced a paragraph break.  it seems we must
+    # treat that as a special case
+
 
     thetext = text
     global a_macro_changed
 
     a_macro_changed = 1
-    component.replaced_macros = []
 
-    the_macroname = re.sub(r"\\",r"\\\\",macroname)
+    while a_macro_changed:   # maybe change to:  while "\\"+macroname in text:
 
-    while a_macro_changed:   # change to:  while "\\"+macroname in text:
-
+        # first, the special case described above, which we are not really handling right
+        if not replacementtext:
+            while a_macro_changed:
+            #    print "replacing macro", macroname, "by nothing"
+                a_macro_changed = 0
+                thetext = re.sub(r"\n\\("+macroname+r")\s*({[^{}]*})\s",
+                                 lambda match: replacemac(match,numargs,"\n"),thetext,1,re.DOTALL)
         a_macro_changed = 0
 
-  #      thetext = re.sub(r"\\("+macroname+r")\**(([0-9]|\b|{)+.*)",
-        thetext = re.sub("(" + the_macroname + r")\**(([0-9]|\b|{)+.*)",
-                         lambda match: replacemac(match,numargs,replacementtext),
-                         thetext,1,re.DOTALL)
-
-    for idx, val in enumerate(component.replaced_macros):
-        the_val = re.sub(r"\\",r"\\\\",val)
-        print "substituting number"+str(idx) + "for" + the_val
-        print r"xxxx" + str(idx) + r"yyyy"
-        thetext = re.sub(r"xxxx" + str(idx) + r"yyyy", the_val, thetext)
+        thetext = re.sub(r"\\("+macroname+r")\**(([0-9]|\b)+.*)",lambda match: replacemac(match,numargs,replacementtext),thetext,1,re.DOTALL)
 
     return thetext
+
 
 ##############
 
 def replacemac(txt,numargs,replacementtext):
 
     this_macro = txt.group(1)
- #   text_after = txt.group(2).strip()   # not sure why we strip the text after?
     text_after = txt.group(2)
 
     if numargs:
         text_after = text_after.lstrip()
 
     if text_after.startswith("["):
-        print "found square group" #  of type",replacementtext
+        print "found square group"
         squaregroup, text_after = first_bracketed_string(text_after,0,"[","]")
         text_after = text_after.lstrip()
         # Currently we ignore the squaregroup.  What should we do with it?
@@ -144,83 +143,58 @@ def replacemac(txt,numargs,replacementtext):
     except IndexError:
         first_character = ""
 
- #   if numargs and not text_after.startswith("{"):
     if numargs and first_character  not in ["{","\\"] and first_character not in r"0123456789":
-        print "found", this_macro, "but it has no argument",text_after[:50]
+        print "found", this_macro, "but it has no argument", text_after[:50]
         return text_after
 
     if first_character in "0123456789":   # wrap it in {} and proceed normally
-        print "found that the argument is a number"
         text_after = re.sub("^([0-9])",r"{\1}",text_after,1)
-        print "now the text after starts:",text_after[:20]
 
     if first_character == r"\\":   # wrap the argument in {} and proceed normally
-        print "found that the argument is another macro"
+        # found that the argument is another macro
         text_after = re.sub(r"^\\([a-zA-Z]+)",r"{\\\1}",text_after,1)
 
     global a_macro_changed
     a_macro_changed += 1
 
-##    print "\n   found",this_macro, "with nurmags",numargs,"to replace:", text_after[:50]
-##
-##    print "\nXXXXX replacing it by",replacementtext,"XXXXX"
-#    print "\nYYYYYYYY\n"
     arglis=[""]      # put a throw-away element 0 so that it is less confusing
                      # when we assign to the LaTeX "#N" argmuments
 
-
-    for _ in range(numargs):
+    for ar in range(numargs):
             try:
                 theitem, text_after = first_bracketed_string(text_after)
             except ValueError:
-                print "ERROR, no text_after in replacemac",text_after[:100]
+              #  logging.error("no text_after in replacemac for argument %s of %s in %s", ar, this_macro, theitem)
+              #  logging.error("text_after begins %s", text_after[:40])
+                if ar:
+                    pass
+              #      logging.error("arglis so far is %s", arglis)
                 theitem = ""
                 # below is to fail gracefully when there is an error.
                 # need to come up with a better way
             if not theitem:  # probably missing close bracket
-                print "was scanning argument",_
-                print "missing brace?  guess to stop at end of line"
-             #  arglis.append(text_after)
+            #    logging.error("was scanning argument %s of %s before text_after %s", ar, this_macro, text_after[:20])
+            #    logging.error("missing brace?  guess to stop at end of line")
                 if "\n" in text_after:
                     theitem, text_after = text_after.split("\n",1)
                 else:
                     theitem = ""
-          #      text_after = ""
-          #      continue
             theitem = strip_brackets(theitem)
             theitem = re.sub(r"\\",r"\\\\",theitem)  # This is tricky.  We are using the extracted LaTeX
                                                    # in a substitution, so we should think of it as code.
                                                    # Therefore we need to excape the backslashes.
-      #      theitem = re.sub(r"\b",r"\\b",theitem)  # because \b is special?
-     #       theitem = re.escape(theitem)  # This is tricky.  We are using the extracted LaTeX
-     #                                              # in a substitution, so we should think of it as code.
-     #                                              # Therefore we need to excape the backslashes.
             arglis.append(theitem)
 
-###    macroexpanded = replacementtext
-    macroexpanded = re.sub(r"\\",r"\\\\",replacementtext)
-#    print "macroexpanded",macroexpanded
+# confused about which of the next two lines is correct
+    macroexpanded = replacementtext
+#    macroexpanded = re.sub(r"\\",r"\\\\",replacementtext)
 
     for arg in range(1,numargs+1):
         mysubstitution = "#"+str(arg)
- #       print "About to do re.sub("
- #       print mysubstitution
- #       print "1111111"
- #       print arglis[arg]
- #       print "22222222"
- #       print macroexpanded
- #       print "33333333"
         macroexpanded = re.sub(mysubstitution,arglis[arg],macroexpanded)
- #       print "4444444"
 
-#    print "At end of replacemac, the macroexpanded is",macroexpanded
-#    print "And the text_after starts",text_after[:120]
+    return macroexpanded + text_after
 
-    macro_index = len(component.replaced_macros)
-    component.replaced_macros.append(macroexpanded)
-
-    return "xxxx" + str(macro_index) + "yyyy" + text_after
-#    return macroexpanded + text_after
 
 #################
 

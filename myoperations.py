@@ -210,6 +210,92 @@ def xx_mytransform_mbx(text):
 
     thetext = text
 
+    thetext = re.sub(r"<problem", "<activity", thetext)
+    thetext = re.sub(r"problem>", "activity>", thetext)
+
+    thetext = re.sub(r"<activity(.*?)</activity>", mytransform_mbx_act, thetext,0, re.DOTALL)
+
+    return thetext
+
+def mytransform_mbx_act(txt):
+
+    the_text = txt.group(1)
+
+    the_start = re.sub("^([^<>]*>)(.*)", r"\1", the_text, 1, re.DOTALL)
+    the_text = re.sub("^([^<>]*>)(.*)", r"\2", the_text, 1, re.DOTALL)
+
+    the_text = the_text.strip()
+
+#    if the_start:
+#        print the_start
+#        print the_text[:30]
+
+#    the_text = re.sub("<statement>\s*", "", the_text)
+#    the_text = re.sub("</statement>\s*", "", the_text)
+    the_text = re.sub("<ol>\s*", "", the_text)
+    the_text = re.sub("</ol>\s*", "", the_text)
+    the_text = re.sub("<ul>\s*", "", the_text)
+    the_text = re.sub("</ul>\s*", "", the_text)
+    the_text = re.sub("<li>", "<task>", the_text)
+    the_text = re.sub("<li ([^>]+)>", r"<task \1>", the_text)
+    the_text = re.sub("</li>", "</task>", the_text)
+
+    the_text = re.sub("(<task>\n) *<p>\n", r"\1", the_text)
+    the_text = re.sub(" *</p>\n(\s*</task>\s*)", r"\1", the_text)
+
+    the_text = re.sub(r"<task>(\s*)(.*?)<solution>",
+                      r"<task>\1<statement><p>\2\1</p>\1</statement>\1<solution>",
+                      the_text, 0, re.DOTALL)
+
+    # may be too aggressive?
+    the_text = re.sub(r"</solution>\s*<p>\s*\\item (.*?)</p>\s*<solution>",
+                      r"</solution><task><statement><p>\1</p></statement></task><solution>",the_text,0,re.DOTALL)
+
+    # the statement and solution should both be inside the task
+    the_text = re.sub(r"</task>\s*<solution>(.*?)</solution>",
+                      r"<solution>\1</solution></task>",the_text,0,re.DOTALL)
+
+    # maybe first taskis not wrapped in task
+    the_text = re.sub(r"<statement>(.*?)</solution>\s*<task>",
+                      r"<task><statement>\1</solution></task><task>",the_text,0,re.DOTALL)
+
+    the_text = re.sub(r"<p>\s*<p>","<p>", the_text)
+    the_text = re.sub(r"</solution>\s*</p>","</solution>", the_text)
+
+    if the_text.startswith("<statement") and the_text.endswith("statement>") and "<task>" in the_text:
+        the_text = the_text[11:-12]
+        the_text = the_text.strip()
+    #    print "ggggg" + the_text[:20]
+    #    print "uuuuu" + the_text[-20:]
+
+        if the_text.startswith("<p>") and the_text.endswith("</p>"):
+            the_text = the_text[3:-4]
+            the_text = the_text.strip()
+            the_text = re.sub("^(.*?)<task", r"<p>\1</p><task", the_text, 1, re.DOTALL)
+
+    if the_text.startswith("<statement") and the_text.endswith("solution>") and "<task>" in the_text:
+
+        the_text_part1 = re.sub("^(.*)</statement>(.*?)$", r"\1", the_text, 1, re.DOTALL)
+        the_text_part2 = re.sub("^(.*)</statement>(.*?)$", r"\2", the_text, 1, re.DOTALL)
+        the_text_part1 = the_text_part1[11:].strip()
+        print "ggggg" + the_text_part1[:40]
+        print "uuuuu" + the_text_part1[-40:]
+
+        if the_text_part1.startswith("<p>") and the_text_part1.endswith("</p>"):
+            print "the_text_part1" + the_text_part1[:33]
+            the_text_part1 = the_text_part1[3:-4]
+            the_text_part1 = the_text_part1.strip()
+            the_text_part1 = re.sub("^(.*?)<task", r"<p>\1</p><task", the_text_part1, 1, re.DOTALL)
+        the_text = the_text_part1 + the_text_part2
+
+    the_text = re.sub(r"</task>\s*</p>","</task>", the_text)
+
+    return "<activity" + the_start + the_text + "</activity>"
+
+def mytransform_mbx_parentheses(text):
+
+    thetext = text
+
     # put periods outside math mode
     # but be careful about ***\right.</m>
     thetext = re.sub(r"([^t])(\.|,) *</m>", r"\1</m>\2", thetext)
@@ -618,6 +704,9 @@ def mytransform_txt(text):
 
     thetext = re.sub(r"^Hint for.*", "", thetext)
     thetext = re.sub(r".$", "", thetext,1,re.DOTALL)
+
+    thetext = "<hint>\n  <p>\n" + thetext.strip() + "\n  </p>\n</hint>\n"
+
     return thetext
 
 ###################

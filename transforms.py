@@ -155,7 +155,7 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("figure|table",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n", thetext)
-    thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint|objectives", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint|objectives|task", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("subsection", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("chapter|section", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
@@ -183,6 +183,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("definition|axiom|theorem|example|insight|exploration|activity", thetext)
     thetext = postprocess.add_space_within("algorithm|objectives", thetext)
     thetext = postprocess.add_space_within("proposition|lemma|remark|conjecture|corollary", thetext)
+    thetext = postprocess.add_space_within("task", thetext)
     thetext = postprocess.add_space_within("statement|solution|answer|hint|proof", thetext)
 #    thetext = postprocess.add_space_within("p", thetext)
     thetext = postprocess.add_space_within("paragraphs", thetext)

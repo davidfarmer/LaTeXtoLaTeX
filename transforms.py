@@ -138,6 +138,9 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("mrow|intertext", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dt", "\n\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
+
+    thetext = postprocess.tag_before_after("fn", "", "", "", "", thetext)
+
 #    thetext = postprocess.tag_before_after("li", "\n\n", "", "", "\n\n", thetext)
     thetext = postprocess.tag_before_after("ul|ol|dl", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("theorem|proposition|lemma|conjecture|corollary",
@@ -156,6 +159,10 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("subsection", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("chapter|section", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
+
+# now shove everything else to the left
+# need to be more clever, because sometimes the author spacing should be preserved
+    thetext = re.sub("\n +", "\n", thetext)
 
     for lip_tag in ["li", "p"]:
         for n in range(component.lipcounter[lip_tag]):

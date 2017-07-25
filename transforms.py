@@ -149,7 +149,7 @@ def mbx_pp(text):
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("objectives",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("definition|axiom|example|insight|exploration|activity|remark|proof",
+    thetext = postprocess.tag_before_after("definition|axiom|example|insight|exploration|activity|remark|warning|proof",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("problem", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("figure|table",
@@ -180,9 +180,10 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("sidebyside", thetext)
     thetext = postprocess.add_space_within("aside", thetext)
     thetext = postprocess.add_space_within("latex-image-code", thetext)
-    thetext = postprocess.add_space_within("definition|axiom|theorem|example|insight|exploration|activity", thetext)
-    thetext = postprocess.add_space_within("algorithm|objectives", thetext)
-    thetext = postprocess.add_space_within("proposition|lemma|remark|conjecture|corollary", thetext)
+    for tag in ["theorem", "definition", "axiom", "proposition", "lemma", "conjecture", "corollary"]:
+        thetext = postprocess.add_space_within(tag, thetext)
+    for tag in ["example", "insight", "exploration", "activity", "remark", "warning", "algorithm", "objectives"]:
+        thetext = postprocess.add_space_within(tag, thetext)
     thetext = postprocess.add_space_within("task", thetext)
     thetext = postprocess.add_space_within("statement|solution|answer|hint|proof", thetext)
 #    thetext = postprocess.add_space_within("p", thetext)

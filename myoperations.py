@@ -182,27 +182,36 @@ def fa_conv(txt):
 
 ###################
 
-def mytransform_mbx(text):   # schmidt calc 3 temporary
+#def mytransform_mbx(text):   # schmidt calc 3 temporary
+def mbx_fix(text):   # schmidt calc 3 temporary
 
 
     thetext = text
+    print "in mbx_fix"
 
-    thetext = re.sub(r"EXTRA\s*<fn>(.*?)</fn>\s*", r"\\extrafn{\1}", thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\\G\b", r"\\mathcal{G}", thetext)
+    thetext = re.sub(r"\\fatr\b", r"\\R", thetext)
+    thetext = re.sub(r"\\fatz\b", r"\\Z", thetext)
+    thetext = re.sub(r"\\fatq\b", r"\\Q", thetext)
+    thetext = re.sub(r"\\fatc\b", r"\\C", thetext)
+    thetext = re.sub(r"\\fatn\b", r"\\N", thetext)
 
-    for mac in ["bmw", "valpo", "valposhort","marginparbmw"]:
-         thetext = utilities.replacemacro(thetext,mac,1,"\n<insight><p>\n#1\n</p></insight>\n")
-
-#    for mac in ["extrafn", "instructor"]:
-    for mac in ["note"]:
-        thetext = utilities.replacemacro(thetext, mac,1,"<!-- \XX" + mac + "{#1} -->")
-        thetext = re.sub("XX" + mac, mac, thetext)
-
-    thetext = re.sub(r"<p>\s*\\section{([^}]+)}",r"\\section{\1}<p>",thetext)
-    thetext = utilities.replacemacro(thetext,"section",1,"<title>#1</title>\n")
-
-    thetext = utilities.replacemacro(thetext,"item",0,"</p></li>\n<li><p>\n")
-    thetext = re.sub(r"\\begin{itemize}\s*</p>\s*</li>","<ul>",thetext)
-    thetext = re.sub(r"\\end{itemize}","</p></li></ul>",thetext)
+#    thetext = re.sub(r"EXTRA\s*<fn>(.*?)</fn>\s*", r"\\extrafn{\1}", thetext, 0, re.DOTALL)
+#
+#    for mac in ["bmw", "valpo", "valposhort","marginparbmw"]:
+#         thetext = utilities.replacemacro(thetext,mac,1,"\n<insight><p>\n#1\n</p></insight>\n")
+#
+##    for mac in ["extrafn", "instructor"]:
+#    for mac in ["note"]:
+#        thetext = utilities.replacemacro(thetext, mac,1,"<!-- \XX" + mac + "{#1} -->")
+#        thetext = re.sub("XX" + mac, mac, thetext)
+#
+#    thetext = re.sub(r"<p>\s*\\section{([^}]+)}",r"\\section{\1}<p>",thetext)
+#    thetext = utilities.replacemacro(thetext,"section",1,"<title>#1</title>\n")
+#
+#    thetext = utilities.replacemacro(thetext,"item",0,"</p></li>\n<li><p>\n")
+#    thetext = re.sub(r"\\begin{itemize}\s*</p>\s*</li>","<ul>",thetext)
+#    thetext = re.sub(r"\\end{itemize}","</p></li></ul>",thetext)
     
     return thetext
 

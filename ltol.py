@@ -14,7 +14,7 @@ import myoperations
 # input and output files.
 #################################
 
-conversion_options = ["mbx", "ptx_pp", "mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
+conversion_options = ["mbx", "ptx_pp", "mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
                       "txt",
                       "tex",
                       "html",
@@ -54,10 +54,10 @@ if os.path.isfile(component.inputname) and not os.path.isdir(component.outputnam
 
 elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
 
-    if component.filetype_plus in ["mbx_pp", "mbx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
-        fileextension_in = "mbx"
-        fileextension_out = "mbx"
-    if component.filetype_plus in ["ptx_pp"]:
+    if component.filetype_plus in ["mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
+        fileextension_in = "ptx"
+        fileextension_out = "ptx"
+    elif component.filetype_plus in ["ptx_pp"]:
         fileextension_in = "ptx"
         fileextension_out = "ptx"
     elif component.filetype_plus in ["pgtombx"]:
@@ -67,12 +67,14 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
         fileextension_in = component.filetype_plus
         fileextension_out = component.filetype_plus
 
+    print "looking for", fileextension_in, "files in",  component.inputname
     inputdir = component.inputname
     inputdir = re.sub(r"/*$","",inputdir)  # remove trailing slash
     outputdir = component.outputname
     outputdir = re.sub(r"/*$","",outputdir)  # remove trailing slash
     outputdir = outputdir + "/"              # and then put it back
     thefiles = glob.glob(inputdir + "/*." + fileextension_in)
+    print "thefiles", thefiles
     for inputfilename in thefiles:
         outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", inputfilename)
         if fileextension_in != fileextension_out:
@@ -90,6 +92,8 @@ else:
     sys.exit()
 
 # print component.iofilepairs
+
+print "about to loop over files:", component.iofilepairs
 
 for inputfile, outputfile in component.iofilepairs:
 
@@ -114,13 +118,13 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_txt(component.onefile)
     elif component.filetype_plus == 'html':
         component.onefile = myoperations.mytransform_html(component.onefile)
-    elif component.filetype_plus == 'mbx':
+    elif component.filetype_plus == 'ptx':
         component.onefile = myoperations.mytransform_mbx(component.onefile)
         component.onefile = transforms.mbx_pp(component.onefile)
     elif component.filetype_plus in ['mbx_pp', 'ptx_pp']:
         component.onefile = transforms.mbx_pp(component.onefile)
-    elif component.filetype_plus in ["mbx_fix", "mbx_strict_tex", "mbx_strict_html"]:
-        component.onefile = transforms.mbx_fix(component.onefile)
+    elif component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:
+        component.onefile = myoperations.mbx_fix(component.onefile)
     else:
         pass
         # print "doing nothing"

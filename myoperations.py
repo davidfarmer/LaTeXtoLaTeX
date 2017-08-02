@@ -720,6 +720,70 @@ def mytransform_txt(text):
 
 ###################
 
+def mytransform_tex_ptx(text):
+
+    thetext = text
+
+    # first let's throw away stuff we can't use
+    thetext = re.sub(r"\\def\\labelenumi.*", "", thetext)
+    thetext = re.sub(r"[%].*", "", thetext)
+    # delete backslash followed by white space
+    thetext = re.sub(r"\\\s+", "", thetext)
+
+    # 3 or more \n should just be 2 of them
+    thetext = re.sub("\n{3,}", "\n\n", thetext)
+
+    # convert the math delimiters
+    # note that this substitution also puts one space befre and after
+    # inline math, because that seemed to be consistently wrong in the source
+    thetext = re.sub(r"\s*\\\(\s*", " <m>", thetext)
+    thetext = re.sub(r"\s*\\\)\s*", "</m> ", thetext)
+
+    # would need to me more clever if there were multiline displays,
+    # but there doesnt seem to be any
+    thetext = re.sub(r"\\\[", "<md>", thetext)
+    thetext = re.sub(r"\\\]", "</md>", thetext)
+
+    # obviously it would be eassy  to fix the \title{...} by hand,
+    # but I wanted to show you how replacemacro works
+    thetext = utilities.replacemacro(thetext, "title", 1,
+           "<title>#1</title>")
+
+    # Convert enumerate to ol
+    # This approach is a bit sloppy, but works in many cases
+    thetext = re.sub(r"\s*\\begin{enumerate}\s*", "\n\n<ol>\n<li>", thetext)
+    thetext = re.sub(r"\s*\\end{enumerate}\s*", "</li>\n</ol>\n\n", thetext)
+    thetext = re.sub(r"\s*\\item\s*", "</li>\n<li>", thetext)
+
+    # see line 2608.  A good example of doing things in the right order
+    thetext = re.sub(r"\\emph{\\\\\s+", r"\\emph{", thetext)
+    # Hope that theorems contain no blank lines
+    thetext = re.sub(r"\\emph{THEOREM[^{}]*}(.*?)\n\n",
+                     r"<theorem><statement><p>\1</p></statement></theorem>",
+                     thetext, 0, re.DOTALL)
+
+    # guess that things in all caps are section titles
+    thetext = re.sub(r"\n\n([A-Z]{2,} [A-Z]+)\n\n",
+                     "</p></section>\n\n<section><title>" + r"\1" + r"</title>\n\n<p>",
+                     thetext)
+    # but now there is an extra </p></section> at the beginning, and a missing one at the end
+    thetext = re.sub(r"</p></section>", "", thetext, 1)
+    thetext = thetext + "</section>"
+
+    # feeble attempt at paragraph markup
+    thetext = re.sub(r"\.\n\n([A-Z][a-z ])", r"</p><p>\1", thetext)
+
+    thetext = re.sub(r"``(.+)''", r"<q>\1</q>", thetext)
+
+    # delete some garbage
+    # empty li
+    thetext = re.sub(r"<li>\s*</li>", "", thetext)
+
+
+    return thetext
+
+###################
+
 def mytransform_tex(text):
 
     thetext = text

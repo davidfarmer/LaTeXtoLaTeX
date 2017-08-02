@@ -157,7 +157,7 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint|objectives|task", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("subsection", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("chapter|section", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("chapter|section", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
 
 # now shove everything else to the left

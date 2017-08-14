@@ -182,7 +182,26 @@ def fa_conv(txt):
 
 ###################
 
-#def mytransform_mbx(text):   # schmidt calc 3 temporary
+def mytransform_xml(text):
+
+    thetext = text
+
+    # do it twice, the first time assuming that the tags have
+    # good indentation and spacing
+    # note that re assumes no carriage returns in the image tag
+    thetext = re.sub(r'(\n *)<image ([^>]*)alt="([^"]+)"([^>]*)/>',
+                     r'\1<image \2\4/>\1  <description>\1    \3\1  </description>\1</image>', thetext)
+    thetext = re.sub(r'<image ([^>]*)alt="([^"]+)"([^>]*)/>',
+                     r'<image \1\3><description>\2</description></image>', thetext)
+
+    # delete spaces at tend of starting tag
+    thetext = re.sub(r'" +>', '">', thetext)
+
+    # delete empty captions  (delete the next line if you want to keep them)
+    thetext = re.sub('\s*<caption>\s*</caption>\s*', '', thetext)
+
+    return thetext
+
 def mbx_fix(text):   # schmidt calc 3 temporary
 
 

@@ -100,6 +100,12 @@ print "about to loop over files:", component.iofilepairs
 
 for inputfile, outputfile in component.iofilepairs:
 
+    # hack for windows
+    inputfile = re.sub(r"\\\\", "/", inputfile)
+    inputfile = re.sub(r"\\", "/", inputfile)
+    outputfile = re.sub(r"\\\\", "/", outputfile)
+    outputfile = re.sub(r"\\", "/", outputfile)
+
     component.extra_macros = []
 
     component.inputstub = inputfile

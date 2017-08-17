@@ -191,6 +191,7 @@ def mytransform_xml(text):
     # note that re assumes no carriage returns in the image tag
     thetext = re.sub(r'(\n *)<image ([^>]*)alt="([^"]+)"([^>]*)/>',
                      r'\1<image \2\4>\1  <description>\1    \3\1  </description>\1</image>', thetext)
+
     thetext = re.sub(r'<image ([^>]*)alt="([^"]+)"([^>]*)/>',
                      r'<image \1\3><description>\2</description></image>', thetext)
 
@@ -198,12 +199,12 @@ def mytransform_xml(text):
     thetext = re.sub(r'" +>', '">', thetext)
 
     # delete empty captions  (delete the next line if you want to keep them)
+
 #    thetext = re.sub('\s*<caption>\s*</caption>\s*', '', thetext)
 
     return thetext
 
 def mbx_fix(text):   # schmidt calc 3 temporarily
-
 
     thetext = text
     print "in mbx_fix"

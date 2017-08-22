@@ -129,9 +129,9 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_txt(component.onefile)
     elif component.filetype_plus == 'html':
         component.onefile = myoperations.mytransform_html(component.onefile)
-    elif component.filetype_plus == 'ptx':
+    elif component.filetype_plus in ['ptx', 'mbx', 'xml']:
         component.onefile = myoperations.mytransform_mbx(component.onefile)
-        component.onefile = transforms.mbx_pp(component.onefile)
+ #       component.onefile = transforms.mbx_pp(component.onefile)
     elif component.filetype_plus in ['mbx_pp', 'ptx_pp']:
         component.onefile = transforms.mbx_pp(component.onefile)
     elif component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:

@@ -215,16 +215,73 @@ def mbx_fix(text):   # schmidt calc 3 temporary
     
     return thetext
 
-def xx_mytransform_mbx(text):
+def mytransform_mbx(text):
 
     thetext = text
 
-    thetext = re.sub(r"<problem", "<activity", thetext)
-    thetext = re.sub(r"problem>", "activity>", thetext)
+    # if a task contains a hint, answer, or solution,
+    # then the statement needs to be wrapped
+    thetext = re.sub(r"<task\b(.*?)</task>", 
+          lambda match: mytransform_mbx_tag(match, "task", "statement", ["hint", "answer", "solution"]),
+          thetext,0, re.DOTALL)
 
-    thetext = re.sub(r"<activity(.*?)</activity>", mytransform_mbx_act, thetext,0, re.DOTALL)
+    # if an exploration contains a task
+    # then the introduction needs to be wrapped
+    thetext = re.sub(r"<exploration\b(.*?)</exploration>", 
+          lambda match: mytransform_mbx_tag(match, "exploration", "introduction", ["task"]),
+          thetext,0, re.DOTALL)
+
 
     return thetext
+
+def mytransform_mbx_tag(txt, outertag, introtag, innertags):
+
+    the_text = txt.group(1)
+
+    # If the intro tag (statement, introduction, etc) is in the environment,
+    # then assume everything is okay.
+    if "<" + introtag + ">" in the_text:
+        return "<" + outertag + the_text + "</" + outertag + ">"
+
+    # If none of the innertags are in the environment, then there is no
+    # need to use the introtag.
+    has_inner_tag = False
+    for tag in innertags:
+        if "<" + tag + ">" in the_text: 
+            has_inner_tag = True
+
+    if not has_inner_tag:
+        return "<" + outertag + the_text + "</" + outertag + ">"
+
+    # We have determined there there are inner tags, but no intro tag,
+    # so we need to pull things apart and then reassemble using the inner tag.
+
+    # pull out the xml_id (which may be empty)
+    the_id = re.sub("(.*?>)(.*)", r"\1", the_text, 1, re.DOTALL)
+    the_text = re.sub("(.*?>)(.*)", r"\2", the_text, 1, re.DOTALL)
+
+    # separate the things which can be in this environment
+    # (which is title, index entries and the innertags)
+    the_env = {}
+    for tag in ["title", "idx"] + innertags:
+        the_env[tag] = ""
+        if "<" + tag in the_text:
+            search_string = "(.*?)(<" + tag + ">.*</" + tag + ">)(.*?)"
+            # pull out this tag and save it
+            the_env[tag] = re.sub(search_string, r"\2", the_text, 1, re.DOTALL)
+            # and then remove it from the_text
+            the_text = re.sub(search_string, r"\1\3", the_text, 1, re.DOTALL)
+        
+    # presumably the only thing left in the_text is the statement/intro/whatever goes first.
+    the_env[introtag] = "<" + introtag + ">" + the_text + "</" + introtag + ">"
+
+    # now put the pieces back togetther again
+    the_answer = "<" + outertag + the_id
+    for tag in ["title", "idx", introtag] + innertags:
+        the_answer += the_env[tag]
+    the_answer += "</" + outertag + ">"
+
+    return the_answer
 
 def mytransform_mbx_act(txt):
 

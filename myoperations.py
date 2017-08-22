@@ -221,20 +221,22 @@ def mytransform_mbx(text):
 
     # if a task contains a hint, answer, or solution,
     # then the statement needs to be wrapped
-#    thetext = re.sub(r"<task\b(.*?)</task>", 
-#          lambda match: mytransform_mbx_tag(match, "task", "statement", ["hint", "answer", "solution"]),
-#          thetext,0, re.DOTALL)
+    # Note: the entry "conclusion" won't be used, but it needs to be there
+    # because some environments have conclusions
+    thetext = re.sub(r"<task\b(.*?)</task>", 
+          lambda match: mytransform_mbx_tag(match, "task", "statement", "conclusion", ["hint", "answer", "solution"]),
+          thetext,0, re.DOTALL)
 
     # if an exploration contains a task
     # then the introduction needs to be wrapped
     thetext = re.sub(r"<exploration\b(.*?)</exploration>", 
-          lambda match: mytransform_mbx_tag(match, "exploration", "introduction", ["task", "hint"]),
+          lambda match: mytransform_mbx_tag(match, "exploration", "introduction", "conclusion", ["task", "hint"]),
           thetext,0, re.DOTALL)
 
 
     return thetext
 
-def mytransform_mbx_tag(txt, outertag, introtag, innertags):
+def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
 
     the_text = txt.group(1)
 
@@ -260,27 +262,47 @@ def mytransform_mbx_tag(txt, outertag, introtag, innertags):
     the_id = re.sub("(.*?>)(.*)", r"\1", the_text, 1, re.DOTALL)
     the_text = re.sub("(.*?>)(.*)", r"\2", the_text, 1, re.DOTALL)
 
-    # separate the things which can be in this environment
-    # (which is title, index entries and the innertags)
+    # separate the title and index entries
     the_env = {}
-    for tag in ["title", "idx"] + innertags:
+    for tag in ["title", "idx"]:
         the_env[tag] = ""
         if "<" + tag in the_text:
             search_string = "^(.*?)(<" + tag + ">.*</" + tag + ">)(.*?)$"
             # pull out this tag and save it
             the_env[tag] = re.sub(search_string, r"\2", the_text, 1, re.DOTALL)
-            if tag == "hint":
-                print "hinthint",the_env[tag],"HINTHINT"
             # and then remove it from the_text
             the_text = re.sub(search_string, r"\1\3", the_text, 1, re.DOTALL)
         
-    # presumably the only thing left in the_text is the statement/intro/whatever goes first.
-    the_env[introtag] = "<" + introtag + ">" + the_text + "</" + introtag + ">"
+    # presumably the only thing left in the_text is:
+    # statement/intro/whatever goes first, then the selected tags, then the conclusion.
+    innertags_re = "|".join(innertags)
+
+    search_string = "^(.*?)(<(" + innertags_re + ").*$)"
+    the_intro = re.sub(search_string, r"\1", the_text, 1, re.DOTALL)
+    the_text = re.sub(search_string, r"\2", the_text, 1, re.DOTALL)
+
+    search_string = "^(.*(" + innertags_re + ")/>)(.*?$)"
+    the_conclusion = re.sub(search_string, r"\3", the_text, 1, re.DOTALL)
+    the_text = re.sub(search_string, r"\1", the_text, 1, re.DOTALL)
+
+    # the_text should now contain only the inner tags
+
+    if the_intro:
+        the_env[introtag] = "<" + introtag + ">" + the_intro + "</" + introtag + ">"
+    else:
+        the_env[introtag] = ""
+    if the_conclusion:
+        the_env[conclusiontag] = "<" + conclusiontag + ">" + the_conclusion + "</" + conclusiontag + ">"
+    else:
+        the_env[conclusiontag] = ""
 
     # now put the pieces back togetther again
     the_answer = "<" + outertag + the_id
-    for tag in ["title", "idx", introtag] + innertags:
+    for tag in ["title", "idx"]:
         the_answer += the_env[tag] + tag.upper()
+    the_answer += the_env[introtag]
+    the_answer += the_text
+    the_answer += the_env[conclusiontag]
     the_answer += "</" + outertag + ">"
 
     return the_answer

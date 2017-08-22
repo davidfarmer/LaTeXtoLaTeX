@@ -227,8 +227,8 @@ def mytransform_mbx(text):
           lambda match: mytransform_mbx_tag(match, "task", "statement", "conclusion", ["hint", "answer", "solution"]),
           thetext,0, re.DOTALL)
 
-    # if an exploration contains a task
-    # then the introduction needs to be wrapped
+    # if an exploration contains a task or hint,
+    # then the introduction and conclusion needs to be wrapped
     thetext = re.sub(r"<exploration\b(.*?)</exploration>", 
           lambda match: mytransform_mbx_tag(match, "exploration", "introduction", "conclusion", ["task", "hint"]),
           thetext,0, re.DOTALL)

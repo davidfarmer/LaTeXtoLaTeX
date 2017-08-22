@@ -221,14 +221,14 @@ def mytransform_mbx(text):
 
     # if a task contains a hint, answer, or solution,
     # then the statement needs to be wrapped
-    thetext = re.sub(r"<task\b(.*?)</task>", 
-          lambda match: mytransform_mbx_tag(match, "task", "statement", ["hint", "answer", "solution"]),
-          thetext,0, re.DOTALL)
+#    thetext = re.sub(r"<task\b(.*?)</task>", 
+#          lambda match: mytransform_mbx_tag(match, "task", "statement", ["hint", "answer", "solution"]),
+#          thetext,0, re.DOTALL)
 
     # if an exploration contains a task
     # then the introduction needs to be wrapped
     thetext = re.sub(r"<exploration\b(.*?)</exploration>", 
-          lambda match: mytransform_mbx_tag(match, "exploration", "introduction", ["task"]),
+          lambda match: mytransform_mbx_tag(match, "exploration", "introduction", ["task", "hint"]),
           thetext,0, re.DOTALL)
 
 
@@ -266,9 +266,11 @@ def mytransform_mbx_tag(txt, outertag, introtag, innertags):
     for tag in ["title", "idx"] + innertags:
         the_env[tag] = ""
         if "<" + tag in the_text:
-            search_string = "(.*?)(<" + tag + ">.*</" + tag + ">)(.*?)"
+            search_string = "^(.*?)(<" + tag + ">.*</" + tag + ">)(.*?)$"
             # pull out this tag and save it
             the_env[tag] = re.sub(search_string, r"\2", the_text, 1, re.DOTALL)
+            if tag == "hint":
+                print "hinthint",the_env[tag],"HINTHINT"
             # and then remove it from the_text
             the_text = re.sub(search_string, r"\1\3", the_text, 1, re.DOTALL)
         

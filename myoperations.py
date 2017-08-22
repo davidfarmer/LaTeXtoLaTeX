@@ -278,7 +278,7 @@ def mytransform_mbx_tag(txt, outertag, introtag, innertags):
     # now put the pieces back togetther again
     the_answer = "<" + outertag + the_id
     for tag in ["title", "idx", introtag] + innertags:
-        the_answer += the_env[tag]
+        the_answer += the_env[tag] + tag.upper()
     the_answer += "</" + outertag + ">"
 
     return the_answer

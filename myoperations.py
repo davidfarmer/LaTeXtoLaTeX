@@ -281,7 +281,7 @@ def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
     the_intro = re.sub(search_string, r"\1", the_text, 1, re.DOTALL)
     the_text = re.sub(search_string, r"\2", the_text, 1, re.DOTALL)
 
-    search_string = "^(.*(" + innertags_re + ")/>)(.*?$)"
+    search_string = "^(.*</(" + innertags_re + ")>)(.*?$)"
     the_conclusion = re.sub(search_string, r"\3", the_text, 1, re.DOTALL)
     the_text = re.sub(search_string, r"\1", the_text, 1, re.DOTALL)
 
@@ -299,7 +299,7 @@ def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
     # now put the pieces back togetther again
     the_answer = "<" + outertag + the_id
     for tag in ["title", "idx"]:
-        the_answer += the_env[tag] + tag.upper()
+        the_answer += the_env[tag]
     the_answer += the_env[introtag]
     the_answer += the_text
     the_answer += the_env[conclusiontag]

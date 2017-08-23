@@ -233,6 +233,9 @@ def mytransform_mbx(text):
           lambda match: mytransform_mbx_tag(match, "exploration", "introduction", "conclusion", ["task", "hint"]),
           thetext,0, re.DOTALL)
 
+    thetext = re.sub(r"<example\b(.*?)</example>", 
+          lambda match: mytransform_mbx_tag(match, "example", "statement", "conclusion", ["hint", "answer", "solution"]),
+          thetext,0, re.DOTALL)
 
     return thetext
 

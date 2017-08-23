@@ -14,7 +14,7 @@ import myoperations
 # input and output files.
 #################################
 
-conversion_options = ["mbx", "ptx_pp", "mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
+conversion_options = ["xml", "mbx", "ptx_pp", "mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
                       "txt",
                       "tex", "tex_ptx",
                       "html",

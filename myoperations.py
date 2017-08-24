@@ -678,12 +678,38 @@ def mytransform_txt(text):
 
     thetext = text
 
-    thetext = re.sub(r"^Hint for.*", "", thetext)
-    thetext = re.sub(r".$", "", thetext,1,re.DOTALL)
+    name_stem = re.sub("_.*", "", component.inputstub)
+    theanswer = name_stem + "_topics = ["
+    thetext = re.sub(", ", "\n", thetext)
+    thelines = thetext.split("\n")
 
-    thetext = "<hint>\n  <p>\n" + thetext.strip() + "\n  </p>\n</hint>\n"
+    for line in thelines:
+        line = line.strip()
+        thediv = ""
+  #      for div in ["\\chap", "\\sec", "\\ssec"]:
+     # try omitting subsecitons because they can be small and arbitrary 
+        for div in ["\\chap", "\\sec"]:
+            if div in line:
+                thediv = re.sub(div + "\n", "", line)
+                thediv = re.sub(".*? ", "", line)
+#                theanswer += thediv + ",\n"
+        if '"secchaptitle' in line:
+            thediv = re.sub('.*secchapnum">', "", line)
+            thediv = re.sub('</span><span class="secchaptitle">', " ", thediv)
+            thediv = re.sub('<.*', "", thediv)
+        if thediv:
+            theanswer += '"' + thediv + '"' + ",\n"
+        thetopic = re.sub('.*(math\.la\.[a-z0-9\.]+).*?', r"\1", line)
+        thetopic = re.sub('<.*', "", thetopic)
+        thetopic = re.sub(r"\.exer\b","",thetopic)
+        if thetopic.startswith("math.la") and not thetopic.endswith(".rep"):
+          if not thetopic.startswith("math.la.e") or thetopic.startswith("math.la.e.vsp"):
+            theanswer += '"' + thetopic + '"' + ",\n"
 
-    return thetext
+    theanswer = re.sub(",\n$", "", theanswer)
+    theanswer += "]\n"
+
+    return theanswer #thetext
 
 ###################
 

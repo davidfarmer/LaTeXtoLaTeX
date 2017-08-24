@@ -63,6 +63,9 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
     elif component.filetype_plus in ["pgtombx"]:
         fileextension_in = "pg"
         fileextension_out = "mbx"
+    elif component.filetype_plus in ["txt"]:
+        fileextension_in = "txt"
+        fileextension_out = "py"
     else:
         fileextension_in = component.filetype_plus
         fileextension_out = component.filetype_plus

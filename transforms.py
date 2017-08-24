@@ -139,6 +139,10 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("dt", "\n\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
 
+    thetext = postprocess.tag_before_after("sage", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("input", "\n", "", "", "\n", thetext)
+    thetext = postprocess.tag_before_after("output", "\n", "", "", "\n", thetext)
+
     thetext = postprocess.tag_before_after("fn", "", "", "", "", thetext)
 
 #    thetext = postprocess.tag_before_after("li", "\n\n", "", "", "\n\n", thetext)
@@ -162,7 +166,7 @@ def mbx_pp(text):
 
 # now shove everything else to the left
 # need to be more clever, because sometimes the author spacing should be preserved
-    thetext = re.sub("\n +", "\n", thetext)
+###########    thetext = re.sub("\n +", "\n", thetext)
 
     for lip_tag in ["li", "p"]:
         for n in range(component.lipcounter[lip_tag]):
@@ -176,6 +180,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("objectives", thetext)
     thetext = postprocess.add_space_within("figure", thetext)
     thetext = postprocess.add_space_within("image", thetext)
+    thetext = postprocess.add_space_within("sage", thetext)
     thetext = postprocess.add_space_within("asymptote", thetext)
     thetext = postprocess.add_space_within("sidebyside", thetext)
     thetext = postprocess.add_space_within("aside", thetext)

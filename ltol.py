@@ -20,7 +20,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "mbx_pp", "ptx_fix", "mbx_strict_t
                       "tex", "tex_ptx",
                       "html",
                       "pgtombx"]
-if sys.argv[1] == '-h'
+if sys.argv[1] == "-h"
     print 'To convert a file to a different form, do either:'
     print './ltol.py filetype_plus inputfile outputfile'
     print 'to convert one file, or'

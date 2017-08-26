@@ -49,6 +49,7 @@ if len(sys.argv) == 4:
     component.filetype_plus = sys.argv[1]
     component.inputname = sys.argv[2]
     component.outputname = sys.argv[3]
+    dorecursive = False
 else:
     component.filetype_plus = sys.argv[1]
     component.inputname = sys.argv[2]

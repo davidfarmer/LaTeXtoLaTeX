@@ -16,7 +16,7 @@ import myoperations
 # input and output files.
 #################################
 
-conversion_options = ["xml", "mbx", "ptx_pp", "mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
+conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
                       "txt",
                       "tex", "tex_ptx",
                       "html",
@@ -82,6 +82,9 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) 
     elif component.filetype_plus in ["ptx_pp"]:
         fileextension_in = "ptx"
         fileextension_out = "ptx"
+    elif component.filetype_plus in ["xml_pp"]:
+        fileextension_in = "xml"
+        fileextension_out = "xml"
     elif component.filetype_plus in ["pgtombx"]:
         fileextension_in = "pg"
         fileextension_out = "mbx"
@@ -192,7 +195,7 @@ for inputfile, outputfile in component.iofilepairs:
     elif component.filetype_plus in ['ptx', 'mbx', 'xml']:
         component.onefile = myoperations.mytransform_mbx(component.onefile)
  #       component.onefile = transforms.mbx_pp(component.onefile)
-    elif component.filetype_plus in ['mbx_pp', 'ptx_pp']:
+    elif component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp']:
         component.onefile = transforms.mbx_pp(component.onefile)
     elif component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = myoperations.mbx_fix(component.onefile)

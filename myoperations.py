@@ -290,11 +290,11 @@ def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
 
     # the_text should now contain only the inner tags
 
-    if the_intro:
+    if the_intro.strip():
         the_env[introtag] = "<" + introtag + ">" + the_intro + "</" + introtag + ">"
     else:
         the_env[introtag] = ""
-    if the_conclusion:
+    if the_conclusion.strip():
         the_env[conclusiontag] = "<" + conclusiontag + ">" + the_conclusion + "</" + conclusiontag + ">"
     else:
         the_env[conclusiontag] = ""

@@ -4,6 +4,8 @@ import sys
 import re
 import os
 import glob
+import shutil
+import fnmatch
 
 import component
 import transforms
@@ -19,8 +21,21 @@ conversion_options = ["xml", "mbx", "ptx_pp", "mbx_pp", "ptx_fix", "mbx_strict_t
                       "tex", "tex_ptx",
                       "html",
                       "pgtombx"]
+if sys.argv[1] == "-h":
+    print 'To convert a file to a different form, do either:'
+    print './ltol.py filetype_plus inputfile outputfile'
+    print 'to convert one file, or'
+    print './ltol.py filetype_plus inputdirectory outputdirectory'
+    print 'to convert all the "filetype" files in a directory.  The outputdirectory must already exist.'
+    print 'OR if you wish to convert an entire folder and subfolders'
+    print './ltol.py filetype_plus inputrootdir outputrootdir R'
+    print 'For recursion target directory should NOT already exist'
+    print 'Supported filetype_plus: '
+    print conversion_options
+    sys.exit()
 
-if not len(sys.argv) == 4:
+
+if not len(sys.argv) >= 4:
     print 'To convert a file to a different form, do either:'
     print './ltol.py filetype_plus inputfile outputfile'
     print 'to convert one file, or'
@@ -30,9 +45,16 @@ if not len(sys.argv) == 4:
     print conversion_options
     sys.exit()
 
-component.filetype_plus = sys.argv[1]
-component.inputname = sys.argv[2]
-component.outputname = sys.argv[3]
+if len(sys.argv) == 4:
+    component.filetype_plus = sys.argv[1]
+    component.inputname = sys.argv[2]
+    component.outputname = sys.argv[3]
+    dorecursive = False
+else:
+    component.filetype_plus = sys.argv[1]
+    component.inputname = sys.argv[2]
+    component.outputname = sys.argv[3]
+    dorecursive = True    
 
 print component.inputname
 print component.outputname
@@ -52,7 +74,7 @@ if os.path.isfile(component.inputname) and not os.path.isdir(component.outputnam
     component.iofilepairs.append([component.inputname,component.outputname])
     print "converting one file:",component.inputname
 
-elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
+elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) and not dorecursive:
 
     if component.filetype_plus in ["mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
         fileextension_in = "ptx"
@@ -71,13 +93,14 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
         fileextension_out = component.filetype_plus
 
     print "looking for", fileextension_in, "files in",  component.inputname
+    print "Only looking in", component.inputname
     inputdir = component.inputname
     inputdir = re.sub(r"/*$","",inputdir)  # remove trailing slash
     outputdir = component.outputname
     outputdir = re.sub(r"/*$","",outputdir)  # remove trailing slash
     outputdir = outputdir + "/"              # and then put it back
     thefiles = glob.glob(inputdir + "/*." + fileextension_in)
-    print "thefiles", thefiles
+
     for inputfilename in thefiles:
         outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", inputfilename)
         if fileextension_in != fileextension_out:
@@ -89,6 +112,40 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname):
   #  print inputdir 
   #  print component.iofilepairs
 #    sys.exit()
+elif dorecursive and os.path.isdir(component.inputname) and not os.path.isdir(component.outputname):
+
+    if component.filetype_plus in ["mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
+        fileextension_in = "ptx"
+        fileextension_out = "ptx"
+    elif component.filetype_plus in ["ptx_pp"]:
+        fileextension_in = "ptx"
+        fileextension_out = "ptx"
+    elif component.filetype_plus in ["pgtombx"]:
+        fileextension_in = "pg"
+        fileextension_out = "mbx"
+    elif component.filetype_plus in ["tex_ptx"]:
+        fileextension_in = "tex"
+        fileextension_out = "ptx"
+    else:
+        fileextension_in = component.filetype_plus
+        fileextension_out = component.filetype_plus
+
+    print "looking for", fileextension_in, "files in",  component.inputname
+    
+    #First copy the entire src directory to the new destination.
+    shutil.copytree(component.inputname, component.outputname)
+    thefiles = []
+    #Two loops below walk entire sub-structure and adds full path to 
+    #each file to be converted. Conversion is done in-place (in = out).
+    for root, dirnames, filenames in os.walk(component.outputname):
+        for filename in fnmatch.filter(filenames,'*.'+fileextension_in):
+            thefiles.append(os.path.join(root,filename))
+        
+    print "thefiles", thefiles
+
+    component.iofilepairs = []
+    for filepath in thefiles:
+        component.iofilepairs.append([filepath, filepath])
 
 else:
     print "Not proper input.  Does target directory exist?"
@@ -100,11 +157,14 @@ print "about to loop over files:", component.iofilepairs
 
 for inputfile, outputfile in component.iofilepairs:
 
-    # hack for windows
-    inputfile = re.sub(r"\\\\", "/", inputfile)
-    inputfile = re.sub(r"\\", "/", inputfile)
-    outputfile = re.sub(r"\\\\", "/", outputfile)
-    outputfile = re.sub(r"\\", "/", outputfile)
+    #By using os.path.join, the paths SHOULD match the operating systems' 
+    #correct syntax. Regardless of windows or linux. Thank you compiler!
+    if not dorecursive:
+        # hack for windows
+        inputfile = re.sub(r"\\\\", "/", inputfile)
+        inputfile = re.sub(r"\\", "/", inputfile)
+        outputfile = re.sub(r"\\\\", "/", outputfile)
+        outputfile = re.sub(r"\\", "/", outputfile)
 
     component.extra_macros = []
 

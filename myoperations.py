@@ -249,7 +249,12 @@ def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
         return "<" + outertag + the_text + "</" + outertag + ">"
 
     if "<!--" in the_text:   # comments mess things up
-        return "<" + outertag + the_text + "</" + outertag + ">"
+        try:
+            the_comment = re.search(r'<!--(.*?)-->', the_text, re.DOTALL).group(1)
+        except:
+            print "can't find the comment", the_text
+        the_text = re.sub(r'<!--(.*?)-->', "", the_text, 1, re.DOTALL)
+        return "\n" + "<todo> qqqqqqq" + the_comment + "</todo>" + "\n" + "<" + outertag + the_text + "</" + outertag + ">"
 
     # If none of the innertags are in the environment, then there is no
     # need to use the introtag.

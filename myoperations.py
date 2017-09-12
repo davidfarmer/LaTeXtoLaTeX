@@ -219,6 +219,10 @@ def mytransform_mbx(text):
 
     thetext = text
 
+    # move hints outside of paragraphs
+    for tag in ["hint"]:
+        thetext = re.sub("(<" + tag + ">.{,350}</" + tag + ">\s*)" + "</p>", "</p>\n" + r"\1", thetext,0, re.DOTALL)
+
     # if a task contains a hint, answer, or solution,
     # then the statement needs to be wrapped
     # Note: the entry "conclusion" won't be used, but it needs to be there
@@ -230,7 +234,8 @@ def mytransform_mbx(text):
     # if an exploration contains a task or hint,
     # then the introduction and conclusion needs to be wrapped
     thetext = re.sub(r"<exploration\b(.*?)</exploration>", 
-          lambda match: mytransform_mbx_tag(match, "exploration", "introduction", "conclusion", ["task", "hint"]),
+ ###         lambda match: mytransform_mbx_tag(match, "exploration", "introduction", "conclusion", ["task", "hint"]),
+          lambda match: mytransform_mbx_tag(match, "exploration", "statement", "conclusion", ["task", "hint"]),
           thetext,0, re.DOTALL)
 
     thetext = re.sub(r"<example\b(.*?)</example>", 
@@ -380,11 +385,17 @@ def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
     # the_text should now contain only the inner tags
 
     if the_intro.strip():
-        the_env[introtag] = "<" + introtag + ">" + the_intro + "</" + introtag + ">"
+        if "<" + introtag + ">" not in the_intro:
+            the_env[introtag] = "<" + introtag + ">" + the_intro + "</" + introtag + ">"
+        else:
+            the_env[introtag] = the_intro
     else:
         the_env[introtag] = ""
     if the_conclusion.strip():
-        the_env[conclusiontag] = "<" + conclusiontag + ">" + the_conclusion + "</" + conclusiontag + ">"
+        if "<" + conclusiontag + ">" not in the_conclusion:
+            the_env[conclusiontag] = "<" + conclusiontag + ">" + the_conclusion + "</" + conclusiontag + ">"
+        else:
+            the_env[conclusiontag] = the_conclusion
     else:
         the_env[conclusiontag] = ""
 

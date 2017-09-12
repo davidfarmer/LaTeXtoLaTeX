@@ -237,6 +237,11 @@ def mytransform_mbx(text):
           lambda match: mytransform_mbx_tag(match, "example", "statement", "conclusion", ["hint", "answer", "solution"]),
           thetext,0, re.DOTALL)
 
+    # remove empty tags
+    for _ in range(2):
+      for tag in ["p", "aside"]:
+        thetext = re.sub("<" + tag + ">" + r"\s*" + "</" + tag + ">", "", thetext)
+
     return thetext
 
 def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
@@ -248,13 +253,87 @@ def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
     if "<" + introtag + ">" in the_text:
         return "<" + outertag + the_text + "</" + outertag + ">"
 
+    asides = []
+    todos = []
+
+    items_to_todo = ["stewarts","stewartsshort","thomasee","thomaseeshort","larsonfive","larsonfiveshort"]
+    items_to_aside = ["extrafn","bmw","marginparbmw","valpo","valposhort","marginpar"]
+    for _ in range(3):  # because things can appear multiple times and be nested in different orders
+      for item in items_to_todo:
+        re.sub(r'\s*<!--\s*-->\s*', "", the_text)
+        search_string = item + "{"
+        if  "\\" + search_string in the_text:
+            find_string = "(" + r"\\" + search_string + "[^{}]*}" + ")"
+            try:
+                this_item = re.search(find_string, the_text, re.DOTALL).group(1)
+                todos.append(this_item)
+            except:
+                if _ == 2:
+                  print "failed to find", find_string, "\n", the_text, "zzzzzz"
+            the_text = re.sub(find_string, "", the_text, 1, re.DOTALL)
+
+    the_todos = ""
+    for td in todos:
+        td = td.strip()
+        if td:
+            the_todos += td
+            the_todos += "\n"
+    if the_todos:
+        the_todos = "\n" + "<todo>" + the_todos + "</todo>" + "\n"
+
+    # delete empty comments
+    the_text = re.sub(r'<!--\s*-->', "", the_text)
+
+    if "Use Sage to check your answer" in the_text:
+        print "found Use Sage", the_text, "jjjjjjjjjjjjjjjjjjj"
+    for _ in range(3):  # because things can appear multiple times and be nested in different orders
+      for item in items_to_aside:
+        re.sub(r'\s*<!--\s*-->\s*', "", the_text)
+        search_string = item + "{"
+        if  "\\" + search_string in the_text:
+            find_string = "(" + r"\\" + search_string + "[^{}]*}" + ")"
+            try:
+                this_item = re.search(find_string, the_text, re.DOTALL).group(1)
+                print "found", this_item
+                this_item = utilities.replacemacro(this_item, item, 1,"#1")
+                print "agan found", this_item
+                asides.append(this_item)
+            except:
+                if _ == 2:
+                  print "failed to find", find_string, "\n", the_text, "zzzzzz"
+            the_text = re.sub(find_string, "", the_text, 1, re.DOTALL)
+
+    # delete empty comments
+    the_text = re.sub(r'<!--\s*-->', "", the_text)
+
+    print "all of the asides:", asides
+    the_text = utilities.replacemacro(the_text,"extrafn",1,"startextrafn#1endextrafn")
+    if "startextrafn" in the_text:
+        find_string = "startextrafn(.*?)endextrafn"
+        this_item = re.search(find_string, the_text, re.DOTALL).group(1)
+        asides.append(this_item)
+        the_text = re.sub(find_string, "", the_text, 1, re.DOTALL)
+
+    the_asides = ""
+    for td in asides:
+        td = td.strip()
+        if td:
+            the_asides += "<p>" + td + "</p>"
+            the_asides += "\n"
+    if the_asides:
+        the_asides = "\n" + "<aside>" + the_asides + "</aside>" + "\n"
+        print "the_asides", the_asides
+
     if "<!--" in the_text:   # comments mess things up
         try:
             the_comment = re.search(r'<!--(.*?)-->', the_text, re.DOTALL).group(1)
+            print "ooooo"+the_comment+"iiiii"
+            todos.append(the_comment)
         except:
-            print "can't find the comment", the_text
+            print "can't find the comment", the_text, "xxxxxx"
         the_text = re.sub(r'<!--(.*?)-->', "", the_text, 1, re.DOTALL)
-        return "\n" + "<todo> qqqqqqq" + the_comment + "</todo>" + "\n" + "<" + outertag + the_text + "</" + outertag + ">"
+
+ #       return "\n" + the_todos + "<todo> qqqqqqq" + the_comment + "</todo>" + "\n" + "<" + outertag + the_text + "</" + outertag + ">"
 
     # If none of the innertags are in the environment, then there is no
     # need to use the introtag.
@@ -264,6 +343,8 @@ def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
             has_inner_tag = True
 
     if not has_inner_tag:
+        if the_asides:
+            the_text = re.sub(">", ">" + the_asides, the_text, 1)
         return "<" + outertag + the_text + "</" + outertag + ">"
 
     # We have determined there there are inner tags, but no intro tag,
@@ -312,9 +393,14 @@ def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
     for tag in ["title", "idx"]:
         the_answer += the_env[tag]
     the_answer += the_env[introtag]
+    the_answer += the_asides
     the_answer += the_text
     the_answer += the_env[conclusiontag]
     the_answer += "</" + outertag + ">"
+    the_answer = the_todos + the_answer
+
+    print "ASIDES:", asides
+    print "THE ASIDES:", the_asides
 
     return the_answer
 

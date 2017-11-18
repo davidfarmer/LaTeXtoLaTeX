@@ -795,12 +795,58 @@ def mytransform_txt(text):
 
     thetext = text
 
-    thetext = re.sub(r"^Hint for.*", "", thetext)
-    thetext = re.sub(r".$", "", thetext,1,re.DOTALL)
+    lines = thetext.split("\n")
 
-    thetext = "<hint>\n  <p>\n" + thetext.strip() + "\n  </p>\n</hint>\n"
+    url_stub = "http://linear.ups.edu/fcla/section-"
+    this_section = "WILA"
+    this_subsection = "LA"
+    the_answer = ""
 
-    return thetext
+    for line in lines:
+        if line.startswith("\\sec"):
+            this_section = re.sub(" .*", "", line[5:])
+        #    print "xxx"+sec_abbr+"yyy"
+        elif line.startswith("\\ssec"):
+            this_subsection = re.sub(" .*", "", line[6:])
+        elif "::" in line:
+            try:
+                type_name, these_ids = line.split(" :: ")
+            except:
+                print "cccc", line, "dddd"
+            id_lis = these_ids.strip().split(",")
+            try:
+                this_type, this_name = type_name.split(" ")
+            except:
+                print "aaaa", type_name, "bbbb" 
+            for this_id in id_lis:
+                this_id = this_id.strip()
+                if not this_id:
+                    next
+                this_link = this_id
+                this_link += " "
+                this_link += url_stub
+                this_link += this_section
+                this_link += ".html" + "#"
+                if this_type in ["Definition", "Theorem", "Example"]:
+                    this_link += this_type.lower()
+                    this_link += "-"
+                    this_link += this_name
+                else:
+                    this_link += "subsection"
+                    this_link += "-"
+                    this_link += this_section
+                    this_link += "-"
+                    this_link += this_subsection
+                the_answer += this_link + "\n"
+        elif line:
+            print "skipping", line
+
+#    thetext = re.sub(r"^Hint for.*", "", thetext)
+#    thetext = re.sub(r".$", "", thetext,1,re.DOTALL)
+#
+#    thetext = "<hint>\n  <p>\n" + thetext.strip() + "\n  </p>\n</hint>\n"
+
+    return the_answer
 
 ###################
 

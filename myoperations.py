@@ -248,6 +248,9 @@ def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
     if "<" + introtag + ">" in the_text:
         return "<" + outertag + the_text + "</" + outertag + ">"
 
+    if "<!--" in the_text:   # comments mess things up
+        return "<" + outertag + the_text + "</" + outertag + ">"
+
     # If none of the innertags are in the environment, then there is no
     # need to use the introtag.
     has_inner_tag = False
@@ -290,11 +293,11 @@ def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
 
     # the_text should now contain only the inner tags
 
-    if the_intro:
+    if the_intro.strip():
         the_env[introtag] = "<" + introtag + ">" + the_intro + "</" + introtag + ">"
     else:
         the_env[introtag] = ""
-    if the_conclusion:
+    if the_conclusion.strip():
         the_env[conclusiontag] = "<" + conclusiontag + ">" + the_conclusion + "</" + conclusiontag + ">"
     else:
         the_env[conclusiontag] = ""

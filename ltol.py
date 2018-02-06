@@ -82,7 +82,7 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) 
     elif component.filetype_plus in ["ptx_pp"]:
         fileextension_in = "ptx"
         fileextension_out = "ptx"
-    elif component.filetype_plus in ["xml_pp"]:
+    elif component.filetype_plus in ["xml", "xml_pp"]:
         fileextension_in = "xml"
         fileextension_out = "xml"
     elif component.filetype_plus in ["pgtombx"]:

@@ -168,6 +168,10 @@ def mbx_pp(text):
 # need to be more clever, because sometimes the author spacing should be preserved
 ###########    thetext = re.sub("\n +", "\n", thetext)
 
+    # sort-of hack for spacing after punctuation after display matn
+    thetext = re.sub(r"(</(me|men)>)\s*(;|:|,)\s*", r"\1\3" + "\n", thetext)
+    thetext = re.sub(r"(</(me|men)>)\s*(\?|!|\.)\s*", r"\1\3" + "\n", thetext)
+
     for lip_tag in ["li", "p"]:
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_space_within(lip_tag + str(n), thetext)
@@ -226,6 +230,9 @@ def mbx_pp(text):
     # special case of p inside li
     thetext = re.sub(r"(<li>\n)\n( *<p>)", r"\1\2", thetext)
     thetext = re.sub(r"(</p>\n)\n( *</li>)", r"\1\2", thetext)
+
+    # special case of punctuation after a closing display math tag
+    thetext = re.sub(r"(</(me|men)>)\s*(\?|!|;|:|,|\.) *?", r"\1\3", thetext)
 
     return thetext
 

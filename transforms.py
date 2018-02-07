@@ -157,7 +157,7 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("definition|axiom|example|insight|exploration|activity|remark|warning|proof|assemblage",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("problem", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("figure|table|blockquote",
+    thetext = postprocess.tag_before_after("figure|table|blockquote|note",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint|task", "\n", "\n", "\n", "\n", thetext)
@@ -192,7 +192,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("latex-image-code", thetext)
     for tag in ["theorem", "definition", "axiom", "proposition", "lemma", "conjecture", "corollary"]:
         thetext = postprocess.add_space_within(tag, thetext)
-    for tag in ["example", "insight", "exploration", "activity", "remark", "warning", "algorithm", "objectives", "assemblage"]:
+    for tag in ["example", "insight", "exploration", "activity", "remark", "warning", "algorithm", "assemblage"]:
         thetext = postprocess.add_space_within(tag, thetext)
     thetext = postprocess.add_space_within("task", thetext)
     thetext = postprocess.add_space_within("statement|solution|answer|hint|proof", thetext)
@@ -215,6 +215,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("pg-code", thetext)
     thetext = postprocess.add_space_within("pg-macros", thetext)
     thetext = postprocess.add_space_within("blockquote", thetext)
+    thetext = postprocess.add_space_within("note", thetext)
     thetext = postprocess.add_space_within("table", thetext)
     thetext = postprocess.add_space_within("tabular", thetext)
     thetext = postprocess.add_space_within("row", thetext)
@@ -233,6 +234,10 @@ def mbx_pp(text):
     # special case of p inside li
     thetext = re.sub(r"(<li>\n)\n( *<p>)", r"\1\2", thetext)
     thetext = re.sub(r"(</p>\n)\n( *</li>)", r"\1\2", thetext)
+
+    # no blank line after ul of before /ul
+    thetext = re.sub(r"(<(ul|ol|dl)>\n)\n", r"\1", thetext)
+    thetext = re.sub(r"\n(\n *</(ul|ol|dl)>)", r"\1", thetext)
 
     # special case of punctuation after a closing display math tag
     thetext = re.sub(r"(</(me|men)>)\s*(\?|!|;|:|,|\.) *?", r"\1\3", thetext)

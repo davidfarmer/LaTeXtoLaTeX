@@ -3,7 +3,8 @@ filetype_plus = ""
 inputname = ""
 outputname = ""
 
-indentamount = "  "
+indent_num = 2
+indentamount = indent_num*" "
 
 iofilepairs = []
 filestubs = []

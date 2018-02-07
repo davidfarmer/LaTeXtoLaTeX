@@ -119,7 +119,7 @@ def add_line_fe(txt):
     problematic_internal_tags = ("<p", "<li>", "<md", "<me")
     if not any(s in the_text for s in problematic_internal_tags):
         the_text = re.sub(r"\s+", " ", the_text)
-        the_text = re.sub(r"\s+$", the_space[:-2], the_text)
+        the_text = re.sub(r"\s+$", the_space[:-1*component.indent_num], the_text)
     
     the_text = the_space + the_text
 
@@ -134,58 +134,64 @@ def add_line_fe(txt):
     the_text = re.sub("(<idx>[^.]+</idx>)\)(\.|,)\s*", r")\2" + the_space + "    " + r"\1" + the_space, the_text)
     # and at the start of a line
     the_text = re.sub(the_space + "(<idx>[^.]+</idx>)\s+", the_space + "    " + r"\1" + the_space, the_text)
-    the_text = re.sub(r"\s+" + "(<idx>[^.]+</idx>)\s+", the_space + "    " + r"\1" + the_space, the_text)
+    the_text = re.sub(r"\s*" + "(<idx>[^.]+</idx>)\s*", the_space + "    " + r"\1" + the_space, the_text)
 
+    # colons and semicolons.  commas later
     the_text = re.sub(the_space + "(.{25,}[0-9a-z>\)](:)) +(([a-z]|<).{30,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
     the_text = re.sub(the_space + "(.{25,}[0-9a-z>\)](:|;)) +(([a-z]|<).{30,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
 
-    the_text = re.sub(the_space + "(.{20,}[0-9a-z>\)](:|;|,)) +(([a-z]|<).{50,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{20,}[0-9a-z>\)](:|;|,)) +(([a-z]|<).{50,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{20,}[0-9a-z>\)](:|;|,)) +(([a-z]|<).{60,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{25,}[0-9a-z>\)](:|;|,)) +(([a-z]|<).{30,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{25,}[a-z>](:|;|,)) +(([a-z]|<).{25,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{25,}[a-z>](:|;|,)) +(([a-z]|<).{25,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{25,}[a-z>\)](:|;|,)) +(([a-z]|<).{25,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-
     # parentheses on their own line
-    the_text = re.sub(the_space + "(.{20,}) +(\([a-z]{2,} [a-zA-Z]{2,}.{5,}\)[.,;:!\?]*) *(.*\n)",
-                      the_space + r"\1" + the_space + r"\2" + the_space + r"\3", the_text)
+    for n in range(3):
+        the_text = re.sub(the_space + "(.{10,}) +(\([<a-z]{2,} [<a-zA-Z]+[^\(\)]*?\)) +(.*\n)",
+                          the_space + r"\1" + the_space + r"\2" + the_space + r"\3", the_text)
+        the_text = re.sub(the_space + "(.{10,}) +(\([<a-z]{2,} [<a-zA-Z]+[^\(\)]*?\)[.,;:!\?]+) +(.*\n)",
+                          the_space + r"\1" + the_space + r"\2" + the_space + r"\3", the_text)
 
-    the_text = re.sub("(.{25,}</(xref|term|q)>) +(.{30,}\n)",
-                      r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub("(.{25,}</(xref|term|q)>) +(.{30,}\n)",
-                      r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{25,}</(m|em)>) +(.{30,}\n)",
+    the_text = re.sub(the_space + "(.{20,}[0-9a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{50,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{25,}</(m|em)>) +(.{30,}\n)",
+    the_text = re.sub(the_space + "(.{20,}[0-9a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{50,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{30,}) +(<(m|em)>.{20,}\n)",
+    the_text = re.sub(the_space + "(.{20,}[0-9a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{60,}\n)",
+                      the_space + r"\1" + the_space + r"\3", the_text)
+    the_text = re.sub(the_space + "(.{25,}[0-9a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{30,}\n)",
+                      the_space + r"\1" + the_space + r"\3", the_text)
+    the_text = re.sub(the_space + "(.{25,}[a-z>]{2,}(:|;|,)) +(([a-z]|<).{25,}\n)",
+                      the_space + r"\1" + the_space + r"\3", the_text)
+    the_text = re.sub(the_space + "(.{25,}[a-z>]{2,}(:|;|,)) +(([a-z]|<).{25,}\n)",
+                      the_space + r"\1" + the_space + r"\3", the_text)
+    the_text = re.sub(the_space + "(.{25,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{25,}\n)",
+                      the_space + r"\1" + the_space + r"\3", the_text)
+
+    the_text = re.sub("(.{25,}</(em|term|q)>) +(.{30,}\n)",
+                      r"\1" + the_space + r"\3", the_text)
+    the_text = re.sub("(.{25,}</(em|term|q)>) +(.{30,}\n)",
+                      r"\1" + the_space + r"\3", the_text)
+    the_text = re.sub(the_space + "(.{25,}</(xref|term|q|em)>) +(.{30,}\n)",
+                      the_space + r"\1" + the_space + r"\3", the_text)
+    the_text = re.sub(the_space + "(.{25,}</(xref|term|q|em)>) +(.{30,}\n)",
+                      the_space + r"\1" + the_space + r"\3", the_text)
+    the_text = re.sub(the_space + "(.{30,}) +(<(xref|term|q|em)>.{20,}\n)",
                       the_space + r"\1" + the_space + r"\2", the_text)
-    the_text = re.sub(the_space + "(.{25,}</(q|m|em|term|xref)>\)) +(.{30,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{25,}</(q|m|em|term|xref)>\)) +(.{30,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{25,})" + " " + "(<(q|m|em|term|xref)>.{30,}\n)",
+ #   the_text = re.sub(the_space + "(.{25,}</(q|m|em|term|xref)>\)) +(.{30,}\n)",
+ #                     the_space + r"\1" + the_space + r"\3", the_text)
+ #   the_text = re.sub(the_space + "(.{25,}</(q|m|em|term|xref)>\)) +(.{30,}\n)",
+ #                     the_space + r"\1" + the_space + r"\3", the_text)
+    the_text = re.sub(the_space + "(.{25,})" + " " + "(<m>[^<]{8,}</m>.{22,}\n)",
+                      the_space + r"\1" + the_space + r"\2", the_text)
+    the_text = re.sub(the_space + "(.{25,})" + " " + "(<m>[^<]{8,}</m>.{22,}\n)",
                       the_space + r"\1" + the_space + r"\2", the_text)
 
-    the_text = re.sub(the_space + "(.{25,}[a-z>\)](:|;|,)) +(([a-z]|<).{30,}\n)",
+    the_text = re.sub(the_space + "(.{25,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{30,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{8,}[a-z>\)](:|;|,)) +(([a-z]|<).{50,}\n)",
+    the_text = re.sub(the_space + "(.{8,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{50,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(.{50,}[a-z>\)](:|;|,)) +(([a-z]|<).{8,}\n)",
+    the_text = re.sub(the_space + "(.{50,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{8,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
 
     # idx at end of paragraph has two extra spaces
-    the_text = re.sub("</idx>" + the_space + "$", "</idx>" + the_space[:-2], the_text)
+    the_text = re.sub("</idx>" + the_space + "$", "</idx>" + the_space[:-1*component.indent_num], the_text)
 
     the_answer = "<" + the_tag + ">" + the_text + "</" + the_tag + ">"
 

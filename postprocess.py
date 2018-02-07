@@ -111,6 +111,14 @@ def add_line_fe(txt):
     the_space = txt.group(2)
     the_text = txt.group(3)
 
+    # if it is a "just text" paragraph, throw away any formatting
+    problematic_internal_tags = ("<p", "<li>", "<md", "<me")
+    if not any(s in the_text for s in problematic_internal_tags):
+        the_text = re.sub(r"\s+", " ", the_text)
+        the_text = re.sub(r"\s+$", "\n", the_text)
+    
+    the_text = the_space + the_text
+
     # traditional end of a sentence
     the_text = re.sub(r"([a-z>\)]+(\.|\?|!)) +([A-Z]|<xref)",
                       r"\1" + the_space + r"\3", the_text)
@@ -166,7 +174,7 @@ def add_line_fe(txt):
 #    the_text = re.sub(r"([a-z>\)](:|;|,)) +([a-z]|<m|<xref)",
 #                      r"\1" + the_space + r"\3", the_text)
 
-    the_answer = "<" + the_tag + ">" + the_space + the_text + "</" + the_tag + ">"
+    the_answer = "<" + the_tag + ">" + the_text + "</" + the_tag + ">"
 
     return(the_answer)
 

@@ -170,8 +170,8 @@ def mbx_pp(text):
 ###########    thetext = re.sub("\n +", "\n", thetext)
 
     # sort-of hack for spacing after punctuation after display matn
-    thetext = re.sub(r"(</(me|men)>)\s*(;|:|,)\s*", r"\1\3" + "\n", thetext)
-    thetext = re.sub(r"(</(me|men)>)\s*(\?|!|\.)\s*", r"\1\3" + "\n", thetext)
+    thetext = re.sub(r"(</(md|mdn|me|men)>)\s*(;|:|,)\s*", r"\1\3" + "\n", thetext)
+    thetext = re.sub(r"(</(md|mdn|me|men)>)\s*(\?|!|\.)\s*", r"\1\3" + "\n", thetext)
 
     for lip_tag in ["ul", "ol", "li", "p"]:
         for n in range(component.lipcounter[lip_tag]):

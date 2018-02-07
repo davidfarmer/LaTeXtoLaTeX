@@ -110,7 +110,7 @@ def mbx_pp(text):
     
     # sort-of a hack to handle tags that can occur withing themselves (like li and p)
     # (does not handle the case of opening tag with parameters)
-    for lip_tag in ["li", "p"]:
+    for lip_tag in ["ul", "ol", "li", "p"]:
         component.lipcounter[lip_tag] = 0
         this_tag_start = "<" + lip_tag + ">"
         this_tag_end = "</" + lip_tag + ">"
@@ -153,13 +153,13 @@ def mbx_pp(text):
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("objectives",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("definition|axiom|example|insight|exploration|activity|remark|warning|proof",
+    thetext = postprocess.tag_before_after("definition|axiom|example|insight|exploration|activity|remark|warning|proof|assemblage",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("problem", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("figure|table",
+    thetext = postprocess.tag_before_after("figure|table|blockquote",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n", thetext)
-    thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint|objectives|task", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint|task", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("subsection", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("chapter|section", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
@@ -172,7 +172,7 @@ def mbx_pp(text):
     thetext = re.sub(r"(</(me|men)>)\s*(;|:|,)\s*", r"\1\3" + "\n", thetext)
     thetext = re.sub(r"(</(me|men)>)\s*(\?|!|\.)\s*", r"\1\3" + "\n", thetext)
 
-    for lip_tag in ["li", "p"]:
+    for lip_tag in ["ul", "ol", "li", "p"]:
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_space_within(lip_tag + str(n), thetext)
       #      thetext = postprocess.add_space_within(lip_tag + str(n), thetext)  # twice, because we will separate into li and p
@@ -191,7 +191,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("latex-image-code", thetext)
     for tag in ["theorem", "definition", "axiom", "proposition", "lemma", "conjecture", "corollary"]:
         thetext = postprocess.add_space_within(tag, thetext)
-    for tag in ["example", "insight", "exploration", "activity", "remark", "warning", "algorithm", "objectives"]:
+    for tag in ["example", "insight", "exploration", "activity", "remark", "warning", "algorithm", "objectives", "assemblage"]:
         thetext = postprocess.add_space_within(tag, thetext)
     thetext = postprocess.add_space_within("task", thetext)
     thetext = postprocess.add_space_within("statement|solution|answer|hint|proof", thetext)
@@ -212,13 +212,14 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("set", thetext)
     thetext = postprocess.add_space_within("pg-code", thetext)
     thetext = postprocess.add_space_within("pg-macros", thetext)
+    thetext = postprocess.add_space_within("blockquote", thetext)
     thetext = postprocess.add_space_within("table", thetext)
     thetext = postprocess.add_space_within("tabular", thetext)
     thetext = postprocess.add_space_within("row", thetext)
     thetext = postprocess.add_space_within("pre", thetext)
 
     # now put back the li and p
-    for lip_tag in ["li", "p"]:
+    for lip_tag in ["ul", "ol", "li", "p"]:
         for n in range(component.lipcounter[lip_tag]):
    #     thetext = re.sub(r"(\n *)<" + lip_tag + str(n) + ">",r"\1<" + lip_tag + ">", thetext)
    #     thetext = re.sub(r"(\n *)</" + lip_tag + str(n) + ">",r"\1</" + lip_tag + ">", thetext)

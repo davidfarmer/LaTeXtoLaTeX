@@ -4,6 +4,7 @@ import re
 import utilities
 import component
 import postprocess
+import transforms
 
 def setvariables(text):
 
@@ -224,36 +225,29 @@ def mytransform_mbx(text):
     # Note: the entry "conclusion" won't be used, but it needs to be there
     # because some environments have conclusions
 
-    # crude way to handle the p inside li.  First hide them in an lip,
-    # and at the end expand them pack and prettyprint
-    thetext = re.sub("<li>\s*(<title>.*?</title>)", r"\1<li>", thetext)
-    thetext = re.sub("<li>\s*<p>", "<lip>", thetext)
-    thetext = re.sub("</p>\s*</li>", "</lip>", thetext)
+    thetext = transforms.mbx_pp(thetext)
 
-    # clean up <p>xxxx</p>   note the \s whitespace we throw away
-    thetext = re.sub("\n" + "( *)" + "<p>" + r"\s*(.*?)\s*" + "</p>",
-                     "\n" + r"\1" + "<p>" + \
-                     "\n" + r"\1" + "  " + r"\2" + \
-    #                 "\n" + r"\1" + r"\2" + \
-                     "\n" + r"\1" +  "</p>",
-                     thetext, 0, re.DOTALL)
+    #  now we make all the p tags separate
+    for lip_tag in ["p"]:
+        component.lipcounter[lip_tag] = 0
+        this_tag_start = "<" + lip_tag + ">"
+        this_tag_end = "</" + lip_tag + ">"
+        the_search_string = this_tag_start + "(.*?)" + this_tag_end
+        component.something_changed = True
+        while component.something_changed:
+            component.something_changed = False
+            thetext = re.sub(the_search_string, lambda match: transforms.liprename(match, lip_tag), thetext, 0, re.DOTALL)
 
- #   thetext = postprocess.add_space_within("p", thetext)
+    for lip_tag in ["p"]:
+        for n in range(component.lipcounter[lip_tag]):
+            thetext = postprocess.add_line_feeds(lip_tag + str(n), thetext)
 
-    thetext = re.sub("<lip>", "<li><p>", thetext)
-    thetext = re.sub("</lip>", "</p></li>", thetext)
-
-    # clean up <li><p>xxxx
-    thetext = re.sub("\n" + "( *)" + "<li><p>" + r"(.*?)" + "</p></li>",
-                     "\n" + r"\1" + "<li>" + \
-                     "\n" + r"\1" + "  " + "<p>" + \
-                     "\n" + r"\1" + "    " + r"\2" + \
-           #          "\n" + r"\1" + "  " + r"\2" + \
-                     "\n" + r"\1" + "  " + "</p>" + \
-                     "\n" + r"\1" + "</li>",
-                     thetext)
-    thetext = re.sub("(<title>.*?</title>)(\s*)<li>(\s*)<p>",
-                     r"\2<li>\3\1\3<p>", thetext)
+    for lip_tag in ["p"]:
+        for n in range(component.lipcounter[lip_tag]):
+   #     thetext = re.sub(r"(\n *)<" + lip_tag + str(n) + ">",r"\1<" + lip_tag + ">", thetext)
+   #     thetext = re.sub(r"(\n *)</" + lip_tag + str(n) + ">",r"\1</" + lip_tag + ">", thetext)
+            thetext = re.sub(r"<" + lip_tag + str(n) + ">", "<" + lip_tag + ">", thetext)
+            thetext = re.sub(r"</" + lip_tag + str(n) + ">", "</" + lip_tag + ">", thetext)
 
     return thetext
 

@@ -117,9 +117,9 @@ def add_line_fe(txt):
     the_text = re.sub(r"([a-z>\)]+(\.|\?|!)) +([A-Z]|<xref)",
                       r"\1" + the_space + r"\3", the_text)
     # put idx tags outside the sentence (if already at end of sentence).
-    the_text = re.sub("(<idx>[^.]+</idx>)\.", "." + the_space + "    " + r"\1", the_text)
+    the_text = re.sub("(<idx>[^.]+</idx>)(\.|,)\s*", r"\2" + the_space + "    " + r"\1" + the_space, the_text)
     # and if in parentheses
-    the_text = re.sub("(<idx>[^.]+</idx>)\)\.", ")." + the_space + "    " + r"\1", the_text)
+    the_text = re.sub("(<idx>[^.]+</idx>)\)(\.|,)\s*", r")\2" + the_space + "    " + r"\1" + the_space, the_text)
 
     the_text = re.sub(the_space + "(.{20,}[a-z>\)](:|;|,)) +(([a-z]|<m|<xref).{50,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)

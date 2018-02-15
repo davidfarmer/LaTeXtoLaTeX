@@ -678,6 +678,21 @@ def mytransform_pfp(text):
         app = re.sub('\t'," ",app)
         app = re.sub(r'\x91',r"'",app)
         app = re.sub(r'\x92',r"'",app)
+        app = re.sub(r'\xd4',r"`",app)
+        app = re.sub(r'\xd5',r"'",app)
+        app = re.sub(r'\xd2',r"`",app)
+        app = re.sub(r'\xd3',r"'",app)
+        app = re.sub(r'\xab',r"'",app)
+        app = re.sub(r'\xac',r"`",app)
+        app = re.sub(r'\xca',r" ",app)
+        app = re.sub(r'\xd0',r"--",app)
+        app = re.sub(r'\xd1',r" -- ",app)
+        app = re.sub(r'\x8e',r"\'e",app)
+        app = re.sub(r'\x96',r"\~n",app)
+        app = re.sub(r'\x97',r"\'o",app)
+        app = re.sub(r'\xc9',r" ",app)  # not sure about that one
+
+        app = re.sub(r'""',r'"',app)
 
         thisapp = app.split("Brrrrk")
         the_number = str(thisapp[0].strip())
@@ -729,12 +744,20 @@ def mytransform_pfp(text):
         essay_text = re.sub(r'Õ',r"'",essay_text)
 #        essay_text = re.sub(r'\x0d',"\n\n",essay_text)
 
+        diversity_text = thisapp[8].strip()
+        diversity_text = re.sub('^"','',diversity_text)
+        diversity_text = re.sub('"$','',diversity_text)
+        the_diversity = r"\noindent\textit{Diversity:} {\small " + diversity_text + "}\n\\vskip 0.1in\n"
+
+
         the_essay = r"\noindent\textit{Essay:}\\" + "\n" + essay_text + "\n"
         the_essay += r"\phantom{xxxxxxxxxxxxxx} \phantom{xxxxxxxx} \phantom{x} \phantom{x} \phantom{x} \phantom{x} \phantom{x} \phantom{x} \phantom{x}\hfill " + "[" + str(essay_length) + "]"
         
 
 
-        this_person = the_name + the_email + the_phone +  the_academics + the_others + the_essay
+        this_person = the_name + the_email + the_phone +  the_academics + the_others 
+        this_person += the_diversity
+        this_person += the_essay
         this_person += "\n\n" + r"\newpage" + "\n\n"
 
         the_answer += this_person

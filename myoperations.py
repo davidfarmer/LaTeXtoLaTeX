@@ -225,6 +225,7 @@ def mytransform_mbx(text):
     # Note: the entry "conclusion" won't be used, but it needs to be there
     # because some environments have conclusions
 
+    thetext = fix_ptx_math_punctuation(thetext)
     thetext = transforms.mbx_pp(thetext)
 
     #  now we make all the p tags separate
@@ -1458,3 +1459,19 @@ def pgpreprocess(text):
     thetext = re.sub(r"\\end{aligned}\s*`\]", r"\\end{aligned}``]", thetext)
     
     return thetext
+
+########################
+
+def fix_ptx_math_punctuation(text):
+
+# punctuation should come after the closing display math tag
+
+    thetext = text
+
+    thetext = re.sub(r"(\.|,)(\s*)(</me>|</men>|</mrow>\s*</md>|</mrow>\s*</mdn>)", r"\2\3\1", thetext)
+
+# and also after the closing inline math tag
+    thetext = re.sub(r"(\.|,)(\s*)(</m>)", r"\3\1", thetext)
+
+    return thetext
+

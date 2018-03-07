@@ -225,6 +225,10 @@ def mytransform_mbx(text):
     # Note: the entry "conclusion" won't be used, but it needs to be there
     # because some environments have conclusions
 
+# kill existing formatting.
+# need to rethink this!
+    thetext = re.sub("\n +", "\n", thetext)
+
     thetext = fix_ptx_math_punctuation(thetext)
     thetext = transforms.mbx_pp(thetext)
 

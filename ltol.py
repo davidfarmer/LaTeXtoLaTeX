@@ -197,6 +197,7 @@ for inputfile, outputfile in component.iofilepairs:
  #       component.onefile = transforms.mbx_pp(component.onefile)
     elif component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp']:
         component.onefile = transforms.mbx_pp(component.onefile)
+        component.onefile = myoperations.mytransform_mbx_linefeeds(component.onefile)
     elif component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = myoperations.mbx_fix(component.onefile)
     else:

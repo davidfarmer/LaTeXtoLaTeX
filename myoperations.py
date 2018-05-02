@@ -216,17 +216,17 @@ def mbx_fix(text):   # schmidt calc 3 temporary
     
     return thetext
 
-def mytransform_mbx(text):
+def mytransform_mbx_linefeeds(text):
 
     thetext = text
 
-    # if a task contains a hint, answer, or solution,
-    # then the statement needs to be wrapped
-    # Note: the entry "conclusion" won't be used, but it needs to be there
-    # because some environments have conclusions
-
 # kill existing formatting.
 # need to rethink this!
+
+    # temporary for apex
+    thetext = re.sub(r'(\s+)<table xml:id="([^" ]+)"\s*>\s+(<caption>.{,200}</caption>)\s*<tabular>\s*<row>\s*<cell>(.{,200})</cell>\s*</row>\s*</tabular>\s*</table>',
+            r'\1<figure xml:id="\2">\1  \3\1    \4\1</figure>', thetext)
+
     thetext = re.sub("\n +", "\n", thetext)
 
     thetext = fix_ptx_math_punctuation(thetext)

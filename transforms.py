@@ -161,6 +161,12 @@ def mbx_pp(text):
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint|task", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("year|holder|name|address|personname|department|instutution|email", "\n", "", "", "\n", thetext)
+    thetext = postprocess.tag_before_after("author|website|shortlicense", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("credit|acknowledgement|copyright", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("preface|colophon", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("titlepage", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("frontmatter", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("subsection", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("chapter|section", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
@@ -195,6 +201,10 @@ def mbx_pp(text):
     for tag in ["example", "insight", "exploration", "activity", "remark", "warning", "algorithm", "assemblage"]:
         thetext = postprocess.add_space_within(tag, thetext)
     thetext = postprocess.add_space_within("task", thetext)
+    for tag in ["credit", "website", "copyright", "titlepage", "colophon", "shortlicense", "acknowledgement"]:
+        thetext = postprocess.add_space_within(tag, thetext)
+    for tag in ["author", "preface", "contributor", "contributors", "frontmatter"]:
+        thetext = postprocess.add_space_within(tag, thetext)
     thetext = postprocess.add_space_within("statement|solution|answer|hint|proof", thetext)
 #    thetext = postprocess.add_space_within("p", thetext)
     thetext = postprocess.add_space_within("paragraphs", thetext)

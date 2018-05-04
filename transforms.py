@@ -165,11 +165,13 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("year|holder|name|address|personname|department|instutution|email", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("author|website|shortlicense|google|feedback", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("credit|acknowledgement|copyright|appendix|index|search", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("preface|colophon", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("preface|colophon|mathbook|book", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("titlepage", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("frontmatter|backmatter|docinfo", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("subsection", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("chapter|section", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("book", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("mathbook|pretext", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("title|cell|caption", "\n", "", "", "\n", thetext)
 
 # now shove everything else to the left
@@ -202,7 +204,7 @@ def mbx_pp(text):
     for tag in ["example", "insight", "exploration", "activity", "remark", "warning", "algorithm", "assemblage"]:
         thetext = postprocess.add_space_within(tag, thetext)
     thetext = postprocess.add_space_within("task", thetext)
-    for tag in ["credit", "website", "copyright", "titlepage", "colophon", "shortlicense", "acknowledgement"]:
+    for tag in ["credit", "website", "copyright", "titlepage", "colophon", "shortlicense", "acknowledgement", "book", "mathbook"]:
         thetext = postprocess.add_space_within(tag, thetext)
     for tag in ["author", "preface", "contributor", "contributors", "frontmatter"]:
         thetext = postprocess.add_space_within(tag, thetext)

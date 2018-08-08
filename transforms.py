@@ -182,6 +182,9 @@ def mbx_pp(text):
     thetext = re.sub(r"(</(md|mdn|me|men)>)\s*(;|:|,)\s*", r"\1\3" + "\n", thetext)
     thetext = re.sub(r"(</(md|mdn|me|men)>)\s*(\?|!|\.)\s*", r"\1\3" + "\n", thetext)
 
+    # sort-of hack for spacing after footnotes that do not end a sentence
+    thetext = re.sub(r"(</fn>)([a-zA-Z])", r"\1 \2", thetext)
+
     for lip_tag in ["ul", "ol", "li", "p"]:
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_space_within(lip_tag + str(n), thetext)

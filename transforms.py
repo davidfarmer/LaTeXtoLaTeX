@@ -131,7 +131,7 @@ def mbx_pp(text):
     # first remove extraneous spaces and put in appropriate carriage returns
 
 #    thetext = postprocess.tag_before_after("p", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("row|tabular|image|latex-image-code|asymptote", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("row|tabular|image|latex-image-code|latex-image|asymptote", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("cd", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("me|men|md|mdn", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("exercises|exercisegroup|exercise", "\n", "\n", "\n", "\n", thetext)
@@ -161,7 +161,8 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("figure|table|blockquote|note",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n", thetext)
-    thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint|task", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("task", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("year|holder|name|address|personname|department|instutution|email", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("author|website|shortlicense|google|feedback", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("credit|acknowledgement|copyright|appendix|index|search", "\n\n", "\n", "\n", "\n\n", thetext)
@@ -185,6 +186,10 @@ def mbx_pp(text):
     # sort-of hack for spacing after footnotes that do not end a sentence
     thetext = re.sub(r"(</fn>)([a-zA-Z])", r"\1 \2", thetext)
 
+    # space around pagebreak
+    thetext = re.sub(r"\s*<pagebreak\s*/>\s*", "\n\n<pagebreak />\n\n", thetext)
+
+
     for lip_tag in ["ul", "ol", "li", "p"]:
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_space_within(lip_tag + str(n), thetext)
@@ -202,6 +207,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("sidebyside", thetext)
     thetext = postprocess.add_space_within("aside", thetext)
     thetext = postprocess.add_space_within("latex-image-code", thetext)
+    thetext = postprocess.add_space_within("latex-image", thetext)
     for tag in ["theorem", "definition", "axiom", "proposition", "lemma", "conjecture", "corollary"]:
         thetext = postprocess.add_space_within(tag, thetext)
     for tag in ["example", "insight", "exploration", "activity", "remark", "warning", "algorithm", "assemblage"]:

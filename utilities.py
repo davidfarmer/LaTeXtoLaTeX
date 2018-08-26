@@ -1,8 +1,24 @@
 
 import logging
-
+import hashlib
 import re
+
 import component
+
+#################
+
+def sha1hexdigest(text):
+    """Return the sha1 hash of text, in hexadecimal."""
+
+    the_text = text
+    sha1 = hashlib.sha1()
+
+    try:
+        sha1.update(the_text.encode('utf-8', errors="ignore"))
+    except UnicodeDecodeError:
+        sha1.update(the_text)
+
+    return(sha1.hexdigest())
 
 #################
 

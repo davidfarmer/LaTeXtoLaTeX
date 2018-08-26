@@ -160,8 +160,9 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("problem", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("figure|table|blockquote|note",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("paragraphs|sidebyside|aside", "\n\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("paragraphs|aside", "\n\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint", "\n", "\n", "\n", "\n", thetext)
+    thetext = postprocess.tag_before_after("subtask", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("task", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("year|holder|name|address|personname|department|instutution|email", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("author|website|shortlicense|google|feedback", "\n\n", "\n", "\n", "\n\n", thetext)
@@ -169,6 +170,8 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("preface|colophon|mathbook|book", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("titlepage", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("frontmatter|backmatter|docinfo", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("sidebyside", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("worksheet", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("subsection", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("chapter|section", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("book", "\n\n", "\n", "\n", "\n\n", thetext)
@@ -198,6 +201,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("chapter", thetext)
     thetext = postprocess.add_space_within("section", thetext)
     thetext = postprocess.add_space_within("subsection", thetext)
+    thetext = postprocess.add_space_within("worksheet", thetext)
     thetext = postprocess.add_space_within("introduction", thetext)
     thetext = postprocess.add_space_within("objectives", thetext)
     thetext = postprocess.add_space_within("figure", thetext)
@@ -212,6 +216,7 @@ def mbx_pp(text):
         thetext = postprocess.add_space_within(tag, thetext)
     for tag in ["example", "insight", "exploration", "activity", "remark", "warning", "algorithm", "assemblage"]:
         thetext = postprocess.add_space_within(tag, thetext)
+    thetext = postprocess.add_space_within("subtask", thetext)
     thetext = postprocess.add_space_within("task", thetext)
     for tag in ["credit", "website", "copyright", "titlepage", "colophon", "shortlicense", "acknowledgement", "book", "mathbook"]:
         thetext = postprocess.add_space_within(tag, thetext)
@@ -250,7 +255,7 @@ def mbx_pp(text):
         for n in range(component.lipcounter[lip_tag]):
    #     thetext = re.sub(r"(\n *)<" + lip_tag + str(n) + ">",r"\1<" + lip_tag + ">", thetext)
    #     thetext = re.sub(r"(\n *)</" + lip_tag + str(n) + ">",r"\1</" + lip_tag + ">", thetext)
-            thetext = re.sub(r"<" + lip_tag + str(n) + ">", "<" + lip_tag + ">", thetext)
+            thetext = re.sub(r"<" + lip_tag + str(n) + r">", "<" + lip_tag + ">", thetext)
             thetext = re.sub(r"</" + lip_tag + str(n) + ">", "</" + lip_tag + ">", thetext)
 #    # for some reason there can be extra </lip>.  Not sure why.
 #    thetext = re.sub(r"(\n *)</lip>",r"\1  </p>\1</li>", thetext)

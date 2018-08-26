@@ -221,6 +221,10 @@ for inputfile, outputfile in component.iofilepairs:
     if component.filetype_plus == "tex_ptx":
         component.onefile = transforms.mbx_pp(component.onefile)
 
+        # there is not actually a subtask tag
+    component.onefile = re.sub(r"<subtask\b", "<task", component.onefile)
+    component.onefile = re.sub(r"subtask>", "task>", component.onefile)
+
     with open(outputfile, 'w') as outfile:
         outfile.write(component.onefile)
 

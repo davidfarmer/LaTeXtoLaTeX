@@ -45,9 +45,9 @@ def tag_before_after(tag, startbefore, endbefore, startafter, endafter, text):
     thetext = text
 
     if not startbefore or startbefore.isspace():
-        thetext = re.sub("\s*(<" + thetag + r"\b[^>]*?>)", startbefore + r"\1", thetext)
+        thetext = re.sub("\s*(<" + thetag + r"(>| [^/>]*>))", startbefore + r"\1", thetext)
     if not endbefore or endbefore.isspace():
-        thetext = re.sub("(<" + thetag + r"\b[^>]*?>)\s*", r"\1" + endbefore, thetext)
+        thetext = re.sub("(<" + thetag + r"(>| [^/>]*>))\s*", r"\1" + endbefore, thetext)
     if not startafter or startafter.isspace():
         thetext = re.sub("\s*(</" + thetag + r">)", startafter + r"\1", thetext)
     if not endafter or endafter.isspace():
@@ -64,7 +64,8 @@ def add_space_within(tag,text):
     thetext = text
 
     # note the work-around for self-closing tags
-    findtag = "<(" + thetag + r")\b([^>]*[^/]?>.*?)</\1>"
+#    findtag = "<(" + thetag + r")\b([^>]*[^/]?>.*?)</\1>"
+    findtag = "<(" + thetag + r")(>| [^/>]*>)(.*?)</\1>"
     thetext = re.sub(findtag, add_space_with, thetext, 0, re.DOTALL)
 
     return thetext
@@ -72,7 +73,10 @@ def add_space_within(tag,text):
 def add_space_with(txt):
 
     the_tag = txt.group(1)
-    the_text = txt.group(2)
+    the_tag_attributes = txt.group(2)
+    the_text_inside = txt.group(3)
+
+    the_text = the_tag_attributes + the_text_inside
 
     # if we have nested lists, don't do anything
     if "<" + the_tag + ">" in the_text or "<" + the_tag + " " in the_text:
@@ -99,6 +103,9 @@ def add_line_feeds(tag,text):
     thetag = tag
     thetext = text
 
+    if "00" in tag:
+        print "before line feed" # , text
+
     findtag = "<(" + thetag + ")>" + "(\n *)" + r"(.*?)</\1>"
     thetext = re.sub(findtag, add_line_fe, thetext, 0, re.DOTALL)
 
@@ -106,6 +113,9 @@ def add_line_feeds(tag,text):
     # this shoudl be somewhere else
     thetext = re.sub('"\s+>', '">', thetext)
     thetext = re.sub("'\s+>", "'>", thetext)
+
+    if "00" in tag:
+        print "after line feed" # , text
 
     return thetext
 
@@ -116,7 +126,7 @@ def add_line_fe(txt):
     the_text = txt.group(3)
 
     # if it is a "just text" paragraph, throw away any formatting
-    problematic_internal_tags = ("<p", "<li>", "<md", "<me")
+    problematic_internal_tags = ("<p>", "<p ", "<li>", "<li ", "<md", "<me")
     if not any(s in the_text for s in problematic_internal_tags):
         the_text = re.sub(r"\s+", " ", the_text)
         the_text = re.sub(r"\s+$", the_space[:-1*component.indent_num], the_text)

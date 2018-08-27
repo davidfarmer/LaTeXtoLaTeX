@@ -220,6 +220,7 @@ def mytransform_mbx_linefeeds(text):
 
     thetext = text
 
+#    print "should be deleting existing formatting, but check!"
 # kill existing formatting.
 # need to rethink this!
 
@@ -227,21 +228,25 @@ def mytransform_mbx_linefeeds(text):
     thetext = re.sub(r'(\s+)<table xml:id="([^" ]+)"\s*>\s+(<caption>.{,200}</caption>)\s*<tabular>\s*<row>\s*<cell>(.{,200})</cell>\s*</row>\s*</tabular>\s*</table>',
             r'\1<figure xml:id="\2">\1  \3\1    \4\1</figure>', thetext)
 
-    thetext = re.sub("\n +", "\n", thetext)
+#    thetext = re.sub("\n +", "\n", thetext)
 
     thetext = fix_ptx_math_punctuation(thetext)
-    thetext = transforms.mbx_pp(thetext)
+#    thetext = transforms.mbx_pp(thetext)
 
     #  now we make all the p tags separate
     for lip_tag in ["p"]:
         component.lipcounter[lip_tag] = 0
-        this_tag_start = "<" + lip_tag + ">"
-        this_tag_end = "</" + lip_tag + ">"
-        the_search_string = this_tag_start + "(.*?)" + this_tag_end
-        component.something_changed = True
-        while component.something_changed:
-            component.something_changed = False
-            thetext = re.sub(the_search_string, lambda match: transforms.liprename(match, lip_tag), thetext, 0, re.DOTALL)
+        thetext = utilities.tag_to_numbered_tag(lip_tag, thetext)
+
+#        this_tag_start = "<" + lip_tag + ">"
+#        this_tag_end = "</" + lip_tag + ">"
+#        the_search_string = this_tag_start + "(.*?)" + this_tag_end
+#        component.something_changed = True
+#        while component.something_changed:
+#            component.something_changed = False
+#            thetext = re.sub(the_search_string, lambda match: transforms.liprename(match, lip_tag), thetext, 0, re.DOTALL)
+#
+        print "counted", component.lipcounter[lip_tag], "of", lip_tag
 
     for lip_tag in ["p"]:
         for n in range(component.lipcounter[lip_tag]):

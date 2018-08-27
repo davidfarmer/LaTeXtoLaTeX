@@ -104,6 +104,17 @@ def mbx_pp(text):
 
     thetext = text
 
+    # first hide comments
+    thetext = re.sub(r"(<!--.*?-->)",
+                     lambda match: utilities.sha1hide(match, "comment"),
+                     thetext, 0, re.DOTALL)
+
+    # then hide verbatim content
+    for tag in component.verbatim_tags:
+        thetext = re.sub(r"<" + tag + "([^/>]*>.*?)</" + tag + ">",
+                         lambda match: utilities.sha1hide(match, tag),
+                         thetext, 0, re.DOTALL)
+
 #    # first a hack to handle 2-level lists.
 #    thetext = re.sub(r"<li>\s*<p>", "<lip>", thetext)
 #    thetext = re.sub(r"</p>\s*</li>", "</lip>", thetext)
@@ -112,16 +123,20 @@ def mbx_pp(text):
     # (does not handle the case of opening tag with parameters)
     for lip_tag in ["ul", "ol", "li", "p"]:
         component.lipcounter[lip_tag] = 0
-        this_tag_start = "<" + lip_tag + ">"
-        this_tag_end = "</" + lip_tag + ">"
-        the_search_string = this_tag_start + "(.*?)" + this_tag_end
-        component.something_changed = True
-        while component.something_changed:
-            component.something_changed = False
-            thetext = re.sub(the_search_string, lambda match: liprename(match, lip_tag), thetext, 0, re.DOTALL)
+        thetext = utilities.tag_to_numbered_tag(lip_tag, thetext)
 
-#    print "found", component.lipcounter, "li/p pairs"
+#        this_tag_start = "<" + lip_tag + ">"
+#        this_tag_end = "</" + lip_tag + ">"
+#        the_search_string = this_tag_start + "(.*?)" + this_tag_end
+#        component.something_changed = True
+#        while component.something_changed:
+#            component.something_changed = False
+#            thetext = re.sub(the_search_string, lambda match: liprename(match, lip_tag), thetext, 0, re.DOTALL)
+#
+        print "found", component.lipcounter, "li/p pairs"
         for n in range(component.lipcounter[lip_tag]):
+            if not n % 20:
+                print "up to", n, "on", lip_tag
             if lip_tag == "li":
                 thetext = postprocess.tag_before_after(lip_tag + str(n), "\n\n", "", "", "\n\n", thetext)
             else:
@@ -140,6 +155,7 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("dt", "\n\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
 
+    thetext = postprocess.tag_before_after("sageplot", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("sage", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("input", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("output", "\n", "", "", "\n", thetext)
@@ -157,6 +173,7 @@ def mbx_pp(text):
                                            "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("definition|axiom|example|insight|exploration|activity|remark|warning|proof|assemblage",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("case", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("problem", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("figure|table|blockquote|note",
                                            "\n\n", "\n", "\n", "\n\n", thetext)
@@ -167,7 +184,7 @@ def mbx_pp(text):
     thetext = postprocess.tag_before_after("year|holder|name|address|personname|department|instutution|email", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("author|website|shortlicense|google|feedback", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("credit|acknowledgement|copyright|appendix|index|search", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("preface|colophon|mathbook|book", "\n\n", "\n", "\n", "\n\n", thetext)
+    thetext = postprocess.tag_before_after("preface|abstract|colophon|mathbook|book", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("titlepage", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("frontmatter|backmatter|docinfo", "\n\n", "\n", "\n", "\n\n", thetext)
     thetext = postprocess.tag_before_after("sidebyside", "\n\n", "\n", "\n", "\n\n", thetext)
@@ -182,7 +199,7 @@ def mbx_pp(text):
 # need to be more clever, because sometimes the author spacing should be preserved
 ###########    thetext = re.sub("\n +", "\n", thetext)
 
-    # sort-of hack for spacing after punctuation after display matn
+    # sort-of hack for spacing after punctuation after display math
     thetext = re.sub(r"(</(md|mdn|me|men)>)\s*(;|:|,)\s*", r"\1\3" + "\n", thetext)
     thetext = re.sub(r"(</(md|mdn|me|men)>)\s*(\?|!|\.)\s*", r"\1\3" + "\n", thetext)
 
@@ -207,6 +224,7 @@ def mbx_pp(text):
     thetext = postprocess.add_space_within("figure", thetext)
     thetext = postprocess.add_space_within("image", thetext)
     thetext = postprocess.add_space_within("sage", thetext)
+    thetext = postprocess.add_space_within("sageplot", thetext)
     thetext = postprocess.add_space_within("asymptote", thetext)
     thetext = postprocess.add_space_within("sidebyside", thetext)
     thetext = postprocess.add_space_within("aside", thetext)
@@ -218,7 +236,7 @@ def mbx_pp(text):
         thetext = postprocess.add_space_within(tag, thetext)
     thetext = postprocess.add_space_within("subtask", thetext)
     thetext = postprocess.add_space_within("task", thetext)
-    for tag in ["credit", "website", "copyright", "titlepage", "colophon", "shortlicense", "acknowledgement", "book", "mathbook"]:
+    for tag in ["credit", "website", "copyright", "titlepage", "abstract",  "colophon", "shortlicense", "acknowledgement", "book", "mathbook"]:
         thetext = postprocess.add_space_within(tag, thetext)
     for tag in ["author", "preface", "contributor", "contributors", "frontmatter"]:
         thetext = postprocess.add_space_within(tag, thetext)
@@ -226,6 +244,7 @@ def mbx_pp(text):
         thetext = postprocess.add_space_within(tag, thetext)
     thetext = postprocess.add_space_within("statement|solution|answer|hint|proof", thetext)
 #    thetext = postprocess.add_space_within("p", thetext)
+    thetext = postprocess.add_space_within("case", thetext)
     thetext = postprocess.add_space_within("paragraphs", thetext)
     thetext = postprocess.add_space_within("ul", thetext)
     thetext = postprocess.add_space_within("ol", thetext)
@@ -255,7 +274,7 @@ def mbx_pp(text):
         for n in range(component.lipcounter[lip_tag]):
    #     thetext = re.sub(r"(\n *)<" + lip_tag + str(n) + ">",r"\1<" + lip_tag + ">", thetext)
    #     thetext = re.sub(r"(\n *)</" + lip_tag + str(n) + ">",r"\1</" + lip_tag + ">", thetext)
-            thetext = re.sub(r"<" + lip_tag + str(n) + r">", "<" + lip_tag + ">", thetext)
+            thetext = re.sub(r"<" + lip_tag + str(n) + r"( |>)", "<" + lip_tag + r"\1", thetext)
             thetext = re.sub(r"</" + lip_tag + str(n) + ">", "</" + lip_tag + ">", thetext)
 #    # for some reason there can be extra </lip>.  Not sure why.
 #    thetext = re.sub(r"(\n *)</lip>",r"\1  </p>\1</li>", thetext)
@@ -271,6 +290,7 @@ def mbx_pp(text):
     # special case of punctuation after a closing display math tag
     thetext = re.sub(r"(</(me|men)>)\s*(\?|!|;|:|,|\.) *?", r"\1\3", thetext)
 
+#    print thetext
     return thetext
 
 ##################

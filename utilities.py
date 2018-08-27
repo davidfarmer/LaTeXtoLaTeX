@@ -18,7 +18,37 @@ def sha1hexdigest(text):
     except UnicodeDecodeError:
         sha1.update(the_text)
 
-    return(sha1.hexdigest())
+    this_sha1 = sha1.hexdigest()
+
+    component.sha1of[this_sha1] = {'original_text' : the_text}
+
+    return(this_sha1)
+
+#################
+
+def sha1hide(txt, tag):
+
+    thetext = txt.group(1)
+
+    the_hash = sha1hexdigest(thetext)
+
+    if tag == "comment":
+        return "ACOMMB" + the_hash + "ENDZ"
+    else:
+        return "A" + tag + "B" + the_hash + "ENDZ"
+        
+#################
+
+def sha1undigest(txt):
+
+    try:
+        the_tag = txt.group(1)
+        the_sha1key = txt.group(2)
+        return "<" + the_tag + component.sha1of[the_sha1key]['original_text'] + "</" + the_tag + ">"
+
+    except (AttributeError, IndexError) as e:
+        the_sha1key = txt.group(1)
+        return component.sha1of[the_sha1key]['original_text']
 
 #################
 
@@ -301,3 +331,50 @@ def magic_character_convert(text, mode):
 # also need an "unhide" mode
 
     return the_text
+
+###############
+
+def tag_to_numbered_tag(tag, text):
+
+    # turn each instance of <tag>...</tag> into <tagN>...</tagN> where N
+    # increments from 1 to the number of times that tag appears
+    # tags are counted by component.lipcounter
+
+    # be careful of tags that can also be self-closing
+
+    the_text = text
+
+    find_start_tag = r"(<" + tag + ")"
+    find_start_tag += "(>| [^/>]*>)"
+    find_end_tag = r"(</" + tag + ")>"
+
+    component.something_changed = True
+#    while "<tag " in the_text or "<tag>" in the_text:
+    while component.something_changed:
+        component.something_changed = False
+        the_text = re.sub(find_start_tag + "(.*?)" + find_end_tag,
+                          lambda match: tag_to_numbered_t(tag, match),
+                          the_text, 0, re.DOTALL)
+
+    return the_text
+
+#-------------#
+
+def tag_to_numbered_t(tag, txt):
+
+    the_tag = tag
+    the_start1 = txt.group(1)
+    the_start2 = txt.group(2)
+    the_text = txt.group(3)
+    the_end = txt.group(4)
+
+    component.something_changed = True
+
+    if "<" + tag + " " in the_text or "<" + tag + ">" in the_text:
+        the_text = tag_to_numbered_tag(the_text + the_end, the_tag)
+        return the_start1 + the_start2  + the_text + the_end + ">"
+    else:
+        component.lipcounter[the_tag] += 1
+        this_N = component.lipcounter[the_tag]
+        return the_start1 + str(this_N) + the_start2  + the_text + the_end + str(this_N) + ">"
+

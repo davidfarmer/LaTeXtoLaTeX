@@ -28,3 +28,8 @@ generic_counter = 0
 extra_macros = []
 
 lipcounter = {}
+
+sha1of = {}
+
+verbatim_tags = ['latex-image', 'slate', 'input', 'asymptote']
+

@@ -121,7 +121,7 @@ def mbx_pp(text):
     
     # sort-of a hack to handle tags that can occur withing themselves (like li and p)
     # (does not handle the case of opening tag with parameters)
-    for lip_tag in ["ul", "ol", "li", "p"]:
+    for lip_tag in component.nestable_tags:
         component.lipcounter[lip_tag] = 0
         thetext = utilities.tag_to_numbered_tag(lip_tag, thetext)
 
@@ -138,25 +138,24 @@ def mbx_pp(text):
     # first remove extraneous spaces and put in appropriate carriage returns
 
 #    thetext = postprocess.tag_before_after("p", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("row|tabular|image|latex-image-code|latex-image|asymptote", "\n", "\n", "\n", "\n", thetext)
+#    thetext = postprocess.tag_before_after("row|tabular|image|latex-image-code|latex-image|asymptote", "\n", "\n", "\n", "\n", thetext)
     thetext = postprocess.tag_before_after("cd", "\n", "\n", "\n", "\n", thetext)
-    thetext = postprocess.tag_before_after("me|men|md|mdn", "\n", "\n", "\n", "\n", thetext)
+#    thetext = postprocess.tag_before_after("me|men|md|mdn", "\n", "\n", "\n", "\n", thetext)
 #    thetext = postprocess.tag_before_after("exercises|exercisegroup|exercise", "\n", "\n", "\n", "\n", thetext)
-    thetext = postprocess.tag_before_after("webwork|setup|set|pg-code|pg-macros", "\n", "\n", "\n", "\n", thetext)
-    thetext = postprocess.tag_before_after("mrow|intertext", "\n", "", "", "\n", thetext)
+#    thetext = postprocess.tag_before_after("webwork|setup|set|pg-code|pg-macros", "\n", "\n", "\n", "\n", thetext)
+#    thetext = postprocess.tag_before_after("mrow|intertext", "\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dt", "\n\n", "", "", "\n", thetext)
     thetext = postprocess.tag_before_after("dd", "\n", "", "", "\n\n", thetext)
 
-    thetext = postprocess.tag_before_after("sageplot", "\n", "\n", "\n", "\n", thetext)
-    thetext = postprocess.tag_before_after("sage", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("input", "\n", "", "", "\n", thetext)
-    thetext = postprocess.tag_before_after("output", "\n", "", "", "\n", thetext)
-    thetext = postprocess.tag_before_after("initialism", "\n", "", "", "\n", thetext)
+ #   thetext = postprocess.tag_before_after("sage", "\n\n", "\n", "\n", "\n\n", thetext)
+##    thetext = postprocess.tag_before_after("input", "\n", "", "", "\n", thetext)
+ ##   thetext = postprocess.tag_before_after("output", "\n", "", "", "\n", thetext)
+##    thetext = postprocess.tag_before_after("initialism", "\n", "", "", "\n", thetext)
 
-    thetext = postprocess.tag_before_after("fn", "", "", "", "", thetext)
+#    thetext = postprocess.tag_before_after("fn", "", "", "", "", thetext)
 
 #    thetext = postprocess.tag_before_after("li", "\n\n", "", "", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("ul|ol|dl", "\n", "\n", "\n", "\n", thetext)
+#    thetext = postprocess.tag_before_after("ul|ol|dl", "\n", "\n", "\n", "\n", thetext)
 #    thetext = postprocess.tag_before_after("theorem|proposition|lemma|conjecture|corollary",
 #                                           "\n\n", "\n", "\n", "\n\n", thetext)
 #    thetext = postprocess.tag_before_after("algorithm",
@@ -166,20 +165,22 @@ def mbx_pp(text):
 #    thetext = postprocess.tag_before_after("definition|axiom|example|insight|exploration|activity|remark|warning|proof|assemblage",
 #                                           "\n\n", "\n", "\n", "\n\n", thetext)
 #    thetext = postprocess.tag_before_after("case", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("problem", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("figure|table|blockquote|note",
-                                           "\n\n", "\n", "\n", "\n\n", thetext)
+#    thetext = postprocess.tag_before_after("problem", "\n\n", "\n", "\n", "\n\n", thetext)
+#    thetext = postprocess.tag_before_after("figure|table|blockquote|note",
+#                                           "\n\n", "\n", "\n", "\n\n", thetext)
 #    thetext = postprocess.tag_before_after("paragraphs|aside", "\n\n", "\n", "\n", "\n", thetext)
 #    thetext = postprocess.tag_before_after("introduction|statement|solution|answer|hint", "\n", "\n", "\n", "\n", thetext)
 #    thetext = postprocess.tag_before_after("subtask", "\n\n", "\n", "\n", "\n\n", thetext)
 #    thetext = postprocess.tag_before_after("task", "\n\n", "\n", "\n", "\n\n", thetext)
-    thetext = postprocess.tag_before_after("year|holder|name|address|personname|department|instutution|email", "\n", "", "", "\n", thetext)
+#    thetext = postprocess.tag_before_after("year|holder|name|address|personname|department|instutution|email", "\n", "", "", "\n", thetext)
 #    thetext = postprocess.tag_before_after("author|website|shortlicense|google|feedback", "\n\n", "\n", "\n", "\n\n", thetext)
 #    thetext = postprocess.tag_before_after("credit|acknowledgement|copyright|appendix|index|search", "\n\n", "\n", "\n", "\n\n", thetext)
 
     component.document_global_structure.reverse()
     component.document_sectioning.reverse()
 
+    for tag in component.math_display:
+        thetext = postprocess.tag_before_after(tag, "\n", "\n", "\n", "\n", thetext)
     for tag in component.document_components:
         thetext = postprocess.tag_before_after(tag, "\n", "\n", "\n", "\n", thetext)
     for tag in component.document_environments:
@@ -190,6 +191,8 @@ def mbx_pp(text):
         thetext = postprocess.tag_before_after(tag, "\n\n", "\n", "\n", "\n\n", thetext)
     for tag in component.document_pieces:
         thetext = postprocess.tag_before_after(tag, "\n", "", "", "\n", thetext)
+    for tag in component.footnote_like:
+        thetext = postprocess.tag_before_after(tag, "", "", "", "", thetext)
 #    thetext = postprocess.tag_before_after("preface|abstract|colophon|mathbook|book", "\n\n", "\n", "\n", "\n\n", thetext)
 #    thetext = postprocess.tag_before_after("titlepage", "\n\n", "\n", "\n", "\n\n", thetext)
 #    thetext = postprocess.tag_before_after("frontmatter|backmatter|docinfo", "\n\n", "\n", "\n", "\n\n", thetext)
@@ -216,7 +219,7 @@ def mbx_pp(text):
     thetext = re.sub(r"\s*<pagebreak\s*/>\s*", "\n\n<pagebreak />\n\n", thetext)
 
 
-    for lip_tag in ["ul", "ol", "li", "p"]:
+    for lip_tag in component.nestable_tags:
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_space_within(lip_tag + str(n), thetext)
       #      thetext = postprocess.add_space_within(lip_tag + str(n), thetext)  # twice, because we will separate into li and p
@@ -229,6 +232,10 @@ def mbx_pp(text):
         thetext = postprocess.add_space_within(tag, thetext)
     for tag in component.document_components:
         thetext = postprocess.add_space_within(tag, thetext)
+    for tag in component.list_like:
+        thetext = postprocess.add_space_within(tag, thetext)
+    for tag in component.math_display:
+        thetext = postprocess.add_space_within(tag, thetext)
 
 #    thetext = postprocess.add_space_within("chapter", thetext)
 #    thetext = postprocess.add_space_within("section", thetext)
@@ -236,8 +243,8 @@ def mbx_pp(text):
 #    thetext = postprocess.add_space_within("worksheet", thetext)
 #    thetext = postprocess.add_space_within("introduction", thetext)
 #    thetext = postprocess.add_space_within("objectives", thetext)
-    thetext = postprocess.add_space_within("figure", thetext)
-    thetext = postprocess.add_space_within("image", thetext)
+#    thetext = postprocess.add_space_within("figure", thetext)
+ ####   thetext = postprocess.add_space_within("image", thetext)
   #  thetext = postprocess.add_space_within("sage", thetext)
   #  thetext = postprocess.add_space_within("sageplot", thetext)
   #  thetext = postprocess.add_space_within("asymptote", thetext)
@@ -261,31 +268,31 @@ def mbx_pp(text):
 #    thetext = postprocess.add_space_within("p", thetext)
 #    thetext = postprocess.add_space_within("case", thetext)
 #    thetext = postprocess.add_space_within("paragraphs", thetext)
-    thetext = postprocess.add_space_within("ul", thetext)
-    thetext = postprocess.add_space_within("ol", thetext)
-    thetext = postprocess.add_space_within("dl", thetext)
+  #  thetext = postprocess.add_space_within("ul", thetext)
+  #  thetext = postprocess.add_space_within("ol", thetext)
+  #  thetext = postprocess.add_space_within("dl", thetext)
 #    thetext = postprocess.add_space_within("li", thetext)
     thetext = postprocess.add_space_within("cd", thetext)
-    thetext = postprocess.add_space_within("me|men|md|mdn", thetext)
+#    thetext = postprocess.add_space_within("me|men|md|mdn", thetext)
 #    thetext = postprocess.add_space_within("exercises", thetext)
 #    thetext = postprocess.add_space_within("exercisegroup", thetext)
 #    thetext = postprocess.add_space_within("exercise", thetext)
 #    thetext = postprocess.add_space_within("problem", thetext)
-    thetext = postprocess.add_space_within("webwork", thetext)
-    thetext = postprocess.add_space_within("setup", thetext)
+#    thetext = postprocess.add_space_within("webwork", thetext)
+#    thetext = postprocess.add_space_within("setup", thetext)
  #   thetext = postprocess.add_space_within("var", thetext)
-    thetext = postprocess.add_space_within("set", thetext)
-    thetext = postprocess.add_space_within("pg-code", thetext)
-    thetext = postprocess.add_space_within("pg-macros", thetext)
-    thetext = postprocess.add_space_within("blockquote", thetext)
-    thetext = postprocess.add_space_within("note", thetext)
-    thetext = postprocess.add_space_within("table", thetext)
-    thetext = postprocess.add_space_within("tabular", thetext)
-    thetext = postprocess.add_space_within("row", thetext)
-    thetext = postprocess.add_space_within("pre", thetext)
+#    thetext = postprocess.add_space_within("set", thetext)
+#    thetext = postprocess.add_space_within("pg-code", thetext)
+#    thetext = postprocess.add_space_within("pg-macros", thetext)
+ #   thetext = postprocess.add_space_within("blockquote", thetext)
+ #   thetext = postprocess.add_space_within("note", thetext)
+ #   thetext = postprocess.add_space_within("table", thetext)
+ #   thetext = postprocess.add_space_within("tabular", thetext)
+#    thetext = postprocess.add_space_within("row", thetext)
+######    thetext = postprocess.add_space_within("pre", thetext)
 
     # now put back the li and p
-    for lip_tag in ["ul", "ol", "li", "p"]:
+    for lip_tag in component.nestable_tags:
         for n in range(component.lipcounter[lip_tag]):
    #     thetext = re.sub(r"(\n *)<" + lip_tag + str(n) + ">",r"\1<" + lip_tag + ">", thetext)
    #     thetext = re.sub(r"(\n *)</" + lip_tag + str(n) + ">",r"\1</" + lip_tag + ">", thetext)

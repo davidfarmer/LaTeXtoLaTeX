@@ -372,22 +372,31 @@ def tag_to_numbered_t(tag, txt):
 
     component.something_changed = True
 
+    if the_tag == "task":
+        print "the_tag", the_tag, "the_start1", the_start1, "the_start2", the_start2, "the_end", the_end
     if "<" + the_tag + " " in the_text or "<" + the_tag + ">" in the_text:
-        print "nested tag", the_tag, " in", the_text + the_end + ">"
-        print "///////nested tag in"
+        if the_tag == "task":
+          print "++++++++++++++nested tag", the_tag, " in", the_text + the_end + ">"
+          print "///////nested tag in"
         before_tag = re.sub(r"(.*?)(<" + the_tag + "(>| [^/>]*).*$)", r"\1", the_text, 1, re.DOTALL)
         after_tag = re.sub(r"(.*?)(<" + the_tag + "(>| [^/>]*).*$)", r"\2", the_text, 1, re.DOTALL)
-        print "scanning for", the_tag,"tag in",the_text + the_end + ">"
-        print "/////////scanning for"
+        if the_tag == "task":
+          print "++++++++++++++scanning for", the_tag,"tag in",the_text + the_end + ">"
+          print "/////////scanning for"
    #     the_text = before_tag + tag_to_numbered_tag(after_tag + the_end + ">", the_tag)
-        the_text = before_tag + tag_to_numbered_tag(the_tag, the_text + the_end + ">")
+        the_text = tag_to_numbered_tag(the_tag, the_text + the_end + ">")
 
-        print "now returning", the_start1 + the_start2 + the_text # + the_end + ">"
-        print "///////now returning"
+        if the_tag == "task":
+          print "++++++++++++++now returning", the_start1 + the_start2 + the_text # + the_end + ">"
+          print "///////now returning"
         return the_start1 + the_start2 + the_text  #+ the_end + ">"
     else:
-        print "incrementing",tag
         this_N = component.lipcounter[the_tag]
         component.lipcounter[the_tag] += 1
+        if the_tag == "task":
+             print "++++++++++++++incrementing",tag
+             print the_start1 + str(this_N) + the_start2  + the_text + the_end + str(this_N) + ">"
+             print "-----------------"
+        
         return the_start1 + str(this_N) + the_start2  + the_text + the_end + str(this_N) + ">"
 

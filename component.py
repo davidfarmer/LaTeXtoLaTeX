@@ -39,26 +39,42 @@ document_global_structure = [
     'frontmatter', 'backmatter', 
     'appendix', 'solutions', 'references',
     'titlepage', 'preface', 'abstract', 'colophon', 'shortlicense',
-    'acknowledgement', 'credit', 'website', 'copyright'
+    'acknowledgement', 'credit', 'website', 'copyright',
     'author', 'institution','contributor', 'contributors' ]
 
-document_sectioning = ['chapter', 'section', 'subsection', 'worksheet',
-                       'objectives', 'paragraphs', 'sidebyside',
-                       'introduction', 'conclusion', 'assemblage']
+document_sectioning = ['chapter', 'section', 'subsection', 'subsubsection',
+                       'technology', 'worksheet',
+                       'objectives', 'outcomes', 'paragraphs', 'task',
+                       'sidebyside',
+                       'introduction', 'conclusion', 'assemblage',
+                       'prelude', 'postlude']
 
 document_environments = ['proof',
+                         'project',
                          'theorem', 'proposition', 'lemma', 'conjecture', 'corollary',
                          'definition', 'axiom', 'example', 'insight', 'exploration',
-                         'problem', 'exercise',
-                         'activity', 'remark', 'warning',
-                         'task', 'subtask', 'notation', 'claim', 'biblio']
+                         'problem', 'exercise', 'note', 'blockquote',
+                         'activity', 'remark', 'warning', 'figure', 'table',
+                         'subtask', 'notation', 'claim', 'biblio']
+
 
 document_components = ['exercises', 'exercisegroup',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside']
 
 document_pieces = ['title', 'cell', 'caption',
+                   'address',
                    'personname', 'date', 'email', 'department', 'line',
-                   'usage', 'description', 'journal', 'volume', 'number']
+                   'usage', 'description', 'journal', 'volume', 'number',
+                   'mrow', 'inertext',
+                   'webwork', 'setup', 'set', 'pg-code', 'pg-macros']
+
+list_like = ['ol', 'ul', 'dl']
+
+math_display = ['me', 'men', 'md', 'mdn']
+
+footnote_like = ['fn']
+
+nestable_tags = ["ul", "ol", "li", "p", "task"]
 
 verbatim_tags = ['latex-image-preamble', 'latex-image',
                  'slate', 'sage', 'asymptote', 'macros']

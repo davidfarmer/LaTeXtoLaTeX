@@ -161,6 +161,8 @@ def add_line_fe(txt):
 
     the_text = re.sub(the_space + "(.{20,}[0-9a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{50,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
+    the_text = re.sub(the_space + "(.{20,}/>(:|;|,)) +(([a-z]|<).{50,}\n)",
+                      the_space + r"\1" + the_space + r"\3", the_text)
     the_text = re.sub(the_space + "(.{20,}[0-9a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{50,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
     the_text = re.sub(the_space + "(.{20,}[0-9a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{60,}\n)",

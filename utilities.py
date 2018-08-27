@@ -44,7 +44,8 @@ def sha1undigest(txt):
     try:
         the_tag = txt.group(1)
         the_sha1key = txt.group(2)
-        return "<" + the_tag + component.sha1of[the_sha1key]['original_text'] + "</" + the_tag + ">"
+    #    return "<" + the_tag + component.sha1of[the_sha1key]['original_text'] + "</" + the_tag + ">"
+        return component.sha1of[the_sha1key]['original_text']
 
     except (AttributeError, IndexError) as e:
         the_sha1key = txt.group(1)
@@ -344,6 +345,7 @@ def tag_to_numbered_tag(tag, text):
 
     the_text = text
 
+    print "in tag_to_numbered_tag for",tag,"tag"
     find_start_tag = r"(<" + tag + ")"
     find_start_tag += "(>| [^/>]*>)"
     find_end_tag = r"(</" + tag + ")>"
@@ -370,11 +372,22 @@ def tag_to_numbered_t(tag, txt):
 
     component.something_changed = True
 
-    if "<" + tag + " " in the_text or "<" + tag + ">" in the_text:
-        the_text = tag_to_numbered_tag(the_text + the_end, the_tag)
-        return the_start1 + the_start2  + the_text + the_end + ">"
+    if "<" + the_tag + " " in the_text or "<" + the_tag + ">" in the_text:
+        print "nested tag", the_tag, " in", the_text + the_end + ">"
+        print "///////nested tag in"
+        before_tag = re.sub(r"(.*?)(<" + the_tag + "(>| [^/>]*).*$)", r"\1", the_text, 1, re.DOTALL)
+        after_tag = re.sub(r"(.*?)(<" + the_tag + "(>| [^/>]*).*$)", r"\2", the_text, 1, re.DOTALL)
+        print "scanning for", the_tag,"tag in",the_text + the_end + ">"
+        print "/////////scanning for"
+   #     the_text = before_tag + tag_to_numbered_tag(after_tag + the_end + ">", the_tag)
+        the_text = before_tag + tag_to_numbered_tag(the_tag, the_text + the_end + ">")
+
+        print "now returning", the_start1 + the_start2 + the_text # + the_end + ">"
+        print "///////now returning"
+        return the_start1 + the_start2 + the_text  #+ the_end + ">"
     else:
-        component.lipcounter[the_tag] += 1
+        print "incrementing",tag
         this_N = component.lipcounter[the_tag]
+        component.lipcounter[the_tag] += 1
         return the_start1 + str(this_N) + the_start2  + the_text + the_end + str(this_N) + ">"
 

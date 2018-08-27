@@ -198,17 +198,26 @@ for inputfile, outputfile in component.iofilepairs:
  #       component.onefile = transforms.mbx_pp(component.onefile)
     elif component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp']:
         component.onefile = transforms.mbx_pp(component.onefile)
-        print component.onefile
+     #   print component.onefile
         component.onefile = myoperations.mytransform_mbx_linefeeds(component.onefile)
-        print component.onefile
+     #   print component.onefile
         # put back comments
-        component.onefile = re.sub(r"ACOMMB(.{40})ENDZ", utilities.sha1undigest,component.onefile)
-        component.onefile = re.sub(r"ACOMMB(.{40})ENDZ", utilities.sha1undigest,component.onefile)
+#        component.onefile = re.sub(r"ACOMMB(.{40})ENDZ", utilities.sha1undigest,component.onefile)
         # put back verbatim environments
         for tag in component.verbatim_tags:
-             component.onefile = re.sub(r"A(" + tag + ")B(.{40})ENDZ",
+             component.onefile = re.sub(r" *A(" + tag + ")B(.{40})ENDZ *",
                                         utilities.sha1undigest,component.onefile)
-        component.onefile = re.sub(r"ACOMMB(.{40})ENDZ", utilities.sha1undigest,component.onefile)
+  #      component.onefile = re.sub(r"ACOMMB(.{40})ENDZ", utilities.sha1undigest,component.onefile)
+        component.onefile = re.sub(r" *ACOMMB(.{40})ENDZ *", utilities.sha1undigest,component.onefile)
+
+      # fix lines that only contain spaces
+        component.onefile = re.sub(r"\n +\n", "\n\n", component.onefile)
+        component.onefile = re.sub(r"\n +\n", "\n\n", component.onefile)
+    # fix extra white space around comments
+        component.onefile = re.sub(r"\n+( *<!--)", "\n" + r"\1", component.onefile)
+        component.onefile = re.sub(r"-->\n+", "-->\n", component.onefile)
+      # no need for more than one blank line
+        component.onefile = re.sub(r"\n{3,}", "\n\n", component.onefile)
     elif component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = myoperations.mbx_fix(component.onefile)
     else:

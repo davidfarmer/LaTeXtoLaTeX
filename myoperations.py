@@ -238,14 +238,6 @@ def mytransform_mbx_linefeeds(text):
         component.lipcounter[lip_tag] = 0
         thetext = utilities.tag_to_numbered_tag(lip_tag, thetext)
 
-#        this_tag_start = "<" + lip_tag + ">"
-#        this_tag_end = "</" + lip_tag + ">"
-#        the_search_string = this_tag_start + "(.*?)" + this_tag_end
-#        component.something_changed = True
-#        while component.something_changed:
-#            component.something_changed = False
-#            thetext = re.sub(the_search_string, lambda match: transforms.liprename(match, lip_tag), thetext, 0, re.DOTALL)
-#
         print "counted", component.lipcounter[lip_tag], "of", lip_tag
 
     for lip_tag in ["p"]:

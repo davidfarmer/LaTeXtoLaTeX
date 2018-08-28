@@ -115,12 +115,11 @@ def mbx_pp(text):
                          lambda match: utilities.sha1hide(match, tag),
                          thetext, 0, re.DOTALL)
 
-#    # first a hack to handle 2-level lists.
-#    thetext = re.sub(r"<li>\s*<p>", "<lip>", thetext)
-#    thetext = re.sub(r"</p>\s*</li>", "</lip>", thetext)
-    
-    # sort-of a hack to handle tags that can occur withing themselves (like li and p)
-    # (does not handle the case of opening tag with parameters)
+    # empty tags that should be on their own line
+    for tag in component.document_pieces_empty:
+        thetext = re.sub(r"\s*(<" + tag + r"[^>]*/>)", "\n" + r"\1", thetext)
+
+    # sort-of a hack to handle tags that can occur within themselves (like li and p)
     for lip_tag in component.nestable_tags:
         component.lipcounter[lip_tag] = 0
         thetext = utilities.tag_to_numbered_tag(lip_tag, thetext)
@@ -216,11 +215,13 @@ def mbx_pp(text):
     # space around pagebreak
     thetext = re.sub(r"\s*<pagebreak\s*/>\s*", "\n\n<pagebreak />\n\n", thetext)
 
+    # sort-of hack for cells containing p paragraphs
+    thetext = re.sub(r"(<cell>)(<p[0-9]*>)", r"\1" + "\n" + r"\2", thetext)
+    thetext = re.sub(r"(</p[0-9]*]>)(</cell>)", r"\1" + "\n" + r"\2", thetext)
 
     for lip_tag in component.nestable_tags:
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_space_within(lip_tag + str(n), thetext)
-      #      thetext = postprocess.add_space_within(lip_tag + str(n), thetext)  # twice, because we will separate into li and p
 
     for tag in component.document_global_structure:
         thetext = postprocess.add_space_within(tag, thetext)
@@ -234,6 +235,8 @@ def mbx_pp(text):
         thetext = postprocess.add_space_within(tag, thetext)
     for tag in component.math_display:
         thetext = postprocess.add_space_within(tag, thetext)
+
+    thetext = postprocess.add_space_within("cell", thetext)
 
 #    thetext = postprocess.add_space_within("chapter", thetext)
 #    thetext = postprocess.add_space_within("section", thetext)

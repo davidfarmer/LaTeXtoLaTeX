@@ -56,7 +56,7 @@ document_environments = ['proof',
                          'definition', 'axiom', 'example', 'insight', 'exploration',
                          'problem', 'exercise', 'question', 'note', 'blockquote',
                          'activity', 'remark', 'warning', 'table', 'tabular',
-                         'listing', 'program', 'console',
+                         'listing', 'program', 'console', 'demonstration',
                          'image',
                          'subtask', 'notation', 'claim', 'biblio',
                          'poem', 'stanza']
@@ -72,6 +72,9 @@ document_pieces = ['title', 'cell', 'caption',
                    'mrow', 'intertext',
                    'webwork', 'setup', 'set', 'pg-code', 'pg-macros']
 
+# empty tags that shoudl be on their own line
+document_pieces_empty = ['cell', 'col']
+
 list_like = ['ol', 'ul', 'dl']
 
 math_display = ['me', 'men', 'md', 'mdn']
@@ -81,6 +84,6 @@ footnote_like = ['fn']
 nestable_tags = ["ul", "ol", "li", "p", "task", "figure", "sidebyside"]
 
 verbatim_tags = ['latex-image-preamble', 'latex-image',
-                 'slate', 'sage', 'asymptote', 'macros',
+                 'slate', 'sage', 'sageplot', 'asymptote', 'macros',
                  'program', 'input', 'output', 'prompt', 'pre']
 

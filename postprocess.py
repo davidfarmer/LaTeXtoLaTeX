@@ -103,9 +103,6 @@ def add_line_feeds(tag,text):
     thetag = tag
     thetext = text
 
-    if "00" in tag:
-        print "before line feed" # , text
-
     findtag = "<(" + thetag + ")>" + "(\n *)" + r"(.*?)</\1>"
     thetext = re.sub(findtag, add_line_fe, thetext, 0, re.DOTALL)
 
@@ -113,9 +110,6 @@ def add_line_feeds(tag,text):
     # this shoudl be somewhere else
     thetext = re.sub('"\s+>', '">', thetext)
     thetext = re.sub("'\s+>", "'>", thetext)
-
-    if "00" in tag:
-        print "after line feed" # , text
 
     return thetext
 
@@ -154,7 +148,7 @@ def add_line_fe(txt):
 
     # parentheses on their own line
     # first, parentheses at the end of a sentence
-    the_text = re.sub("([^ ]+) +(\([<a-z]{2,}[^\(\)]*?\)\.)",
+    the_text = re.sub("([^\n ]+) +(\([<a-z]{2,}[^\(\)]*?\)\.)",
                           r"\1" + the_space + r"\2", the_text)
     for n in range(3):
         the_text = re.sub(the_space + "(\S.{10,}) +(\([<a-z]{2,} [<a-zA-Z]+[^\(\)]*?\)) +(.*\n)",

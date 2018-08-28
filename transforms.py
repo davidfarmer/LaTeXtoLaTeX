@@ -105,13 +105,13 @@ def mbx_pp(text):
     thetext = text
 
     # first hide comments
-    thetext = re.sub(r"(\s*<!--.*?-->\s*)",
+    thetext = re.sub(r"(\s*(<!--)(.*?)(-->)\s*)",
                      lambda match: utilities.sha1hide(match, "comment"),
                      thetext, 0, re.DOTALL)
 
     # then hide verbatim content
     for tag in component.verbatim_tags:
-        thetext = re.sub(r"(\s*<" + tag + "(>| [^/>]*)>.*?</" + tag + ">)",
+        thetext = re.sub(r"(\s*(<" + tag + "(>| [^/>]*>))(.*?)(</" + tag + ">))",
                          lambda match: utilities.sha1hide(match, tag),
                          thetext, 0, re.DOTALL)
 

@@ -65,15 +65,15 @@ document_environments = ['proof',
 document_components = ['exercises', 'exercisegroup', 'row', 'cd',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside']
 
-document_pieces = ['title', 'cell', 'caption',
+document_pieces = ['title', 'subtitle', 'cell', 'caption',
                    'address',
                    'personname', 'date', 'email', 'department', 'line', 'cline',
                    'usage', 'description', 'journal', 'volume', 'number',
-                   'mrow', 'intertext',
+                   'mrow', 'intertext', 'initialism',
                    'webwork', 'setup', 'set', 'pg-code', 'pg-macros']
 
 # empty tags that shoudl be on their own line
-document_pieces_empty = ['cell', 'col']
+document_pieces_empty = ['cell', 'col', 'notation-list', 'brandlogo', 'cross-references']
 
 list_like = ['ol', 'ul', 'dl']
 
@@ -83,7 +83,7 @@ footnote_like = ['fn']
 
 nestable_tags = ["ul", "ol", "li", "p", "task", "figure", "sidebyside"]
 
-verbatim_tags = ['latex-image-preamble', 'latex-image',
+verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
                  'slate', 'sage', 'sageplot', 'asymptote', 'macros',
                  'program', 'input', 'output', 'prompt', 'pre']
 

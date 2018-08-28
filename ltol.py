@@ -207,6 +207,10 @@ for inputfile, outputfile in component.iofilepairs:
         for tag in component.verbatim_tags:
              component.onefile = re.sub(r" *A(" + tag + ")B(.{40})ENDZ *",
                                         utilities.sha1undigest,component.onefile)
+        # those tags can nest
+        for tag in component.verbatim_tags:
+             component.onefile = re.sub(r" *A(" + tag + ")B(.{40})ENDZ *",
+                                        utilities.sha1undigest,component.onefile)
   #      component.onefile = re.sub(r"ACOMMB(.{40})ENDZ", utilities.sha1undigest,component.onefile)
         component.onefile = re.sub(r" *ACOMMB(.{40})ENDZ *", utilities.sha1undigest,component.onefile)
 

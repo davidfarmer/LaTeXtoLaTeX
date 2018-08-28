@@ -80,7 +80,8 @@ def add_space_with(txt):
 
     # if we have nested lists, don't do anything
     if "<" + the_tag + ">" in the_text or "<" + the_tag + " " in the_text:
-        print "problem with nested environment:", the_tag, the_text[:20]
+        print "problem with nested environment:", the_tag, the_text
+        print "/////////////problem with nested environment"
         closing_tag = "</" + the_tag + ">"
         the_text = add_space_within(the_tag, the_text + closing_tag)
         the_text = re.sub(closing_tag + "$", "", the_text)
@@ -153,12 +154,16 @@ def add_line_fe(txt):
                       the_space + r"\1" + the_space + r"\3", the_text)
 
     # parentheses on their own line
+    # parentheses at the end of a sentence
+    the_text = re.sub("([^ ]+) +(\([<a-z]{2,}[^\(\)]*?\)\.)",
+                          r"\1" + the_space + r"\2", the_text)
     for n in range(3):
         the_text = re.sub(the_space + "(.{10,}) +(\([<a-z]{2,} [<a-zA-Z]+[^\(\)]*?\)) +(.*\n)",
                           the_space + r"\1" + the_space + r"\2" + the_space + r"\3", the_text)
         the_text = re.sub(the_space + "(.{10,}) +(\([<a-z]{2,} [<a-zA-Z]+[^\(\)]*?\)[.,;:!\?]+) +(.*\n)",
                           the_space + r"\1" + the_space + r"\2" + the_space + r"\3", the_text)
 
+    # commas
     the_text = re.sub(the_space + "(.{20,}[0-9a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{50,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
     the_text = re.sub(the_space + "(.{20,}/>(:|;|,)) +(([a-z]|<).{50,}\n)",
@@ -198,7 +203,7 @@ def add_line_fe(txt):
     the_text = re.sub(the_space + "(.{25,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{30,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
     the_text = re.sub(the_space + "(.{8,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{50,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
+                      the_space + r"\1" + the_space + r"ssss\3", the_text)
     the_text = re.sub(the_space + "(.{50,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{8,}\n)",
                       the_space + r"\1" + the_space + r"\3", the_text)
 

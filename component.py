@@ -34,7 +34,7 @@ sha1of = {}
 # list these tags in order of importance/containment
 document_global_structure = [
     'pretext', 'mathbook', 'book', 'part', 'article', 
-    'docinfo', 'macros', 'latex-preamble', 'latex-image-preamble',
+    'docinfo', 'macros',
     'html', 'search', 'google', 'feedback', 'index',
     'frontmatter', 'backmatter', 
     'appendix', 'solutions', 'references',
@@ -45,27 +45,31 @@ document_global_structure = [
 document_sectioning = ['chapter', 'section', 'subsection', 'subsubsection',
                        'technology', 'worksheet',
                        'objectives', 'outcomes', 'paragraphs', 'task',
-                       'sidebyside',
+                       'sbsgroup', 'stack',
                        'introduction', 'conclusion', 'assemblage',
                        'prelude', 'postlude']
 
 document_environments = ['proof',
                          'project',
-                         'theorem', 'proposition', 'lemma', 'conjecture', 'corollary',
+                         'theorem', 'proposition', 'lemma', 'conjecture',
+                         'corollary', 'principle',
                          'definition', 'axiom', 'example', 'insight', 'exploration',
-                         'problem', 'exercise', 'note', 'blockquote',
-                         'activity', 'remark', 'warning', 'figure', 'table',
-                         'subtask', 'notation', 'claim', 'biblio']
+                         'problem', 'exercise', 'question', 'note', 'blockquote',
+                         'activity', 'remark', 'warning', 'table', 'tabular',
+                         'listing', 'program', 'console',
+                         'image',
+                         'subtask', 'notation', 'claim', 'biblio',
+                         'poem', 'stanza']
 
 
-document_components = ['exercises', 'exercisegroup',
+document_components = ['exercises', 'exercisegroup', 'row', 'cd',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside']
 
 document_pieces = ['title', 'cell', 'caption',
                    'address',
-                   'personname', 'date', 'email', 'department', 'line',
+                   'personname', 'date', 'email', 'department', 'line', 'cline',
                    'usage', 'description', 'journal', 'volume', 'number',
-                   'mrow', 'inertext',
+                   'mrow', 'intertext',
                    'webwork', 'setup', 'set', 'pg-code', 'pg-macros']
 
 list_like = ['ol', 'ul', 'dl']
@@ -74,8 +78,9 @@ math_display = ['me', 'men', 'md', 'mdn']
 
 footnote_like = ['fn']
 
-nestable_tags = ["ul", "ol", "li", "p", "task"]
+nestable_tags = ["ul", "ol", "li", "p", "task", "figure", "sidebyside"]
 
 verbatim_tags = ['latex-image-preamble', 'latex-image',
-                 'slate', 'sage', 'asymptote', 'macros']
+                 'slate', 'sage', 'asymptote', 'macros',
+                 'program', 'input', 'output', 'prompt', 'pre']
 

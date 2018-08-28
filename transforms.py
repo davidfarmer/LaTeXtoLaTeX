@@ -111,7 +111,7 @@ def mbx_pp(text):
 
     # then hide verbatim content
     for tag in component.verbatim_tags:
-        thetext = re.sub(r"(\s*<" + tag + "[^/>]*>.*?</" + tag + ">)",
+        thetext = re.sub(r"(\s*<" + tag + "(>| [^/>]*)>.*?</" + tag + ">)",
                          lambda match: utilities.sha1hide(match, tag),
                          thetext, 0, re.DOTALL)
 
@@ -139,7 +139,7 @@ def mbx_pp(text):
 
 #    thetext = postprocess.tag_before_after("p", "\n\n", "\n", "\n", "\n\n", thetext)
 #    thetext = postprocess.tag_before_after("row|tabular|image|latex-image-code|latex-image|asymptote", "\n", "\n", "\n", "\n", thetext)
-    thetext = postprocess.tag_before_after("cd", "\n", "\n", "\n", "\n", thetext)
+#    thetext = postprocess.tag_before_after("cd", "\n", "\n", "\n", "\n", thetext)
 #    thetext = postprocess.tag_before_after("me|men|md|mdn", "\n", "\n", "\n", "\n", thetext)
 #    thetext = postprocess.tag_before_after("exercises|exercisegroup|exercise", "\n", "\n", "\n", "\n", thetext)
 #    thetext = postprocess.tag_before_after("webwork|setup|set|pg-code|pg-macros", "\n", "\n", "\n", "\n", thetext)
@@ -272,7 +272,7 @@ def mbx_pp(text):
   #  thetext = postprocess.add_space_within("ol", thetext)
   #  thetext = postprocess.add_space_within("dl", thetext)
 #    thetext = postprocess.add_space_within("li", thetext)
-    thetext = postprocess.add_space_within("cd", thetext)
+#    thetext = postprocess.add_space_within("cd", thetext)
 #    thetext = postprocess.add_space_within("me|men|md|mdn", thetext)
 #    thetext = postprocess.add_space_within("exercises", thetext)
 #    thetext = postprocess.add_space_within("exercisegroup", thetext)

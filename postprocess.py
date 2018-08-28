@@ -197,11 +197,11 @@ def add_line_fe(txt):
                       the_space + r"\1" + the_space + r"\2", the_text)
 
     the_text = re.sub(the_space + "(\S.{25,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{30,}\n)",
-                      the_space + r"YY1\1" + the_space + r"YY11\3", the_text)
+                      the_space + r"\1" + the_space + r"\3", the_text)
     the_text = re.sub(the_space + "(\S.{8,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{50,}\n)",
-                      the_space + r"YY2\1" + the_space + r"YY22\3", the_text)
+                      the_space + r"\1" + the_space + r"\3", the_text)
     the_text = re.sub(the_space + "(\S.{50,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{8,}\n)",
-                      the_space + r"YY3\1" + the_space + r"YY33\3", the_text)
+                      the_space + r"\1" + the_space + r"\3", the_text)
 
     # idx at end of paragraph has two extra spaces
     the_text = re.sub("</idx>" + the_space + "$", "</idx>" + the_space[:-1*component.indent_num], the_text)

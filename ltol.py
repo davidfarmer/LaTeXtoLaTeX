@@ -198,20 +198,16 @@ for inputfile, outputfile in component.iofilepairs:
  #       component.onefile = transforms.mbx_pp(component.onefile)
     elif component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp']:
         component.onefile = transforms.mbx_pp(component.onefile)
-     #   print component.onefile
         component.onefile = myoperations.mytransform_mbx_linefeeds(component.onefile)
-     #   print component.onefile
-        # put back comments
-#        component.onefile = re.sub(r"ACOMMB(.{40})ENDZ", utilities.sha1undigest,component.onefile)
+
         # put back verbatim environments
         for tag in component.verbatim_tags:
-             component.onefile = re.sub(r" *A(" + tag + ")B(.{40})ENDZ *",
+             component.onefile = re.sub(r"A(" + tag + ")B(.{40})ENDZ *",
                                         utilities.sha1undigest,component.onefile)
-        # those tags can nest
-        for tag in component.verbatim_tags:
-             component.onefile = re.sub(r" *A(" + tag + ")B(.{40})ENDZ *",
-                                        utilities.sha1undigest,component.onefile)
-  #      component.onefile = re.sub(r"ACOMMB(.{40})ENDZ", utilities.sha1undigest,component.onefile)
+#        # those tags can nest
+#        for tag in component.verbatim_tags:
+#             component.onefile = re.sub(r"A(" + tag + ")B(.{40})ENDZ *",
+#                                        utilities.sha1undigest,component.onefile)
         component.onefile = re.sub(r" *ACOMMB(.{40})ENDZ *", utilities.sha1undigest,component.onefile)
 
       # fix lines that only contain spaces

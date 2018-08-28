@@ -125,10 +125,8 @@ def mbx_pp(text):
         component.lipcounter[lip_tag] = 0
         thetext = utilities.tag_to_numbered_tag(lip_tag, thetext)
 
-        print "found", component.lipcounter, "li/p pairs"
+        print "found", component.lipcounter
         for n in range(component.lipcounter[lip_tag]):
-            if not n % 20:
-                print "up to", n, "on", lip_tag
             if lip_tag == "li":
                 thetext = postprocess.tag_before_after(lip_tag + str(n), "\n\n", "", "", "\n\n", thetext)
             else:

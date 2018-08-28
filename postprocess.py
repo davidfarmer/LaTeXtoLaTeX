@@ -64,7 +64,6 @@ def add_space_within(tag,text):
     thetext = text
 
     # note the work-around for self-closing tags
-#    findtag = "<(" + thetag + r")\b([^>]*[^/]?>.*?)</\1>"
     findtag = "<(" + thetag + r")(>| [^/>]*>)(.*?)</\1>"
     thetext = re.sub(findtag, add_space_with, thetext, 0, re.DOTALL)
 
@@ -210,6 +209,4 @@ def add_line_fe(txt):
     the_answer = "<" + the_tag + ">" + the_text + "</" + the_tag + ">"
 
     return(the_answer)
-
-
 

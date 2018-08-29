@@ -240,6 +240,12 @@ def mytransform_mbx_linefeeds(text):
 
         print "counted", component.lipcounter[lip_tag], "of", lip_tag
 
+    # before we put line feeds in p's, there could be some leaf li's
+    # that just contain one big p that is not marked as a p.
+    # So we arrange for that to have line breaks
+    thetext = re.sub(r"(\n +)<li>([a-zA-Z].{50,})</li>", r"\1<li>\1  \2\1</li>", thetext)
+    thetext = postprocess.add_line_feeds("li", thetext)
+
     for lip_tag in ["p"]:
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_line_feeds(lip_tag + str(n), thetext)

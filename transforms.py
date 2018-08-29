@@ -206,7 +206,7 @@ def mbx_pp(text):
     thetext = re.sub(r"\n(\n *</(ul|ol|dl)>)", r"\1", thetext)
 
     # special case of punctuation after a closing display math tag
-    thetext = re.sub(r"(</(me|men)>)\s*(\?|!|;|:|,|\.) *?", r"\1\3", thetext)
+    thetext = re.sub(r"(</(me|men)>)\s*((\?|!|;|:|,|\.)+) *?", r"\1\3", thetext)
 
 #    print thetext
     return thetext

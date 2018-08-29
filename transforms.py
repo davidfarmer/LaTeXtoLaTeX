@@ -132,6 +132,9 @@ def mbx_pp(text):
                 thetext = postprocess.tag_before_after(lip_tag + str(n), "\n\n", "\n", "\n", "\n\n", thetext)
         thetext = postprocess.tag_before_after(lip_tag, "\n\n", "\n", "\n", "\n\n", thetext)
 
+    # delete all leading spaces!
+    thetext = re.sub(r"\n +", "\n", thetext)
+
     # first remove extraneous spaces and put in appropriate carriage returns
 
 #    thetext = postprocess.tag_before_after("p", "\n\n", "\n", "\n", "\n\n", thetext)
@@ -299,8 +302,6 @@ def mbx_pp(text):
    #     thetext = re.sub(r"(\n *)</" + lip_tag + str(n) + ">",r"\1</" + lip_tag + ">", thetext)
             thetext = re.sub(r"<" + lip_tag + str(n) + r"( |>)", "<" + lip_tag + r"\1", thetext)
             thetext = re.sub(r"</" + lip_tag + str(n) + ">", "</" + lip_tag + ">", thetext)
-#    # for some reason there can be extra </lip>.  Not sure why.
-#    thetext = re.sub(r"(\n *)</lip>",r"\1  </p>\1</li>", thetext)
 
     # special case of p inside li
     thetext = re.sub(r"(<li>\n)\n( *<p>)", r"\1\2", thetext)

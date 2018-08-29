@@ -224,9 +224,9 @@ def mytransform_mbx_linefeeds(text):
 # kill existing formatting.
 # need to rethink this!
 
-    # temporary for apex
-    thetext = re.sub(r'(\s+)<table xml:id="([^" ]+)"\s*>\s+(<caption>.{,200}</caption>)\s*<tabular>\s*<row>\s*<cell>(.{,200})</cell>\s*</row>\s*</tabular>\s*</table>',
-            r'\1<figure xml:id="\2">\1  \3\1    \4\1</figure>', thetext)
+#    # temporary for apex
+#    thetext = re.sub(r'(\s+)<table xml:id="([^" ]+)"\s*>\s+(<caption>.{,200}</caption>)\s*<tabular>\s*<row>\s*<cell>(.{,200})</cell>\s*</row>\s*</tabular>\s*</table>',
+#            r'\1<figure xml:id="\2">\1  \3\1    \4\1</figure>', thetext)
 
 #    thetext = re.sub("\n +", "\n", thetext)
 
@@ -244,11 +244,12 @@ def mytransform_mbx_linefeeds(text):
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_line_feeds(lip_tag + str(n), thetext)
 
+    # now put back the original p tags
     for lip_tag in ["p"]:
         for n in range(component.lipcounter[lip_tag]):
    #     thetext = re.sub(r"(\n *)<" + lip_tag + str(n) + ">",r"\1<" + lip_tag + ">", thetext)
    #     thetext = re.sub(r"(\n *)</" + lip_tag + str(n) + ">",r"\1</" + lip_tag + ">", thetext)
-            thetext = re.sub(r"<" + lip_tag + str(n) + ">", "<" + lip_tag + ">", thetext)
+            thetext = re.sub(r"<" + lip_tag + str(n) + "( |>)", "<" + lip_tag + r"\1", thetext)
             thetext = re.sub(r"</" + lip_tag + str(n) + ">", "</" + lip_tag + ">", thetext)
 
     return thetext

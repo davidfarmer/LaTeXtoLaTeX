@@ -52,7 +52,7 @@ document_sectioning = ['chapter', 'section', 'subsection', 'subsubsection',
 document_environments = ['proof',
                          'project',
                          'theorem', 'proposition', 'lemma', 'conjecture',
-                         'corollary', 'principle',
+                         'corollary', 'principle', 'algorithm',
                          'definition', 'axiom', 'example', 'insight', 'exploration',
                          'problem', 'exercise', 'question', 'note', 'blockquote',
                          'activity', 'remark', 'warning', 'table', 'tabular',
@@ -66,14 +66,15 @@ document_components = ['exercises', 'exercisegroup', 'row', 'cd',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside']
 
 document_pieces = ['title', 'subtitle', 'cell', 'caption',
-                   'address',
+                   'address', 'attribution',
                    'personname', 'date', 'email', 'department', 'line', 'cline',
                    'usage', 'description', 'journal', 'volume', 'number',
                    'mrow', 'intertext', 'initialism',
                    'webwork', 'setup', 'set', 'pg-code', 'pg-macros']
 
 # empty tags that shoudl be on their own line
-document_pieces_empty = ['cell', 'col', 'notation-list', 'brandlogo', 'cross-references']
+document_pieces_empty = ['cell', 'col', 'notation-list', 'brandlogo',
+                         'cross-references', 'input']
 
 list_like = ['ol', 'ul', 'dl']
 

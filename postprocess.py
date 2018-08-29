@@ -119,6 +119,11 @@ def add_line_fe(txt):
     the_space = txt.group(2)
     the_text = txt.group(3)
 
+#    # since p can occur inside a p, only add line feeds in the innermost one
+#    tag_stub = re.sub("[0-9]*$", "", the_tag)
+#    if re.search("<" + tag_stub + r"[1-9]", the_text):
+#        return "<" + the_tag + ">" + the_text + "</" + the_tag + ">"
+
     # if it is a "just text" paragraph, throw away any formatting
     problematic_internal_tags = ("<p>", "<p ", "<li>", "<li ", "<md", "<me")
     if not any(s in the_text for s in problematic_internal_tags):
@@ -148,7 +153,7 @@ def add_line_fe(txt):
 
     # parentheses on their own line
     # first, parentheses at the end of a sentence
-    the_text = re.sub("([^\n ]+) +(\([<a-z]{2,}[^\(\)]*?\)\.)",
+    the_text = re.sub("([^\n ]+) +(\([<a-z]{2,}[^\(\)]*?\)\.\s)",
                           r"\1" + the_space + r"\2", the_text)
     for n in range(3):
         the_text = re.sub(the_space + "(\S.{10,}) +(\([<a-z]{2,} [<a-zA-Z]+[^\(\)]*?\)) +(.*\n)",

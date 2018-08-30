@@ -63,7 +63,8 @@ document_environments = ['proof',
 
 
 document_components = ['exercises', 'exercisegroup', 'row', 'cd',
-                       'statement', 'solution', 'answer', 'hint', 'case', 'aside']
+                       'statement', 'solution', 'answer', 'hint', 'case', 'aside',
+                       'interactive', 'static', 'instructions']
 
 document_pieces = ['title', 'subtitle', 'cell', 'caption',
                    'address', 'attribution',
@@ -74,7 +75,7 @@ document_pieces = ['title', 'subtitle', 'cell', 'caption',
 
 # empty tags that shoudl be on their own line
 document_pieces_empty = ['cell', 'col', 'notation-list', 'brandlogo',
-                         'cross-references', 'input']
+                         'cross-references', 'input', 'video', 'slate']
 
 list_like = ['ol', 'ul', 'dl']
 

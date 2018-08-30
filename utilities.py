@@ -45,11 +45,16 @@ def sha1undigest(txt):
         the_tag = txt.group(1)
         the_sha1key = txt.group(2)
     #    return "<" + the_tag + component.sha1of[the_sha1key]['original_text'] + "</" + the_tag + ">"
-        return component.sha1of[the_sha1key]['original_text']
+   #     return component.sha1of[the_sha1key]['original_text']
 
     except (AttributeError, IndexError) as e:
         the_sha1key = txt.group(1)
-        return component.sha1of[the_sha1key]['original_text']
+    #    return component.sha1of[the_sha1key]['original_text']
+
+    orig_text = component.sha1of[the_sha1key]['original_text']
+    orig_text_trimmed = delete_leading_block(orig_text)
+
+    return orig_text_trimmed
 
 #################
 
@@ -382,3 +387,34 @@ def tag_to_numbered_t(tag, txt):
         
         return the_start1 + str(this_N) + the_start2  + the_text + the_end + str(this_N) + ">"
 
+#############
+
+def delete_leading_block(text):
+
+    """If a block of text has white space at the beginning
+       of every line, delete the common white space."""
+
+    the_text = text
+
+    # do we need to ensure there are at least 2 lines?
+    the_text_plus = the_text + "\n"
+    the_lines_plus = the_text_plus.split("\n")
+
+    min_leading_space = 9999999
+    for line in the_lines_plus:
+        if line:  # there might be empty lines, such as at the end
+            leading_space = re.match("( *)", line).group(1)
+            num_leading_space = len(leading_space)
+            min_leading_space = min(min_leading_space, num_leading_space)
+
+    if min_leading_space > 10:
+        the_answer = re.sub("\n {" + str(min_leading_space) + "}", "\n" + " "*12, the_text)
+    else:
+        the_answer = the_text
+    if "sage" in the_text:
+        print "SAGE FROM VERBATIM", str(min_leading_space)
+        print the_text
+        print "-----------------"
+        print the_answer
+    
+    return the_answer

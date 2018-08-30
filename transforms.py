@@ -105,7 +105,7 @@ def mbx_pp(text):
     thetext = text
 
     # first hide comments
-    thetext = re.sub(r"(\s*(<!--)(.*?)(-->)\s*)",
+    thetext = re.sub(r"(\s*(<!--)(.*?)(-->))",
                      lambda match: utilities.sha1hide(match, "comment"),
                      thetext, 0, re.DOTALL)
 

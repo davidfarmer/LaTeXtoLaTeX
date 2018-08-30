@@ -199,7 +199,10 @@ for inputfile, outputfile in component.iofilepairs:
     elif component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp']:
         component.onefile = transforms.mbx_pp(component.onefile)
 
+        print "000000000000000000"
+        print component.onefile
         component.onefile = myoperations.mytransform_mbx_linefeeds(component.onefile)
+        print component.onefile
 
         # put back verbatim environments
         for tag in component.verbatim_tags:
@@ -219,6 +222,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = re.sub(r"-->\n+", "-->\n", component.onefile)
       # no need for more than one blank line
         component.onefile = re.sub(r"\n{3,}", "\n\n", component.onefile)
+
+        component.onefile = re.sub("<li>\s+(.{,50})\s+</li>",
     elif component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = myoperations.mbx_fix(component.onefile)
     else:

@@ -240,16 +240,20 @@ def mytransform_mbx_linefeeds(text):
 
         print "counted", component.lipcounter[lip_tag], "of", lip_tag
 
+    print re.sub("Practice visualizing vector addition", "Practice visualizing vector1addition", thetext)
     # before we put line feeds in p's, there could be some leaf li's
     # that just contain one big p that is not marked as a p.
     # So we arrange for that to have line breaks
-    thetext = re.sub(r"(\n +)<li>([a-zA-Z].{50,})</li>", r"\1<li>\1  \2\1</li>", thetext)
+    thetext = re.sub(r"(\n +)<li>([a-zA-Z].{50,}?)</li>", r"\1<li>\1  \2\1</li>",
+                     thetext, 0, re.DOTALL)
     thetext = postprocess.add_line_feeds("li", thetext)
+    print re.sub("Practice visualizing vector addition", "Practice visualizing vector2addition", thetext)
 
     for lip_tag in ["p"]:
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_line_feeds(lip_tag + str(n), thetext)
 
+    print re.sub("Practice visualizing vector addition", "Practice visualizing vector3addition", thetext)
     # now put back the original p tags
     for lip_tag in ["p"]:
         for n in range(component.lipcounter[lip_tag]):

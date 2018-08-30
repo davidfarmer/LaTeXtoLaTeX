@@ -126,8 +126,8 @@ def mbx_pp(text):
 
         print "found", component.lipcounter
         for n in range(component.lipcounter[lip_tag]):
-            if lip_tag == "li":
-                thetext = postprocess.tag_before_after(lip_tag + str(n), "\n\n", "", "", "\n\n", thetext)
+            if lip_tag == "li":  # note: now the same as the else case!
+                thetext = postprocess.tag_before_after(lip_tag + str(n), "\n\n", "\n", "\n", "\n\n", thetext)
             else:
                 thetext = postprocess.tag_before_after(lip_tag + str(n), "\n\n", "\n", "\n", "\n\n", thetext)
         thetext = postprocess.tag_before_after(lip_tag, "\n\n", "\n", "\n", "\n\n", thetext)
@@ -147,6 +147,8 @@ def mbx_pp(text):
         thetext = postprocess.tag_before_after(tag, "\n", "\n", "\n", "\n", thetext)
     for tag in component.document_components:
         thetext = postprocess.tag_before_after(tag, "\n", "\n", "\n", "\n", thetext)
+    for tag in component.list_like:
+        thetext = postprocess.tag_before_after(tag, "\n", "\n", "\n", "\n", thetext)
     for tag in component.document_environments:
         thetext = postprocess.tag_before_after(tag, "\n\n", "\n", "\n", "\n\n", thetext)
     for tag in component.document_sectioning:
@@ -160,7 +162,7 @@ def mbx_pp(text):
 
     # sort-of hack for spacing after punctuation after display math
     thetext = re.sub(r"(</(md|mdn|me|men)>)\s*(;|:|,)\s*", r"\1\3" + "\n", thetext)
-    thetext = re.sub(r"(</(md|mdn|me|men)>)\s*(\?|!|\.)\s*", r"\1\3" + "\n", thetext)
+    thetext = re.sub(r"(</(md|mdn|me|men)>)\s*((\?|!|\.)+)\s*", r"\1\3" + "\n", thetext)
 
     # sort-of hack for spacing after footnotes that do not end a sentence
     thetext = re.sub(r"(</fn>)([a-zA-Z])", r"\1 \2", thetext)
@@ -201,8 +203,8 @@ def mbx_pp(text):
     thetext = re.sub(r"(<li>\n)\n( *<p>)", r"\1\2", thetext)
     thetext = re.sub(r"(</p>\n)\n( *</li>)", r"\1\2", thetext)
 
-    # no blank line after ul of before /ul
-    thetext = re.sub(r"(<(ul|ol|dl)>\n)\n", r"\1", thetext)
+    # no blank line after ul or before /ul
+    thetext = re.sub(r"(<(ul|ol|dl)(>| [^>]+>)\n)\n", r"\1", thetext)
     thetext = re.sub(r"\n(\n *</(ul|ol|dl)>)", r"\1", thetext)
 
     # special case of punctuation after a closing display math tag

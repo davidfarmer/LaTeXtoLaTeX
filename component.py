@@ -56,7 +56,7 @@ document_environments = ['proof',
                          'definition', 'axiom', 'example', 'insight', 'exploration',
                          'problem', 'exercise', 'question', 'note', 'blockquote',
                          'activity', 'remark', 'warning', 'table', 'tabular',
-                         'listing', 'program', 'console', 'demonstration',
+                         'list', 'listing', 'program', 'console', 'demonstration',
                          'image',
                          'subtask', 'notation', 'claim', 'biblio',
                          'poem', 'stanza']

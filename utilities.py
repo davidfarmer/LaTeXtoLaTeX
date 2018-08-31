@@ -411,10 +411,5 @@ def delete_leading_block(text):
         the_answer = re.sub("\n {" + str(min_leading_space) + "}", "\n" + " "*12, the_text)
     else:
         the_answer = the_text
-    if "sage" in the_text:
-        print "SAGE FROM VERBATIM", str(min_leading_space)
-        print the_text
-        print "-----------------"
-        print the_answer
     
     return the_answer

@@ -75,7 +75,8 @@ document_pieces = ['title', 'subtitle', 'cell', 'caption',
 
 # empty tags that shoudl be on their own line
 document_pieces_empty = ['cell', 'col', 'notation-list', 'brandlogo',
-                         'cross-references', 'input', 'video', 'slate']
+                         'cross-references', 'input', 'video', 'slate',
+                         'webwork']
 
 list_like = ['ol', 'ul', 'dl']
 

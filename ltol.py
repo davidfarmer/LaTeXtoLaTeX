@@ -22,19 +22,23 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "tex", "tex_ptx",
                       "html",
                       "pgtombx"]
-if sys.argv[1] == "-h":
+
+if len(sys.argv) == 1 or sys.argv[1] == "-h":
+    print ''
     print 'To convert a file to a different form, do either:'
-    print './ltol.py filetype_plus inputfile outputfile'
+    print '    ./ltol.py filetype_plus inputfile outputfile'
     print 'to convert one file, or'
-    print './ltol.py filetype_plus inputdirectory outputdirectory'
+    print '    ./ltol.py filetype_plus inputdirectory outputdirectory'
     print 'to convert all the "filetype" files in a directory.  The outputdirectory must already exist.'
-    print 'OR if you wish to convert an entire folder and subfolders'
-    print './ltol.py filetype_plus inputrootdir outputrootdir R'
+    print ''
+    print 'OR if you wish to convert an entire folder and subfolders, do'
+    print '    ./ltol.py filetype_plus inputrootdir outputrootdir R'
     print 'For recursion target directory should NOT already exist'
+    print ''
     print 'Supported filetype_plus: '
     print conversion_options
+    print ''
     sys.exit()
-
 
 if not len(sys.argv) >= 4:
     print 'To convert a file to a different form, do either:'
@@ -46,15 +50,12 @@ if not len(sys.argv) >= 4:
     print conversion_options
     sys.exit()
 
-if len(sys.argv) == 4:
-    component.filetype_plus = sys.argv[1]
-    component.inputname = sys.argv[2]
-    component.outputname = sys.argv[3]
-    dorecursive = False
-else:
-    component.filetype_plus = sys.argv[1]
-    component.inputname = sys.argv[2]
-    component.outputname = sys.argv[3]
+component.filetype_plus = sys.argv[1]
+component.inputname = sys.argv[2]
+component.outputname = sys.argv[3]
+dorecursive = False
+
+if len(sys.argv) == 5:
     dorecursive = True    
 
 print component.inputname
@@ -75,26 +76,26 @@ if os.path.isfile(component.inputname) and not os.path.isdir(component.outputnam
     component.iofilepairs.append([component.inputname,component.outputname])
     print "converting one file:",component.inputname
 
-elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) and not dorecursive:
+if component.filetype_plus in ["mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
+    fileextension_in = "ptx"
+    fileextension_out = "ptx"
+elif component.filetype_plus in ["ptx_pp"]:
+    fileextension_in = "ptx"
+    fileextension_out = "ptx"
+elif component.filetype_plus in ["xml", "xml_pp"]:
+    fileextension_in = "xml"
+    fileextension_out = "xml"
+elif component.filetype_plus in ["pgtombx"]:
+    fileextension_in = "pg"
+    fileextension_out = "mbx"
+elif component.filetype_plus in ["tex_ptx"]:
+    fileextension_in = "tex"
+    fileextension_out = "ptx"
+else:
+    fileextension_in = component.filetype_plus
+    fileextension_out = component.filetype_plus
 
-    if component.filetype_plus in ["mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
-        fileextension_in = "ptx"
-        fileextension_out = "ptx"
-    elif component.filetype_plus in ["ptx_pp"]:
-        fileextension_in = "ptx"
-        fileextension_out = "ptx"
-    elif component.filetype_plus in ["xml", "xml_pp"]:
-        fileextension_in = "xml"
-        fileextension_out = "xml"
-    elif component.filetype_plus in ["pgtombx"]:
-        fileextension_in = "pg"
-        fileextension_out = "mbx"
-    elif component.filetype_plus in ["tex_ptx"]:
-        fileextension_in = "tex"
-        fileextension_out = "ptx"
-    else:
-        fileextension_in = component.filetype_plus
-        fileextension_out = component.filetype_plus
+elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) and not dorecursive:
 
     print "looking for", fileextension_in, "files in",  component.inputname
     print "Only looking in", component.inputname
@@ -117,22 +118,6 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) 
   #  print component.iofilepairs
 #    sys.exit()
 elif dorecursive and os.path.isdir(component.inputname) and not os.path.isdir(component.outputname):
-
-    if component.filetype_plus in ["mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
-        fileextension_in = "ptx"
-        fileextension_out = "ptx"
-    elif component.filetype_plus in ["ptx_pp"]:
-        fileextension_in = "ptx"
-        fileextension_out = "ptx"
-    elif component.filetype_plus in ["pgtombx"]:
-        fileextension_in = "pg"
-        fileextension_out = "mbx"
-    elif component.filetype_plus in ["tex_ptx"]:
-        fileextension_in = "tex"
-        fileextension_out = "ptx"
-    else:
-        fileextension_in = component.filetype_plus
-        fileextension_out = component.filetype_plus
 
     print "looking for", fileextension_in, "files in",  component.inputname
     

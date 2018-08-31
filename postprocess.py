@@ -45,9 +45,9 @@ def tag_before_after(tag, startbefore, endbefore, startafter, endafter, text):
     thetext = text
 
     if not startbefore or startbefore.isspace():
-        thetext = re.sub("\s*(<" + thetag + r"(>| [^/>]*>))", startbefore + r"\1", thetext)
+        thetext = re.sub("\s*(<" + thetag + r"(>| [^>]*[^/]>))", startbefore + r"\1", thetext)
     if not endbefore or endbefore.isspace():
-        thetext = re.sub("(<" + thetag + r"(>| [^/>]*>))\s*", r"\1" + endbefore, thetext)
+        thetext = re.sub("(<" + thetag + r"(>| [^>]*[^/]>))\s*", r"\1" + endbefore, thetext)
     if not startafter or startafter.isspace():
         thetext = re.sub("\s*(</" + thetag + r">)", startafter + r"\1", thetext)
     if not endafter or endafter.isspace():
@@ -64,7 +64,7 @@ def add_space_within(tag,text):
     thetext = text
 
     # note the work-around for self-closing tags
-    findtag = "<(" + thetag + r")(>| [^/>]*>)(.*?)</\1>"
+    findtag = "<(" + thetag + r")(>| [^>]*[^/]>)(.*?)</\1>"
     thetext = re.sub(findtag, add_space_with, thetext, 0, re.DOTALL)
 
     return thetext

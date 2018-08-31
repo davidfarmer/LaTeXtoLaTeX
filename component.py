@@ -37,10 +37,10 @@ document_global_structure = [
     'docinfo', 'macros',
     'html', 'search', 'google', 'feedback', 'index',
     'frontmatter', 'backmatter', 
-    'appendix', 'solutions', 'references',
+    'appendix', 'solutions', 'references', 'biography', 'dedication',
     'titlepage', 'preface', 'abstract', 'colophon', 'shortlicense',
     'acknowledgement', 'credit', 'website', 'copyright',
-    'author', 'institution','contributor', 'contributors' ]
+    'author', 'editor', 'contributor', 'contributors' ]
 
 document_sectioning = ['chapter', 'section', 'subsection', 'subsubsection',
                        'technology', 'worksheet',
@@ -67,8 +67,10 @@ document_components = ['exercises', 'exercisegroup', 'row', 'cd',
                        'interactive', 'static', 'instructions']
 
 document_pieces = ['title', 'subtitle', 'cell', 'caption',
-                   'address', 'attribution',
-                   'personname', 'date', 'email', 'department', 'line', 'cline',
+                   'address', 'attribution', 'location', 'edition',
+                   'personname', 'date', 'email', 'department', 'institution',
+                   'line', 'cline',
+                   'role', 'entity', 'year', 'minilicense', 'holder',
                    'usage', 'description', 'journal', 'volume', 'number',
                    'mrow', 'intertext', 'initialism',
                    'webwork', 'setup', 'set', 'pg-code', 'pg-macros']

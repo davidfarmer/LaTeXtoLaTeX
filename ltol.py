@@ -72,10 +72,6 @@ if component.inputname == component.outputname:
     print "try again"
     sys.exit()
 
-if os.path.isfile(component.inputname) and not os.path.isdir(component.outputname):
-    component.iofilepairs.append([component.inputname,component.outputname])
-    print "converting one file:",component.inputname
-
 if component.filetype_plus in ["mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
     fileextension_in = "ptx"
     fileextension_out = "ptx"
@@ -94,6 +90,10 @@ elif component.filetype_plus in ["tex_ptx"]:
 else:
     fileextension_in = component.filetype_plus
     fileextension_out = component.filetype_plus
+
+if os.path.isfile(component.inputname) and not os.path.isdir(component.outputname):
+    component.iofilepairs.append([component.inputname,component.outputname])
+    print "converting one file:",component.inputname
 
 elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) and not dorecursive:
 
@@ -130,7 +130,7 @@ elif dorecursive and os.path.isdir(component.inputname) and not os.path.isdir(co
         for filename in fnmatch.filter(filenames,'*.'+fileextension_in):
             thefiles.append(os.path.join(root,filename))
         
-    print "thefiles", thefiles
+#    print "thefiles", thefiles
 
     component.iofilepairs = []
     for filepath in thefiles:

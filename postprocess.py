@@ -206,10 +206,10 @@ def add_line_fe(txt):
 
     # put parentheses on their own line
     # parentheses that contain an entire sentence
-   # the_text = re.sub("(\S[a-z>]\.) +(\([A-Z<][a-z][^\(\)]*?\.\)) +(\S)",
-    the_text = re.sub(the_space + "(\S.*?[a-z>]\.) +(\([A-Z<][a-z][^\(\)]*?\.\)) +(\S)",
+    for _ in range(3):
+        the_text = re.sub(the_space + "(\S.*?[a-z>]\.) +(\([A-Z<][a-z][^\(\)]*?\.\)) +(\S)",
                           the_space + r"\1" + the_space + r"\2" + the_space + r"\3", the_text)
-    the_text = re.sub(the_space + "(\S.*?[a-z>]\.) +(\([A-Z<][a-z][^\(\)]*?\.\)\s)",
+        the_text = re.sub(the_space + "(\S.*?[a-z>]\.) +(\([A-Z<][a-z][^\(\)]*?\.\)\s)",
                           the_space + r"\1" + the_space + r"\2", the_text)
     print "3333333333333333", the_tag
     print re.sub("being the other option", "being the other2option", the_text)

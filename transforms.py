@@ -111,6 +111,8 @@ def mbx_pp(text):
 
     # then hide verbatim content
     for tag in component.verbatim_tags:
+        thetext = postprocess.tag_before_after(tag, "\n", "\n", "\n", "\n", thetext)
+    for tag in component.verbatim_tags:
         thetext = re.sub(r"(\s*(<" + tag + "(>| [^/>]*>))(.*?)(</" + tag + ">))",
                          lambda match: utilities.sha1hide(match, tag),
                          thetext, 0, re.DOTALL)
@@ -158,7 +160,7 @@ def mbx_pp(text):
     for tag in component.document_pieces:
         thetext = postprocess.tag_before_after(tag, "\n", "", "", "\n", thetext)
     for tag in component.footnote_like:
-        thetext = postprocess.tag_before_after(tag, "", "", "", "", thetext)
+        thetext = postprocess.tag_before_after(tag, "", "\n", "\n", "", thetext)
 
     # sort-of hack for spacing after punctuation after display math
     thetext = re.sub(r"(</(md|mdn|me|men)>)\s*(;|:|,)\s*", r"\1\3" + "\n", thetext)
@@ -209,6 +211,10 @@ def mbx_pp(text):
 
     # special case of punctuation after a closing display math tag
     thetext = re.sub(r"(</(me|men)>)\s*((\?|!|;|:|,|\.)+) *?", r"\1\3", thetext)
+    # special case of punctuation after quantity
+    thetext = re.sub(r"(</quantity>)\s*((\?|!|;|:|,|\.|\)|</)+) *?", r"\1\2", thetext)
+    # and parentheses or other markup before quantity
+    thetext = re.sub(r"(\(|>)\s*(<quantity>)", r"\1\2", thetext)
 
 #    print thetext
     return thetext

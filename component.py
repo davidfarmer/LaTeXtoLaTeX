@@ -73,6 +73,7 @@ document_pieces = ['title', 'subtitle', 'cell', 'caption',
                    'role', 'entity', 'year', 'minilicense', 'holder',
                    'usage', 'description', 'journal', 'volume', 'number',
                    'mrow', 'intertext', 'initialism',
+                   'quantity',
                    'webwork', 'setup', 'set', 'pg-code', 'pg-macros']
 
 # empty tags that shoudl be on their own line

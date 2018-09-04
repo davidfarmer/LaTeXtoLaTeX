@@ -111,8 +111,6 @@ def mbx_pp(text):
 
     # then hide verbatim content
     for tag in component.verbatim_tags:
-        thetext = postprocess.tag_before_after(tag, "\n", "\n", "\n", "\n", thetext)
-    for tag in component.verbatim_tags:
         thetext = re.sub(r"(\s*(<" + tag + "(>| [^/>]*>))(.*?)(</" + tag + ">))",
                          lambda match: utilities.sha1hide(match, tag),
                          thetext, 0, re.DOTALL)

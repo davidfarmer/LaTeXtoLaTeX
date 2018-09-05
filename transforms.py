@@ -213,6 +213,8 @@ def mbx_pp(text):
     thetext = re.sub(r"(</quantity>)\s*((\?|!|;|:|,|\.|\)|</)+) *?", r"\1\2", thetext)
     # and parentheses or other markup before quantity
     thetext = re.sub(r"(\(|>)\s*(<quantity>)", r"\1\2", thetext)
+    # and punctuation after /line
+    thetext = re.sub(r"(</line>)\s*((\?|!|;|:|,|\.|\)|</)+) *?", r"\1\2", thetext)
 
 #    print thetext
     return thetext

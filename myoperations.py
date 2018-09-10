@@ -1525,10 +1525,10 @@ def add_permid_within_sections(text):
         thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
             lambda match: add_permid_within(match, tag, 5), thetext, 0, re.DOTALL)
 
-#    for lev in range(5, -1, -1):
-#      for tag in component.tags_by_level[lev]:
-#        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
-#            lambda match: add_permid_within(match, tag, 6), thetext, 0, re.DOTALL)
+    for lev in range(5, -1, -1):
+      for tag in component.tags_by_level[lev]:
+        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+            lambda match: add_permid_within(match, tag, 6), thetext, 0, re.DOTALL)
 
         # put back verbatim environments
     print "put back verbatim environments"
@@ -1619,7 +1619,7 @@ def add_permid_on(txt, tag, parent_permid=""):
             this_permid = parent_id
         except AttributeError:
             the_title = re.search('<title>\s*(.*)\s*</title>', everything_else,).group(1)
-            this_permid = re.sub(r"\W", "-", the_title).lower()
+            this_permid = tag + "-" + re.sub(r"\W", "-", the_title).lower()
             print "this_permid", this_permid
 
         this_permid = shorten(this_permid)

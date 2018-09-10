@@ -19,6 +19,7 @@ import myoperations
 
 conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
                       "txt",
+                      "permid",
                       "tex", "tex_ptx",
                       "html",
                       "pgtombx"]
@@ -86,6 +87,9 @@ elif component.filetype_plus in ["pgtombx"]:
     fileextension_out = "mbx"
 elif component.filetype_plus in ["tex_ptx"]:
     fileextension_in = "tex"
+    fileextension_out = "ptx"
+elif component.filetype_plus in ["permid"]:
+    fileextension_in = "mbx"
     fileextension_out = "ptx"
 else:
     fileextension_in = component.filetype_plus
@@ -170,6 +174,8 @@ for inputfile, outputfile in component.iofilepairs:
 
 #    myoperations.setvariables(component.onefile)
 
+    if component.filetype_plus == 'permid':
+        component.onefile = myoperations.add_permid_within_sections(component.onefile)
     if component.filetype_plus == 'tex':
         component.onefile = myoperations.mytransform_tex(component.onefile)
     if component.filetype_plus == 'tex_ptx':
@@ -190,10 +196,6 @@ for inputfile, outputfile in component.iofilepairs:
         for tag in component.verbatim_tags:
              component.onefile = re.sub(r"A(" + tag + ")B(.{40})ENDZ *",
                                         utilities.sha1undigest,component.onefile)
-#        # those tags can nest
-#        for tag in component.verbatim_tags:
-#             component.onefile = re.sub(r"A(" + tag + ")B(.{40})ENDZ *",
-#                                        utilities.sha1undigest,component.onefile)
         component.onefile = re.sub(r" *ACOMMB(.{40})ENDZ *", utilities.sha1undigest,component.onefile)
 
       # fix lines that only contain spaces

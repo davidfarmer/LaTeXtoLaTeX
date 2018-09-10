@@ -26,11 +26,19 @@ def sha1hexdigest(text):
 
 #################
 
-def sha1hide(txt, tag):
+def sha1hide(txt, tag, keeptags=False):
 
     thetext = txt.group(1)
-
     the_hash = sha1hexdigest(thetext)
+
+    if keeptags:
+        theopeningtag = txt.group(1)
+        theinnertext = txt.group(4)
+        theclosingtag = txt.group(5)
+
+        the_hash = sha1hexdigest(theinnertext)
+
+        return theopeningtag + "A" + tag + "B" + the_hash + "ENDZ" + theclosingtag
 
     if tag == "comment":
         return "ACOMMB" + the_hash + "ENDZ"
@@ -49,6 +57,7 @@ def sha1undigest(txt):
 
     except (AttributeError, IndexError) as e:
         the_sha1key = txt.group(1)
+    print "unsha1 of", the_sha1key
     #    return component.sha1of[the_sha1key]['original_text']
 
     orig_text = component.sha1of[the_sha1key]['original_text']

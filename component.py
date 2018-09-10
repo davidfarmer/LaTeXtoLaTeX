@@ -28,6 +28,7 @@ generic_counter = 0
 extra_macros = []
 
 lipcounter = {}
+local_counter = {}
 
 sha1of = {}
 
@@ -93,3 +94,70 @@ verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
                  'slate', 'sage', 'sageplot', 'asymptote', 'macros',
                  'program', 'input', 'output', 'prompt', 'pre']
 
+# these shoudl be listed from innermost to outermost
+
+tags_by_level = [
+         ['subsubsection', 'subsection', 'section', 'chapter'],
+         ['paragraphs','exercises', 'worksheet', 'example', 'assemblage'],
+         ['theorem', 'proposition', 'lemma',
+              'exercise', 'investigation'],
+         ['task', 'solution', 'proof'],
+         ['ul', 'ol', 'dl'],
+         ['li'],
+         ['p']  ]
+
+abbreviation_of_tag = {
+    'chapter': 'chap',
+    'section': 'sec',
+    'subsection': 'ssec',
+    'subsec': 'ssec',
+    'subsubsection': 'sssec',
+    'exercises': 'exers',
+    'paragraphs': 'ps',
+    'worksheet': 'wrk',
+    'introduction': 'intr',
+    'conclusion': 'conc',
+    'objectives': 'ob',
+    'outcomes': 'out',
+    'proof': 'pf',
+    'project': 'proj',
+    'theorem': 't',
+    'proposition': 'pr',
+    'lemma': 'l',
+    'conjecture': 'conj',
+    'corollary': 'cor',
+    'principle': 'prin',
+    'algorithm': 'alg',
+    'investigation': 'inv',
+    'assemblage': 'asm',
+    'definition': 'd',
+    'axiom': 'ax',
+    'example': 'ex',
+    'insight': 'in',
+    'exploration': 'expl',
+    'problem': 'prob',
+    'exercise': 'exer',
+    'question': 'q',
+    'note': 'n',
+    'task': 'tk',
+    'blockquote': 'bq',
+    'activity': 'act',
+    'remark': 'rem',
+    'warning': 'warn',
+    'table': 'tab',
+    'tabular': 'tabu',
+    'list': 'lst',
+    'listing': 'lsti',
+    'program': 'prog',
+    'console': 'con',
+    'demonstration': 'demo',
+    'image': 'im',
+    'answer': 'a',
+    'solution': 's',
+    'ul': 'ul',
+    'ol': 'ol',
+    'dl': 'dl',
+    'dd': 'dd',
+    'p': 'p',
+    'li': 'li'
+}

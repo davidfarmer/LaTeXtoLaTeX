@@ -224,14 +224,9 @@ def mytransform_mbx_linefeeds(text):
 # kill existing formatting.
 # need to rethink this!
 
-#    # temporary for apex
-#    thetext = re.sub(r'(\s+)<table xml:id="([^" ]+)"\s*>\s+(<caption>.{,200}</caption>)\s*<tabular>\s*<row>\s*<cell>(.{,200})</cell>\s*</row>\s*</tabular>\s*</table>',
-#            r'\1<figure xml:id="\2">\1  \3\1    \4\1</figure>', thetext)
-
 #    thetext = re.sub("\n +", "\n", thetext)
 
     thetext = fix_ptx_math_punctuation(thetext)
-#    thetext = transforms.mbx_pp(thetext)
 
     #  now we make all the p tags separate
     for lip_tag in ["p", "li"]:
@@ -241,24 +236,14 @@ def mytransform_mbx_linefeeds(text):
         print "counted", component.lipcounter[lip_tag], "of", lip_tag
 
     print re.sub("The hybrid reference recognizes that the", "The hybrid reference recognizes that1" + lip_tag + "the", thetext)
-#    # before we put line feeds in p's, there could be some leaf li's
-#    # that just contain one big p that is not marked as a p.
-#    # So we arrange for that to have line breaks
-#    thetext = re.sub(r"(\n +)<li>([a-zA-Z].{50,}?)</li>", r"\1<li>\1  \2\1</li>",
-#                     thetext, 0, re.DOTALL)
-#    thetext = postprocess.add_line_feeds("li", thetext)
-    print re.sub("The hybrid reference recognizes that the", "The hybrid reference recognizes that2" + lip_tag + "the", thetext)
 
     for lip_tag in ["p", "li"]:
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_line_feeds(lip_tag + str(n), thetext)
 
-    print re.sub("Practice visualizing vector addition", "Practice visualizing vector3addition", thetext)
     # now put back the original p tags
     for lip_tag in ["p", "li"]:
         for n in range(component.lipcounter[lip_tag]):
-   #     thetext = re.sub(r"(\n *)<" + lip_tag + str(n) + ">",r"\1<" + lip_tag + ">", thetext)
-   #     thetext = re.sub(r"(\n *)</" + lip_tag + str(n) + ">",r"\1</" + lip_tag + ">", thetext)
             thetext = re.sub(r"<" + lip_tag + str(n) + "( |>)", "<" + lip_tag + r"\1", thetext)
             thetext = re.sub(r"</" + lip_tag + str(n) + ">", "</" + lip_tag + ">", thetext)
 
@@ -1487,3 +1472,165 @@ def fix_ptx_math_punctuation(text):
 
     return thetext
 
+########################
+
+def add_permid_within_sections(text):
+
+    thetext = text
+
+    # first hide comments
+    thetext = re.sub(r"(\s*(<!--)(.*?)(-->))",
+                     lambda match: utilities.sha1hide(match, "comment"),
+                     thetext, 0, re.DOTALL)
+
+    # then hide verbatim content
+    for tag in component.verbatim_tags:
+        thetext = re.sub(r"(\s*(<" + tag + "(>| [^/>]*>))(.*?)(</" + tag + ">))",
+                         lambda match: utilities.sha1hide(match, tag),
+                         thetext, 0, re.DOTALL)
+
+    for tag in component.tags_by_level[0]:
+
+        if '<' + tag + ' ' not in thetext and '<' + tag + '>' not in thetext:  
+                 # space, because xml:id is required, but may be missing
+            continue
+
+        component.local_counter[tag] = 0
+
+        thetext = re.sub(r"<" + tag + r"( [^>]*|)>(.*?</" + tag + ">)",
+            lambda match: add_permid_on(match, tag), thetext, 0, re.DOTALL)
+
+        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+            lambda match: add_permid_within(match, tag, 1), thetext, 0, re.DOTALL)
+
+    for tag in component.tags_by_level[1] + component.tags_by_level[0]:
+        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+            lambda match: add_permid_within(match, tag, 2), thetext, 0, re.DOTALL)
+
+#    for tag in component.tags_by_level[0]:
+#        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+#            lambda match: add_permid_within(match, tag, 2), thetext, 0, re.DOTALL)
+
+    for tag in component.tags_by_level[2] + component.tags_by_level[1] + component.tags_by_level[0]:
+        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+            lambda match: add_permid_within(match, tag, 3), thetext, 0, re.DOTALL)
+
+    for lev in range(3, -1, -1):
+      for tag in component.tags_by_level[lev]:
+        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+            lambda match: add_permid_within(match, tag, 4), thetext, 0, re.DOTALL)
+
+    for lev in range(4, -1, -1):
+      for tag in component.tags_by_level[lev]:
+        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+            lambda match: add_permid_within(match, tag, 5), thetext, 0, re.DOTALL)
+
+#    for lev in range(5, -1, -1):
+#      for tag in component.tags_by_level[lev]:
+#        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+#            lambda match: add_permid_within(match, tag, 6), thetext, 0, re.DOTALL)
+
+        # put back verbatim environments
+    print "put back verbatim environments"
+    for tag in component.verbatim_tags:
+         thetext = re.sub(r"A(" + tag + ")B(.{40})ENDZ *",
+                                    utilities.sha1undigest,thetext)
+    thetext = re.sub(r" *ACOMMB(.{40})ENDZ *", utilities.sha1undigest,thetext)
+
+    return thetext
+
+#-------------#
+
+def add_permid_within(txt, parent_tag, level):
+
+    the_opening_tag = txt.group(1)   
+    the_attributes = txt.group(2)
+    the_text = txt.group(3)
+    the_closing_tag = txt.group(4)
+
+    print "    doing something with level", level,"yyy", the_text[:30]
+
+    try:
+        parent_permid = re.search('permid="([^"]+)"', the_attributes).group(1)
+    except AttributeError:
+
+        try:
+            parent_id = re.search('xml:id="([^"]+)"', the_attributes).group(1)
+        except AttributeError:
+            print "the_attributes", the_attributes
+            print "Error, no xml:id on",parent_tag,"of",the_text[:40]
+            the_title = re.search("<title>\s*(.*?)\s*</title>", the_text, re.DOTALL).group(1)
+            print "found the title", the_title, "pppp"
+            parent_id = the_title.lower()
+            parent_id = re.sub(r"\W", "-", parent_id)
+            print "       Assigned the parent_id", parent_id, "oooo"
+            parent_id = shorten(parent_id)
+
+        parent_permid = parent_id
+
+    print "parent_permid", parent_permid
+    print component.tags_by_level[level]
+    for tag in component.tags_by_level[level]:
+        if tag == "example":
+            print "    starting working on an example", the_text[:30]
+
+        component.local_counter[tag] = 0
+        the_text = re.sub(r"<" + tag + r"( [^>]*|)>(.*?</" + tag + ">)",
+            lambda match: add_permid_on(match, tag, parent_permid), the_text, 0, re.DOTALL)
+
+    return the_opening_tag + the_text + the_closing_tag
+
+#-------------#
+def shorten(permid):
+
+    the_permid = permid
+    for tag in component.abbreviation_of_tag:
+        the_permid = re.sub(r"(^|[_\- \"\'])" + tag + r"($|[_\- \"\'])",
+                               r"\1" + component.abbreviation_of_tag[tag] + r"\2",
+                               the_permid)
+    for tag in ['and', 'of', 'the', "m"]:
+        the_permid = re.sub("-" + tag + "-", "-", the_permid)
+
+    the_permid = re.sub("-{2,}", "-", the_permid)
+    the_permid = re.sub("^-+", "", the_permid)
+    the_permid = re.sub("-+$", "", the_permid)
+
+    return the_permid
+
+#-------------#
+
+def add_permid_on(txt, tag, parent_permid=""):
+
+    component.local_counter[tag] += 1
+
+    the_attribute = txt.group(1)
+    everything_else = txt.group(2)
+
+    if tag == "example":
+        print "    working on an example", the_attribute,"pp",everything_else[:30]
+
+    if 'permid="' in the_attribute:  # don;t change an existing permid
+        return "<" + tag + the_attribute + ">" + everything_else
+
+    if not parent_permid:  # if no parent, then make the xml:id be the permid
+        print "the_attribute", the_attribute
+        try:
+            parent_id = re.search('xml:id="([^"]+)"', the_attribute).group(1)
+            this_permid = parent_id
+        except AttributeError:
+            the_title = re.search('<title>\s*(.*)\s*</title>', everything_else,).group(1)
+            this_permid = re.sub(r"\W", "-", the_title).lower()
+            print "this_permid", this_permid
+
+        this_permid = shorten(this_permid)
+        permid_attribute = 'permid="' + this_permid + '"'
+
+    else:
+        this_tag_abbrev = component.abbreviation_of_tag[tag]
+
+        permid_attribute = 'permid="' + parent_permid
+        permid_attribute += '-' + this_tag_abbrev + str(component.local_counter[tag]) + '"'
+
+    return "<" + tag + " " + permid_attribute + the_attribute + ">" + everything_else
+
+    

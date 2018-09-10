@@ -119,19 +119,14 @@ def add_line_fe(txt):
     the_space = txt.group(2)
     the_text = txt.group(3)
 
-#    # since p can occur inside a p, only add line feeds in the innermost one
-#    tag_stub = re.sub("[0-9]*$", "", the_tag)
-#    if re.search("<" + tag_stub + r"[1-9]", the_text):
-#        return "<" + the_tag + ">" + the_text + "</" + the_tag + ">"
-
-    print "0101010101010101010", the_tag
-    print re.sub("Practice visualizing vector addition", "Practice visualizing vector11addition", the_text)
+#    print "0101010101010101010", the_tag
+#    print re.sub("Practice visualizing vector addition", "Practice visualizing vector11addition", the_text)
 
 #    # if it is a "just text" paragraph, throw away any formatting
     problematic_internal_tags = ("<p>", "<p ", "<li>", "<li ", "<md", "<me")
     if not any(s in the_text for s in problematic_internal_tags):
-         if "ion may be used by itself ins" in the_text:
-             print "QQQQQQQQQQQ",the_text,"PPPPPPPPP"
+#         if "ion may be used by itself ins" in the_text:
+#             print "QQQQQQQQQQQ",the_text,"PPPPPPPPP"
          the_text = re.sub(r"(\S)  +(\S)", r"\1 \2", the_text)
          # twice because of "  a  b  c  "
          the_text = re.sub(r"(\S)  +(\S)", r"\1 \2", the_text)
@@ -139,12 +134,12 @@ def add_line_fe(txt):
    #     the_text = re.sub(r"\s+", " ", the_text)
    #     the_text = re.sub(r"\s+$", the_space[:-1*component.indent_num], the_text)
     
-    print "020202020202020202", the_tag
-    print re.sub("Practice visualizing vector addition", "Practice visualizing vector22addition", the_text)
+#    print "020202020202020202", the_tag
+#    print re.sub("Practice visualizing vector addition", "Practice visualizing vector22addition", the_text)
     the_text = the_space + the_text
 
-    print "0303030303030303", the_tag
-    print re.sub("Practice visualizing vector addition", "Practice visualizing vector22addition", the_text)
+#    print "0303030303030303", the_tag
+#    print re.sub("Practice visualizing vector addition", "Practice visualizing vector22addition", the_text)
     the_text = the_space + the_text
     # traditional end of a sentence
     for _ in range(20):   # can be many sentences in one paragraph
@@ -153,8 +148,8 @@ def add_line_fe(txt):
  #       the_text = re.sub(the_space + r"(\S.*?[0-9a-z>\)]+(\.|\?|!)) +([A-Z]|<xref)",
  #                         the_space + r"\1" + the_space + r"\3", the_text)
 
-    print "11111111111111111111111", the_tag
-    print re.sub("Practice visualizing vector addition", "Practice visualizing vector33addition", the_text)
+#    print "11111111111111111111111", the_tag
+#    print re.sub("Practice visualizing vector addition", "Practice visualizing vector33addition", the_text)
 
     # put idx tags outside the sentence (if already at end of sentence).
     for _ in range(3):
@@ -162,24 +157,24 @@ def add_line_fe(txt):
     # and if in parentheses
         the_text = re.sub("(<idx>.{,30}</idx>)\)(\.|,)\s*", r")\2" + the_space + "    " + r"\1" + the_space, the_text)
 
-    print "10101010101010101", the_tag
-    print re.sub("Practice visualizing vector addition", "Practice visualizing vector33addition", the_text)
+#    print "10101010101010101", the_tag
+#    print re.sub("Practice visualizing vector addition", "Practice visualizing vector33addition", the_text)
 
     for _ in range(3):
         the_text = re.sub("(<idx>.{,70}</idx>)(\.|,)\s*", r"\2" + the_space + "    " + r"\1" + the_space, the_text)
     # and if in parentheses
         the_text = re.sub("(<idx>.{,70}</idx>)\)(\.|,)\s*", r")\2" + the_space + "    " + r"\1" + the_space, the_text)
 
-    print "1212121212121212212", the_tag
-    print re.sub("Practice visualizing vector addition", "Practice visualizing vector44addition", the_text)
+#    print "1212121212121212212", the_tag
+#    print re.sub("Practice visualizing vector addition", "Practice visualizing vector44addition", the_text)
 
     # idx after punctuation should be on next line
     for _ in range(3):
         the_text = re.sub("(\.|\?|!)\s*(<idx>.{,30}</idx>)\s*", r"\1" + the_space + "    " + r"\2" + the_space, the_text)
         the_text = re.sub("(\.|\?|!)\s*(<idx>.{,60}</idx>)\s*", r"\1" + the_space + "    " + r"\2" + the_space, the_text)
 
-    print "131313131313131313", the_tag
-    print re.sub("Practice visualizing vector addition", "Practice visualizing vector44addition", the_text)
+#    print "131313131313131313", the_tag
+#    print re.sub("Practice visualizing vector addition", "Practice visualizing vector44addition", the_text)
 
     for _ in range(3):
         the_text = re.sub(the_space + r"(.*?(\S|\S +))" + "(<idx>.{,30}</idx>)\s*", the_space + r"\1" + the_space + "    " + r"\3" + the_space, the_text)
@@ -187,8 +182,8 @@ def add_line_fe(txt):
         the_text = re.sub(the_space + " *(<idx>.{,60}</idx>) *([a-x])", the_space + r"    \1" + the_space + r"\2", the_text)
         the_text = re.sub(the_space + " *(<idx>.*?</idx>) *([a-x])", the_space + r"    \1" + the_space + r"\2", the_text)
 
-    print "22222222222222222222", the_tag
-    print re.sub("Practice visualizing vector addition", "Practice visualizing vector44addition", the_text)
+#    print "22222222222222222222", the_tag
+#    print re.sub("Practice visualizing vector addition", "Practice visualizing vector44addition", the_text)
 
     for _ in range(10):
     # put each idx on its own line
@@ -211,15 +206,15 @@ def add_line_fe(txt):
                           the_space + r"\1" + the_space + r"\2" + the_space + r"\3", the_text)
         the_text = re.sub(the_space + "(\S.*?[a-z>]\.) +(\([A-Z<][a-z][^\(\)]*?\.\)\s)",
                           the_space + r"\1" + the_space + r"\2", the_text)
-    print "3333333333333333", the_tag
-    print re.sub("being the other option", "being the other2option", the_text)
+#    print "3333333333333333", the_tag
+#    print re.sub("being the other option", "being the other2option", the_text)
 
     # parentheses at the end of a sentence
     for _ in range(3):
         the_text = re.sub(the_space + "(\S.*?) +(\([<a-z]{2,}[^\(\)]*?\)\.\s)",
                           the_space + r"\1" + the_space + r"\2", the_text)
-    print "444444444444444", the_tag
-    print re.sub("being the other option", "being the other2option", the_text)
+#    print "444444444444444", the_tag
+#    print re.sub("being the other option", "being the other2option", the_text)
 
     # urls on their own line, if not punctuated
     for _ in range(3):
@@ -235,8 +230,8 @@ def add_line_fe(txt):
         the_text = re.sub(the_space + "(\S.{10,}) +(\([<a-z]{2,} [<a-zA-Z]+[^\(\)]*?\)[.,;:!\?]+) +(.*\n)",
                           the_space + r"\1" + the_space + r"\2" + the_space + r"\3", the_text)
 
-    print "55555555555555555", the_tag
-    print re.sub("being the other option", "being the other3option", the_text)
+#    print "55555555555555555", the_tag
+#    print re.sub("being the other option", "being the other3option", the_text)
 
     # commas
     for _ in range(3):
@@ -264,8 +259,8 @@ def add_line_fe(txt):
         the_text = re.sub(the_space + "(\S.{25,})" + " " + "(<m>[^<]{8,}</m>.{22,}\n)",
                           the_space + r"\1" + the_space + r"\2", the_text)
 
-    print "66666666666666666", the_tag
-    print re.sub("being the other option", "being the other3option", the_text)
+#    print "66666666666666666", the_tag
+#    print re.sub("being the other option", "being the other3option", the_text)
 
     for _ in range(2):
         the_text = re.sub(the_space + "(\S.{25,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{30,}\n)",
@@ -275,22 +270,22 @@ def add_line_fe(txt):
         the_text = re.sub(the_space + "(\S.{50,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{8,}\n)",
                           the_space + r"\1" + the_space + r"\3", the_text)
 
-    print "7777777777777777", the_tag
-    print re.sub("being the other option", "being the other3option", the_text)
+#    print "7777777777777777", the_tag
+#    print re.sub("being the other option", "being the other3option", the_text)
 
     the_text = re.sub(the_space + " *(<idx>.*?</idx>) *([a-x])", the_space + r"    \1" + the_space + r"\2", the_text)
 
     # idx at end of paragraph has two extra spaces
     the_text = re.sub("</idx>" + the_space + "$", "</idx>" + the_space[:-1*component.indent_num], the_text)
 
-    print "8888888888888888", the_tag
-    print re.sub("being the other option", "being the other3option", the_text)
+#    print "8888888888888888", the_tag
+#    print re.sub("being the other option", "being the other3option", the_text)
 
     the_text_trimmed = re.sub("^" + the_space + the_space, the_space, the_text)
     the_answer = "<" + the_tag + ">" + the_text_trimmed + "</" + the_tag + ">"
 
-    print "rrrrrrrrrrrrrrrrr", the_tag
-    print the_answer
+#    print "rrrrrrrrrrrrrrrrr", the_tag
+#    print the_answer
 
     return(the_answer)
 

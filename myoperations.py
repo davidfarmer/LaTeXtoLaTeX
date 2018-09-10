@@ -235,8 +235,6 @@ def mytransform_mbx_linefeeds(text):
 
         print "counted", component.lipcounter[lip_tag], "of", lip_tag
 
-    print re.sub("The hybrid reference recognizes that the", "The hybrid reference recognizes that1" + lip_tag + "the", thetext)
-
     for lip_tag in ["p", "li"]:
         for n in range(component.lipcounter[lip_tag]):
             thetext = postprocess.add_line_feeds(lip_tag + str(n), thetext)
@@ -402,11 +400,8 @@ def mytransform_mbx_act(txt):
         the_text_part1 = re.sub("^(.*)</statement>(.*?)$", r"\1", the_text, 1, re.DOTALL)
         the_text_part2 = re.sub("^(.*)</statement>(.*?)$", r"\2", the_text, 1, re.DOTALL)
         the_text_part1 = the_text_part1[11:].strip()
-        print "ggggg" + the_text_part1[:40]
-        print "uuuuu" + the_text_part1[-40:]
 
         if the_text_part1.startswith("<p>") and the_text_part1.endswith("</p>"):
-            print "the_text_part1" + the_text_part1[:33]
             the_text_part1 = the_text_part1[3:-4]
             the_text_part1 = the_text_part1.strip()
             the_text_part1 = re.sub("^(.*?)<task", r"<p>\1</p><task", the_text_part1, 1, re.DOTALL)

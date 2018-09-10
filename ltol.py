@@ -73,12 +73,12 @@ if component.inputname == component.outputname:
     print "try again"
     sys.exit()
 
-if component.filetype_plus in ["mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
+if component.filetype_plus in ["ptx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
     fileextension_in = "ptx"
     fileextension_out = "ptx"
-elif component.filetype_plus in ["ptx_pp"]:
-    fileextension_in = "ptx"
-    fileextension_out = "ptx"
+elif component.filetype_plus in ["mbx_pp"]:
+    fileextension_in = "mbx"
+    fileextension_out = "mbx"
 elif component.filetype_plus in ["xml", "xml_pp"]:
     fileextension_in = "xml"
     fileextension_out = "xml"

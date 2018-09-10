@@ -57,7 +57,7 @@ def sha1undigest(txt):
 
     except (AttributeError, IndexError) as e:
         the_sha1key = txt.group(1)
-    print "unsha1 of", the_sha1key
+#    print "unsha1 of", the_sha1key
     #    return component.sha1of[the_sha1key]['original_text']
 
     orig_text = component.sha1of[the_sha1key]['original_text']

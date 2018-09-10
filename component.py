@@ -65,7 +65,7 @@ document_environments = ['proof',
 
 document_components = ['exercises', 'exercisegroup', 'row', 'cd',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside',
-                       'interactive', 'static', 'instructions']
+                       'interactive', 'static', 'instructions', 'investigation']
 
 document_pieces = ['title', 'subtitle', 'cell', 'caption',
                    'address', 'attribution', 'location', 'edition',

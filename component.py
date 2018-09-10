@@ -101,7 +101,7 @@ tags_by_level = [
          ['paragraphs','exercises', 'worksheet', 'example', 'assemblage'],
          ['theorem', 'proposition', 'lemma',
               'exercise', 'investigation'],
-         ['task', 'solution', 'proof'],
+         ['task', 'solution', 'answer', 'proof'],
          ['ul', 'ol', 'dl'],
          ['li'],
          ['p']  ]
@@ -136,7 +136,7 @@ abbreviation_of_tag = {
     'insight': 'in',
     'exploration': 'expl',
     'problem': 'prob',
-    'exercise': 'exer',
+    'exercise': 'e_',
     'question': 'q',
     'note': 'n',
     'task': 'tk',

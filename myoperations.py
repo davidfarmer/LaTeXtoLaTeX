@@ -1543,7 +1543,7 @@ def add_permid_within(txt, parent_tag, level):
     the_text = txt.group(3)
     the_closing_tag = txt.group(4)
 
-    print "    doing something with level", level,"yyy", the_text[:30]
+#    print "    doing something with level", level,"yyy", the_text[:30]
 
     try:
         parent_permid = re.search('permid="([^"]+)"', the_attributes).group(1)
@@ -1563,15 +1563,20 @@ def add_permid_within(txt, parent_tag, level):
 
         parent_permid = parent_id
 
-    print "parent_permid", parent_permid
-    print component.tags_by_level[level]
+#    print "parent_permid", parent_permid
+#    print component.tags_by_level[level]
     for tag in component.tags_by_level[level]:
-        if tag == "example":
-            print "    starting working on an example", the_text[:30]
+#        if tag == "example":
+#            print "    starting working on an example", the_text[:30]
 
         component.local_counter[tag] = 0
         the_text = re.sub(r"<" + tag + r"( [^>]*|)>(.*?</" + tag + ">)",
             lambda match: add_permid_on(match, tag, parent_permid), the_text, 0, re.DOTALL)
+        if component.local_counter[tag] == 1:
+            replace_tmp_tag = ""
+        else:
+            replace_tmp_tag = "1"
+        the_text = re.sub("XY&XY#FZ", replace_tmp_tag, the_text)
 
     return the_opening_tag + the_text + the_closing_tag
 
@@ -1596,16 +1601,23 @@ def shorten(permid):
 
 def add_permid_on(txt, tag, parent_permid=""):
 
-    component.local_counter[tag] += 1
-
     the_attribute = txt.group(1)
     everything_else = txt.group(2)
 
-    if tag == "example":
-        print "    working on an example", the_attribute,"pp",everything_else[:30]
+#    if tag == "example":
+#        print "    working on an example", the_attribute,"pp",everything_else[:30]
 
     if 'permid="' in the_attribute:  # don;t change an existing permid
         return "<" + tag + the_attribute + ">" + everything_else
+
+    component.local_counter[tag] += 1
+
+    tag_counter = str(component.local_counter[tag])
+    if tag == "exercise":
+        tag_counter = utilities.two_letter_number(50+component.local_counter[tag])
+
+    if tag_counter == "1":
+        tag_counter = "XY&XY#FZ"    # for easy removal later
 
     if not parent_permid:  # if no parent, then make the xml:id be the permid
         print "the_attribute", the_attribute
@@ -1623,8 +1635,9 @@ def add_permid_on(txt, tag, parent_permid=""):
     else:
         this_tag_abbrev = component.abbreviation_of_tag[tag]
 
-        permid_attribute = 'permid="' + parent_permid
-        permid_attribute += '-' + this_tag_abbrev + str(component.local_counter[tag]) + '"'
+        permid_attribute = 'permid="'
+#        permid_attribute += parent_permid + '-'
+        permid_attribute += this_tag_abbrev + tag_counter + '"'
 
     return "<" + tag + " " + permid_attribute + the_attribute + ">" + everything_else
 

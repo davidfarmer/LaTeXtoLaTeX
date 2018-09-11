@@ -19,7 +19,7 @@ import myoperations
 
 conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
                       "txt",
-                      "permid",
+                      "mbx_permid", "xml_permid", "ptx_permid",
                       "tex", "tex_ptx",
                       "html",
                       "pgtombx"]
@@ -73,13 +73,13 @@ if component.inputname == component.outputname:
     print "try again"
     sys.exit()
 
-if component.filetype_plus in ["ptx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
+if component.filetype_plus in ["ptx_pp", "ptx_permid", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
     fileextension_in = "ptx"
     fileextension_out = "ptx"
 elif component.filetype_plus in ["mbx_pp"]:
     fileextension_in = "mbx"
     fileextension_out = "mbx"
-elif component.filetype_plus in ["xml", "xml_pp"]:
+elif component.filetype_plus in ["xml", "xml_pp", "xml_permid"]:
     fileextension_in = "xml"
     fileextension_out = "xml"
 elif component.filetype_plus in ["pgtombx"]:
@@ -88,7 +88,7 @@ elif component.filetype_plus in ["pgtombx"]:
 elif component.filetype_plus in ["tex_ptx"]:
     fileextension_in = "tex"
     fileextension_out = "ptx"
-elif component.filetype_plus in ["permid"]:
+elif component.filetype_plus in ["mbx_permid"]:
     fileextension_in = "mbx"
     fileextension_out = "ptx"
 else:
@@ -174,8 +174,10 @@ for inputfile, outputfile in component.iofilepairs:
 
 #    myoperations.setvariables(component.onefile)
 
-    if component.filetype_plus == 'permid':
+    if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid']:
         component.onefile = myoperations.add_permid_within_sections(component.onefile)
+        if component.filetype_plus == 'mbx_permid':  # because we are changing file extensions
+            component.onefile = re.sub("\.mbx", ".ptx", component.onefile)
     if component.filetype_plus == 'tex':
         component.onefile = myoperations.mytransform_tex(component.onefile)
     if component.filetype_plus == 'tex_ptx':

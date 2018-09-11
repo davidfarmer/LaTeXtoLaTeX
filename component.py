@@ -97,11 +97,16 @@ verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
 # these shoudl be listed from innermost to outermost
 
 tags_by_level = [
-         ['subsubsection', 'subsection', 'section', 'chapter'],
-         ['paragraphs','exercises', 'worksheet', 'example', 'assemblage'],
-         ['theorem', 'proposition', 'lemma',
-              'exercise', 'investigation'],
-         ['task', 'solution', 'answer', 'proof'],
+         ['subsubsection', 'subsection', 'section', 'appendix',
+             'book', 'chapter'],
+         ['frontmatter', 'backmatter', 'preface',
+             'exercises', 'objectives',
+             'worksheet', 'example', 'assemblage', 'solutions'],
+         ['paragraphs', 'theorem', 'proposition', 'lemma', 'definition',
+             'conjecture', 'corollary', 'principle', 'algorithm',
+             'axiom', 'example', 'insight',
+             'exercise', 'investigation', 'activity', 'exploration'],
+         ['task', 'solution', 'answer', 'hint', 'proof', 'blockquote'],
          ['ul', 'ol', 'dl'],
          ['li'],
          ['p']  ]
@@ -112,6 +117,9 @@ abbreviation_of_tag = {
     'subsection': 'ssec',
     'subsec': 'ssec',
     'subsubsection': 'sssec',
+    'frontmatter': 'frontm',
+    'backmatter': 'backm',
+    'preface': 'pref',
     'exercises': 'exers',
     'paragraphs': 'ps',
     'worksheet': 'wrk',
@@ -154,10 +162,11 @@ abbreviation_of_tag = {
     'image': 'im',
     'answer': 'a',
     'solution': 's',
+    'hint': 'h',
     'ul': 'ul',
     'ol': 'ol',
     'dl': 'dl',
     'dd': 'dd',
     'p': 'p',
-    'li': 'li'
+    'li': 'l_'
 }

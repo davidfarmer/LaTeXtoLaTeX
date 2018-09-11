@@ -430,12 +430,12 @@ def two_letter_number(num):
 
     if num < 26:
  #       print "nun", num, "eee"
-        num_mod = 37*num % 26
+        num_mod = 35*num % 26
         ans = chr(ord('a') + num_mod)
 
     else:
  #       print "bignum", num, "www"
-        num_mod = 37*num % (26*26)
+        num_mod = 35*num % (26*26)
  #       print "num_mod", num_mod, "www", num_mod % 26, "zzz", num_mod/26, math.floor(num_mod/26), int(math.floor(num_mod/26))
         ans = two_letter_number(num_mod % 26) + two_letter_number(int(math.floor(num_mod/26)))
 

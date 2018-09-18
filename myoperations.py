@@ -1492,6 +1492,7 @@ def add_permid_within_sections(text):
 
         component.local_counter[tag] = 0
 
+   #     print "AA",tag
         thetext = re.sub(r"<" + tag + r"( [^>]*|)>(.*?</" + tag + ">)",
             lambda match: add_permid_on(match, tag), thetext, 0, re.DOTALL)
 
@@ -1521,12 +1522,19 @@ def add_permid_within_sections(text):
         thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
             lambda match: add_permid_within(match, tag, 6), thetext, 0, re.DOTALL)
 
+    for lev in range(6, -1, -1):
+      for tag in component.tags_by_level[lev]:
+        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+            lambda match: add_permid_within(match, tag, 7), thetext, 0, re.DOTALL)
+
+
     # now we put permid "on" everything.  If there already is a permid,
     # then it should not change.  But if we missed somethign, now we catch it.
     # (A time we miss somethign is when a file only contains somethign of lev > 0
-    for lev in range(5, -1, -1):
+    for lev in range(6, -1, -1):
       for tag in component.tags_by_level[lev]:
         component.local_counter[tag] = 0
+   #     print "BBB",lev,tag
         thetext = re.sub(r"<" + tag + r"( [^>]*|)>(.*?</" + tag + ">)",
             lambda match: add_permid_on(match, tag), thetext, 0, re.DOTALL)
 
@@ -1565,7 +1573,7 @@ def add_permid_within(txt, parent_tag, level):
             parent_id = the_title.lower()
   #          parent_id = re.sub(r"[\'\",\.\(\)]", "", parent_id)
   #          parent_id = re.sub(r"\W", "-", parent_id)
-            print "       Assigned the parent_id", parent_id, "oooo"
+##            print "       Assigned the parent_id", parent_id, "oooo"
   #          parent_id = shorten(parent_id)
 
         parent_permid = shorten(parent_id)
@@ -1577,13 +1585,14 @@ def add_permid_within(txt, parent_tag, level):
 #            print "    starting working on an example", the_text[:30]
 
         component.local_counter[tag] = 0
+ #       print "CCC",level,tag,parent_permid
         the_text = re.sub(r"<" + tag + r"( [^>]*|)>(.*?</" + tag + ">)",
             lambda match: add_permid_on(match, tag, parent_permid), the_text, 0, re.DOTALL)
-        if component.local_counter[tag] == 1:
-            replace_tmp_tag = ""
-        else:
-            replace_tmp_tag = "1"
-        the_text = re.sub("XY&XY#FZ", replace_tmp_tag, the_text)
+#        if component.local_counter[tag] == 1:
+#            replace_tmp_tag = ""
+#        else:
+#            replace_tmp_tag = "1"
+#        the_text = re.sub("XY&XY#FZ", replace_tmp_tag, the_text)
 
     return the_opening_tag + the_text + the_closing_tag
 
@@ -1627,7 +1636,6 @@ def add_permid_on(txt, tag, parent_permid=""):
     if 'xml:id="' in the_attribute:  #use the xml:id if it exists
         this_id = re.search('xml:id="([^"]+)"', the_attribute).group(1)
         this_id = re.sub("-[0-9]", "", this_id)
-   #     this_permid = this_id.lower()
         this_permid = shorten(this_id)
         permid_attribute = 'permid="' + this_permid + '"'
         return "<" + tag + " " + permid_attribute + the_attribute + ">" + everything_else
@@ -1639,13 +1647,13 @@ def add_permid_on(txt, tag, parent_permid=""):
         tag_counter = utilities.two_letter_number(50+component.local_counter[tag])
     elif tag == "li":
         tag_counter = utilities.two_letter_number(component.local_counter[tag])
-    if tag_counter == "1":
-        tag_counter = "XY&XY#FZ"    # for easy removal later
+#    if tag_counter == "1":
+#        tag_counter = "XY&XY#FZ"    # for easy removal later
 
  #   if not parent_permid:  # if no parent, then make the xml:id be the permid
     needs_number = True
     if True:   # clean this up
-        print "the_attribute", the_attribute
+##        print "the_attribute", the_attribute
         try:
             this_id = re.search('xml:id="([^"]+)"', the_attribute).group(1)
             this_id = re.sub("-[0-9]", "", this_id)
@@ -1661,7 +1669,7 @@ def add_permid_on(txt, tag, parent_permid=""):
                 this_permid = tag + "-" + the_title
                 needs_number = False
             except AttributeError:
-                print "Error with id or title", tag, everything_else[:30]
+  ##              print "Error with id or title", tag, everything_else[:30]
                 this_permid = tag
 #            print "this_permid", this_permid
 
@@ -1674,10 +1682,21 @@ def add_permid_on(txt, tag, parent_permid=""):
 #        permid_attribute = 'permid="'
 ##        permid_attribute += parent_permid + '-'
 #        permid_attribute += this_tag_abbrev + tag_counter + '"'
-    permid_attribute = 'permid="' + this_permid # + tag_counter + '"'
+    full_permid = this_permid
+    if parent_permid:
+        if "stars" in parent_permid:
+            print "VVVVVVVVVVVVVVVVV", parent_permid, "OOO", this_permid, "OOO", everything_else[:30]
+        full_permid = parent_permid + "-" + this_permid
+##    permid_attribute = 'permid="' + this_permid # + tag_counter + '"'
     if needs_number:
-        permid_attribute += tag_counter
+        full_permid += tag_counter
+     #   permid_attribute += tag_counter
+
+    permid_attribute = 'permid="'
+    permid_attribute += full_permid
     permid_attribute += '"'
+
+    component.all_permid.append(full_permid)
 
     return "<" + tag + " " + permid_attribute + the_attribute + ">" + everything_else
 

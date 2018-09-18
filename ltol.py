@@ -244,6 +244,13 @@ for inputfile, outputfile in component.iofilepairs:
     with open(outputfile, 'w') as outfile:
         outfile.write(component.onefile)
 
+if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid'] and component.all_permid:
+    component.all_permid.sort()
+    with open(outputdir + 'allpermid.txt', 'w') as f:
+        for permid in component.all_permid:
+            f.write(permid + "\n")
+print set([x for x in component.all_permid if component.all_permid.count(x) > 1])
+
 tmpcount=0
 if component.filetype_plus == "pgtombx":
     with open(outputdir + 'compilation.mbx', 'w') as f:

@@ -32,6 +32,8 @@ local_counter = {}
 
 sha1of = {}
 
+all_permid = []
+
 # list these tags in order of importance/containment
 document_global_structure = [
     'pretext', 'mathbook', 'book', 'part', 'article', 
@@ -105,11 +107,13 @@ tags_by_level = [
          ['paragraphs', 'theorem', 'proposition', 'lemma', 'definition',
              'conjecture', 'corollary', 'principle', 'algorithm',
              'axiom', 'example', 'insight',
+             'sidebyside', 'introduction', 'conclusion',
              'exercise', 'investigation', 'activity', 'exploration'],
          ['task', 'solution', 'answer', 'hint', 'proof', 'blockquote'],
          ['ul', 'ol', 'dl'],
          ['li'],
-         ['p']  ]
+         ['p', 'figure'],
+         ['me', 'men', 'md', 'mdn', 'image', 'table'] ]
 
 abbreviation_of_tag = {
     'chapter': 'chap',
@@ -127,6 +131,7 @@ abbreviation_of_tag = {
     'conclusion': 'conc',
     'objectives': 'ob',
     'outcomes': 'out',
+    'sidebyside': 'sbs',
     'proof': 'pf',
     'project': 'proj',
     'theorem': 't',

@@ -1660,7 +1660,7 @@ def add_permid_on(txt, tag, parent_permid=""):
             this_permid = this_id.lower()
             needs_number = False
         except AttributeError:
-            print "tag", tag, "everything_else", everything_else[:30]
+ #           print "tag", tag, "everything_else", everything_else[:30]
             try:
                 the_title = re.search('^\s*<title>\s*(.*?)\s*</title>', everything_else, re.DOTALL).group(1)
     #            this_permid = re.sub(r"[0-9]", "", the_title)
@@ -1684,8 +1684,6 @@ def add_permid_on(txt, tag, parent_permid=""):
 #        permid_attribute += this_tag_abbrev + tag_counter + '"'
     full_permid = this_permid
     if parent_permid:
-        if "stars" in parent_permid:
-            print "VVVVVVVVVVVVVVVVV", parent_permid, "OOO", this_permid, "OOO", everything_else[:30]
         full_permid = parent_permid + "-" + this_permid
 ##    permid_attribute = 'permid="' + this_permid # + tag_counter + '"'
     if needs_number:

@@ -1492,7 +1492,6 @@ def add_permid_within_sections(text):
 
         component.local_counter[tag] = 0
 
-   #     print "AA",tag
         thetext = re.sub(r"<" + tag + r"( [^>]*|)>(.*?</" + tag + ">)",
             lambda match: add_permid_on(match, tag), thetext, 0, re.DOTALL)
 
@@ -1556,8 +1555,6 @@ def add_permid_within(txt, parent_tag, level):
     the_text = txt.group(3)
     the_closing_tag = txt.group(4)
 
-#    print "    doing something with level", level,"yyy", the_text[:30]
-
     try:
         parent_permid = re.search('permid="([^"]+)"', the_attributes).group(1)
     except AttributeError:
@@ -1571,28 +1568,13 @@ def add_permid_within(txt, parent_tag, level):
             the_title = re.search("<title>\s*(.*?)\s*</title>", the_text, re.DOTALL).group(1)
             print "found the title", the_title, "pppp"
             parent_id = the_title.lower()
-  #          parent_id = re.sub(r"[\'\",\.\(\)]", "", parent_id)
-  #          parent_id = re.sub(r"\W", "-", parent_id)
-##            print "       Assigned the parent_id", parent_id, "oooo"
-  #          parent_id = shorten(parent_id)
 
         parent_permid = shorten(parent_id)
 
-#    print "parent_permid", parent_permid
-#    print component.tags_by_level[level]
     for tag in component.tags_by_level[level]:
-#        if tag == "example":
-#            print "    starting working on an example", the_text[:30]
-
         component.local_counter[tag] = 0
- #       print "CCC",level,tag,parent_permid
         the_text = re.sub(r"<" + tag + r"( [^>]*|)>(.*?</" + tag + ">)",
             lambda match: add_permid_on(match, tag, parent_permid), the_text, 0, re.DOTALL)
-#        if component.local_counter[tag] == 1:
-#            replace_tmp_tag = ""
-#        else:
-#            replace_tmp_tag = "1"
-#        the_text = re.sub("XY&XY#FZ", replace_tmp_tag, the_text)
 
     return the_opening_tag + the_text + the_closing_tag
 
@@ -1625,9 +1607,6 @@ def add_permid_on(txt, tag, parent_permid=""):
     the_attribute = txt.group(1)
     everything_else = txt.group(2)
 
-#    if tag == "example":
-#        print "    working on an example", the_attribute,"pp",everything_else[:30]
-
     if tag == "activity":
         print "ACTIVITY", the_attribute, everything_else[:30]
     if 'permid="' in the_attribute:  # don;t change an existing permid
@@ -1647,48 +1626,30 @@ def add_permid_on(txt, tag, parent_permid=""):
         tag_counter = utilities.two_letter_number(50+component.local_counter[tag])
     elif tag == "li":
         tag_counter = utilities.two_letter_number(component.local_counter[tag])
-#    if tag_counter == "1":
-#        tag_counter = "XY&XY#FZ"    # for easy removal later
 
- #   if not parent_permid:  # if no parent, then make the xml:id be the permid
     needs_number = True
-    if True:   # clean this up
-##        print "the_attribute", the_attribute
+
+    try:
+        this_id = re.search('xml:id="([^"]+)"', the_attribute).group(1)
+        this_id = re.sub("-[0-9]", "", this_id)
+        this_permid = this_id.lower()
+        needs_number = False
+    except AttributeError:
         try:
-            this_id = re.search('xml:id="([^"]+)"', the_attribute).group(1)
-            this_id = re.sub("-[0-9]", "", this_id)
-            this_permid = this_id.lower()
+            the_title = re.search('^\s*<title>\s*(.*?)\s*</title>', everything_else, re.DOTALL).group(1)
+            this_permid = tag + "-" + the_title
             needs_number = False
         except AttributeError:
- #           print "tag", tag, "everything_else", everything_else[:30]
-            try:
-                the_title = re.search('^\s*<title>\s*(.*?)\s*</title>', everything_else, re.DOTALL).group(1)
-    #            this_permid = re.sub(r"[0-9]", "", the_title)
-    #            this_permid = re.sub(r"[\'\",\.\(\)]", "", the_title)
-    #            this_permid = tag + "-" + re.sub(r"\W", "-", this_permid).lower()
-                this_permid = tag + "-" + the_title
-                needs_number = False
-            except AttributeError:
-  ##              print "Error with id or title", tag, everything_else[:30]
-                this_permid = tag
-#            print "this_permid", this_permid
+            this_permid = tag
 
-        this_permid = shorten(this_permid)
-#        permid_attribute = 'permid="' + this_permid + '"'
+    this_permid = shorten(this_permid)
 
-#    else:
-#        this_tag_abbrev = component.abbreviation_of_tag[tag]
-#
-#        permid_attribute = 'permid="'
-##        permid_attribute += parent_permid + '-'
-#        permid_attribute += this_tag_abbrev + tag_counter + '"'
     full_permid = this_permid
     if parent_permid:
         full_permid = parent_permid + "-" + this_permid
-##    permid_attribute = 'permid="' + this_permid # + tag_counter + '"'
+
     if needs_number:
         full_permid += tag_counter
-     #   permid_attribute += tag_counter
 
     permid_attribute = 'permid="'
     permid_attribute += full_permid

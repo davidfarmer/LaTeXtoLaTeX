@@ -104,9 +104,8 @@ verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
 # these shoudl be listed from innermost to outermost
 
 tags_by_level = [
-         ['section', 'appendix',
-             'book', 'chapter'],
-         ['subsubsection', 'subsection', 'frontmatter', 'backmatter', 'preface',
+         ['book', 'chapter','appendix', 'section'],
+         [ 'subsection', 'subsubsection', 'frontmatter', 'backmatter', 'preface',
              'exercises', 'paragraphs',
              'worksheet', 'assemblage', 'solutions'],
 #         ['subsubsection', 'subsection', 'section', 'appendix',

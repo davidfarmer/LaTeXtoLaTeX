@@ -440,3 +440,49 @@ def two_letter_number(num):
         ans = two_letter_number(num_mod % 26) + two_letter_number(int(math.floor(num_mod/26)))
 
     return ans
+
+##############
+
+def frombase52(string):
+
+    string_backward = string[::-1]
+
+    ans = 0
+    base = 52
+    base_ct = ord('a')
+    for i, char in enumerate(string_backward):
+        this_num = ord(char)
+        if this_num >= 97:
+            num_normalized = this_num - 97
+        else:
+            num_normalized = this_num - 65
+        ans += base**i * num_normalized
+
+    return ans
+
+#-----------#
+
+def tobase52(num, chars=5):
+
+    the_num = num
+    base = 52
+    base_ct = ord('a')
+    base_CT = ord('A')
+
+    ans = ""
+    for place in range(chars):
+        print "                   the_num", the_num, "this_place_num", the_num % base
+        this_place_num = the_num % base
+        if this_place_num < 26:
+            this_place_num += base_ct
+        else:
+            this_place_num += base_CT - 26
+        print "BASE_CT", base_ct, "hhh", place, "this_place_num", this_place_num, "ggg", the_num, "ooo", base
+        this_place_char = chr(this_place_num)
+        print "this_place_char", this_place_char
+        ans = this_place_char + ans
+        the_num = int(math.floor(the_num/base))
+        print "the_num = math.floor...", the_num, "ans=", ans
+
+    return ans
+

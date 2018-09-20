@@ -34,6 +34,11 @@ sha1of = {}
 
 all_permid = []
 
+permid_base = "dmoi"
+permid_base_number = 1234567
+permid_base_increment = 166469888
+permid_base_mod = 380204032
+
 # list these tags in order of importance/containment
 document_global_structure = [
     'pretext', 'mathbook', 'book', 'part', 'article', 

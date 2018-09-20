@@ -472,18 +472,18 @@ def tobase52(num, chars=3):
 
     ans = ""
     for place in range(chars):
-        print "                   the_num", the_num, "this_place_num", the_num % base
+#        print "                   the_num", the_num, "this_place_num", the_num % base
         this_place_num = the_num % base
         if this_place_num < 26:
             this_place_num += base_ct
         else:
             this_place_num += base_CT - 26
-        print "BASE_CT", base_ct, "hhh", place, "this_place_num", this_place_num, "ggg", the_num, "ooo", base
+#        print "BASE_CT", base_ct, "hhh", place, "this_place_num", this_place_num, "ggg", the_num, "ooo", base
         this_place_char = chr(this_place_num)
-        print "this_place_char", this_place_char
+#        print "this_place_char", this_place_char
         ans = this_place_char + ans
         the_num = int(math.floor(the_num/base))
-        print "the_num = math.floor...", the_num, "ans=", ans
+#        print "the_num = math.floor...", the_num, "ans=", ans
 
     return ans
 
@@ -493,7 +493,7 @@ def next_permid_encoded():
 
     component.current_permid = (component.current_permid + component.permid_base_increment) % component.permid_base_mod
 
-    print "component.current_permid", component.current_permid
+#    print "component.current_permid", component.current_permid
     current_permid_encoded = tobase52(component.current_permid)
     current_permid_encoded_lc_13 = codecs.encode(current_permid_encoded.lower(), 'rot_13')
     if not any(s in current_permid_encoded_lc_13 for s in component.prohibited_13):

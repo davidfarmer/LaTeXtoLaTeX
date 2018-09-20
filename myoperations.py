@@ -1558,18 +1558,18 @@ def add_permid_within(txt, parent_tag, level):
     try:
         parent_permid = re.search('permid="([^"]+)"', the_attributes).group(1)
     except AttributeError:
-
-        try:
-            parent_id = re.search('xml:id="([^"]+)"', the_attributes).group(1)
-    #        parent_id = re.sub("-[0-9]", "", parent_id)
-        except AttributeError:
-            print "the_attributes", the_attributes
-            print "Error, no xml:id on",parent_tag,"of",the_text[:40]
-            the_title = re.search("<title>\s*(.*?)\s*</title>", the_text, re.DOTALL).group(1)
-            print "found the title", the_title, "pppp"
-            parent_id = the_title.lower()
-
-        parent_permid = shorten(parent_id)
+        print "ERROR: parent with no permid:", the_opening_tag, "aaa", the_text[:30]
+#        try:
+#            parent_id = re.search('xml:id="([^"]+)"', the_attributes).group(1)
+#    #        parent_id = re.sub("-[0-9]", "", parent_id)
+#        except AttributeError:
+#            print "the_attributes", the_attributes
+#            print "Error, no xml:id on",parent_tag,"of",the_text[:40]
+#            the_title = re.search("<title>\s*(.*?)\s*</title>", the_text, re.DOTALL).group(1)
+#            print "found the title", the_title, "pppp"
+#            parent_id = the_title.lower()
+#
+#        parent_permid = shorten(parent_id)
 
     for tag in component.tags_by_level[level]:
         component.local_counter[tag] = 0
@@ -1608,18 +1608,19 @@ def add_permid_on(txt, tag, parent_permid=""):
     the_attribute = txt.group(1)
     everything_else = txt.group(2)
 
-    if tag == "activity":
-        print "ACTIVITY", the_attribute, everything_else[:30]
+#    if tag == "activity":
+#        print "ACTIVITY", the_attribute, everything_else[:30]
     if 'permid="' in the_attribute:  # don;t change an existing permid
         return "<" + tag + the_attribute + ">" + everything_else
 
-    if 'xml:id="' in the_attribute:  #use the xml:id if it exists
-        this_id = re.search('xml:id="([^"]+)"', the_attribute).group(1)
-  #      this_id = re.sub("-[0-9]", "", this_id)
-        this_permid = shorten(this_id)
-        permid_attribute = 'permid="' + this_permid + '"'
-        return "<" + tag + " " + permid_attribute + the_attribute + ">" + everything_else
+#    if 'xml:id="' in the_attribute:  #use the xml:id if it exists
+#        this_id = re.search('xml:id="([^"]+)"', the_attribute).group(1)
+#  #      this_id = re.sub("-[0-9]", "", this_id)
+#        this_permid = shorten(this_id)
+#        permid_attribute = 'permid="' + this_permid + '"'
+#        return "<" + tag + " " + permid_attribute + the_attribute + ">" + everything_else
 
+# the next several lines are irrelevant
     component.local_counter[tag] += 1
 
     tag_counter = str(component.local_counter[tag])
@@ -1651,6 +1652,10 @@ def add_permid_on(txt, tag, parent_permid=""):
 
     if needs_number:
         full_permid += tag_counter
+
+# above several lines are irrelevant
+
+    full_permid = utilities.next_permid_encoded()
 
     permid_attribute = 'permid="'
     permid_attribute += full_permid

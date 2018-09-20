@@ -111,9 +111,9 @@ verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
 # these shoudl be listed from innermost to outermost
 
 tags_by_level = [
-         ['book', 'chapter','appendix', 'section'],
-         [ 'subsection', 'subsubsection', 'frontmatter', 'backmatter', 'preface',
-             'exercises', 'paragraphs',
+         ['book', 'chapter','appendix', 'section', 'frontmatter', 'backmatter'],
+         [ 'subsection', 'subsubsection', 'preface',
+             'exercises', 'exercisegroup', 'paragraphs',
              'worksheet', 'assemblage', 'solutions'],
 #         ['subsubsection', 'subsection', 'section', 'appendix',
 #             'book', 'chapter'],
@@ -125,11 +125,12 @@ tags_by_level = [
              'axiom', 'example', 'insight',
              'sbsgroup', 'sidebyside', 'introduction', 'conclusion',
              'exercise', 'investigation', 'activity', 'exploration'],
-         ['task', 'solution', 'answer', 'hint', 'proof', 'blockquote'],
+         ['task', 'solution', 'answer', 'hint', 'proof', 'blockquote',
+          'note', 'warning'],
          ['ul', 'ol', 'dl'],
          ['li'],
          ['p', 'figure'],
-         ['me', 'men', 'md', 'mdn', 'image', 'table'] ]
+         ['me', 'men', 'md', 'mdn', 'image', 'table', 'tabular'] ]
 
 abbreviation_of_tag = {
     'chapter': 'chap',

@@ -225,6 +225,8 @@ for inputfile, outputfile in component.iofilepairs:
         for _ in range(10):
             component.onefile = re.sub("(\n +)(<idx>.*?</idx>) *(<idx>)",
                                        r"\1\2\1\3", component.onefile)
+        component.onefile = re.sub("(\n +)(    <idx>.*?</idx>) *([A-Z])",
+                                   r"\1\2\1\3", component.onefile)
 
     elif component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = myoperations.mbx_fix(component.onefile)

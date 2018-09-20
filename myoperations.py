@@ -1561,7 +1561,7 @@ def add_permid_within(txt, parent_tag, level):
 
         try:
             parent_id = re.search('xml:id="([^"]+)"', the_attributes).group(1)
-            parent_id = re.sub("-[0-9]", "", parent_id)
+    #        parent_id = re.sub("-[0-9]", "", parent_id)
         except AttributeError:
             print "the_attributes", the_attributes
             print "Error, no xml:id on",parent_tag,"of",the_text[:40]
@@ -1614,7 +1614,7 @@ def add_permid_on(txt, tag, parent_permid=""):
 
     if 'xml:id="' in the_attribute:  #use the xml:id if it exists
         this_id = re.search('xml:id="([^"]+)"', the_attribute).group(1)
-        this_id = re.sub("-[0-9]", "", this_id)
+  #      this_id = re.sub("-[0-9]", "", this_id)
         this_permid = shorten(this_id)
         permid_attribute = 'permid="' + this_permid + '"'
         return "<" + tag + " " + permid_attribute + the_attribute + ">" + everything_else
@@ -1631,15 +1631,15 @@ def add_permid_on(txt, tag, parent_permid=""):
 
     try:
         this_id = re.search('xml:id="([^"]+)"', the_attribute).group(1)
-        this_id = re.sub("-[0-9]", "", this_id)
+  #      this_id = re.sub("-[0-9]", "", this_id)
         this_permid = this_id.lower()
         needs_number = False
     except AttributeError:
-        try:
-            the_title = re.search('^\s*<title>\s*(.*?)\s*</title>', everything_else, re.DOTALL).group(1)
-            this_permid = tag + "-" + the_title
-            needs_number = False
-        except AttributeError:
+#        try:
+#            the_title = re.search('^\s*<title>\s*(.*?)\s*</title>', everything_else, re.DOTALL).group(1)
+#            this_permid = tag + "-" + the_title
+#            needs_number = False
+#        except AttributeError:
             this_permid = tag
 
     this_permid = shorten(this_permid)

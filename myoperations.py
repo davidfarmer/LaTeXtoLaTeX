@@ -1579,6 +1579,7 @@ def add_permid_within(txt, parent_tag, level):
     return the_opening_tag + the_text + the_closing_tag
 
 #-------------#
+
 def shorten(permid):
 
     the_permid = permid

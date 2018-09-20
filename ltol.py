@@ -6,6 +6,7 @@ import os
 import glob
 import shutil
 import fnmatch
+import codecs
 
 import component
 import utilities
@@ -65,13 +66,22 @@ print component.outputname
 component.permid_base_number = utilities.frombase52(component.permid_base)
 print "component.permid_base_number", component.permid_base_number
 junk=[]
-for n in range(1000):
-   new_permid_num = (component.permid_base_number + n*component.permid_base_increment) % component.permid_base_mod
-   print "new_permid_num", new_permid_num
-   new_permid_str = utilities.tobase52(new_permid_num)
-   print n, "           new_permid_str", new_permid_str
-   junk.append(new_permid_str)
-print "junk", junk
+rude_words = ["ass", "tit", "cum", "fuc", "fuk", "nig", "cnt", "sob", "fbi", "cia", "usa",
+              "poo", "pee", "die", "sex", "bum", "ars", "cok", "dik", "jiz", "wtf", "lol",
+              "fag", "kkk", "std", "lsd", "gay", "jew", "wop", "jap", "xxx", "pot", "pms",
+              "god", "lay"]
+rude_words_13 = [codecs.encode(x, 'rot_13') for x in rude_words]
+print rude_words_13
+
+for n in range(120000):
+   this_pid = utilities.next_permid_encoded()
+   print "next permid:", n, "ttt", this_pid, "sss"
+#   new_permid_num = (component.permid_base_number + n*component.permid_base_increment) % component.permid_base_mod
+#   print "new_permid_num", new_permid_num
+#   new_permid_str = utilities.tobase52(new_permid_num)
+#   print n, "           new_permid_str", new_permid_str
+#   junk.append(new_permid_str)
+#print "junk", junk
 
 
 if component.filetype_plus not in conversion_options:

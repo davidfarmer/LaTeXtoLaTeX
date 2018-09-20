@@ -3,6 +3,7 @@ import logging
 import hashlib
 import re
 import math
+import codecs
 
 import component
 
@@ -462,7 +463,7 @@ def frombase52(string):
 
 #-----------#
 
-def tobase52(num, chars=5):
+def tobase52(num, chars=3):
 
     the_num = num
     base = 52
@@ -485,4 +486,20 @@ def tobase52(num, chars=5):
         print "the_num = math.floor...", the_num, "ans=", ans
 
     return ans
+
+################
+
+def next_permid_encoded():
+
+    component.current_permid = (component.current_permid + component.permid_base_increment) % component.permid_base_mod
+
+    print "component.current_permid", component.current_permid
+    current_permid_encoded = tobase52(component.current_permid)
+    current_permid_encoded_lc_13 = codecs.encode(current_permid_encoded.lower(), 'rot_13')
+    if not any(s in current_permid_encoded_lc_13 for s in component.prohibited_13):
+        return current_permid_encoded
+    else:
+        print "prohibited:", current_permid_encoded
+        return next_permid_encoded()
+
 

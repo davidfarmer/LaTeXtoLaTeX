@@ -34,10 +34,17 @@ sha1of = {}
 
 all_permid = []
 
+prohibited_13 = [
+    'nff', 'gvg', 'phz', 'shp', 'shx', 'avt', 'pag', 'fbo', 'sov', 'pvn',
+    'hfn', 'cbb', 'crr', 'qvr', 'frk', 'ohz', 'nef', 'pbx', 'qvx', 'wvm',
+    'jgs', 'yby', 'snt', 'xxx', 'fgq', 'yfq', 'tnl', 'wrj', 'jbc', 'wnc',
+    'kkk', 'cbg', 'czf', 'tbq', 'ynl']
+
 permid_base = "dmoi"
-permid_base_number = 1234567
-permid_base_increment = 166469888
-permid_base_mod = 380204032
+permid_base_number = 12345
+current_permid = permid_base_number
+permid_base_increment = 86901
+permid_base_mod = 140608
 
 # list these tags in order of importance/containment
 document_global_structure = [

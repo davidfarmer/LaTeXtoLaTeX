@@ -22,8 +22,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "txt",
                       "mbx_permid", "xml_permid", "ptx_permid",
                       "tex", "tex_ptx",
-                      "html",
-                      "pgtombx"]
+                      "html"]
 
 if len(sys.argv) == 1 or sys.argv[1] == "-h":
     print ''
@@ -86,9 +85,6 @@ elif component.filetype_plus in ["mbx_pp"]:
 elif component.filetype_plus in ["xml", "xml_pp", "xml_permid"]:
     fileextension_in = "xml"
     fileextension_out = "xml"
-elif component.filetype_plus in ["pgtombx"]:
-    fileextension_in = "pg"
-    fileextension_out = "mbx"
 elif component.filetype_plus in ["tex_ptx"]:
     fileextension_in = "tex"
     fileextension_out = "ptx"
@@ -237,9 +233,6 @@ for inputfile, outputfile in component.iofilepairs:
     if component.filetype_plus == "mbx_fa":
         component.onefile = transforms.mbx_fa(component.onefile)
 
-    if component.filetype_plus == "pgtombx":
-        component.onefile = transforms.pgtombx(component.onefile)
-
     if component.filetype_plus == "tex_ptx":
         component.onefile = transforms.mbx_pp(component.onefile)
 
@@ -259,25 +252,6 @@ print "permid~s", len(component.all_permid), "of which repeats:"
 print [x for x in component.all_permid if component.all_permid.count(x) > 1]
 
 print "component.current_permid", component.current_permid
-
-tmpcount=0
-if component.filetype_plus == "pgtombx":
-    with open(outputdir + 'compilation.mbx', 'w') as f:
-        f.write('<?xml version="1.0" encoding="UTF-8" ?>\n\n')
-        f.write('<mathbook xmlns:xi="http://www.w3.org/2001/XInclude" xml:lang="en-US">\n')
-        f.write('<docinfo>\n')
-        f.write('</docinfo>\n')
-        f.write('<article>\n')
-        f.write('  <section>\n')
-        f.write('    <exercises>\n')
-        for stub in component.filestubs:
-     #       if tmpcount > 30: continue
-            tmpcount += 1
-            f.write('      <xi:include href="./' + stub + '.mbx' + '" />' + '\n\n')
-        f.write('    </exercises>\n')
-        f.write('  </section>\n')
-        f.write('</article>\n')
-        f.write('</mathbook>\n')
 
 if component.generic_counter:
     print component.generic_counter

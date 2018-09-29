@@ -1529,13 +1529,24 @@ def add_permid_within_sections(text):
 
     # now we put permid "on" everything.  If there already is a permid,
     # then it should not change.  But if we missed somethign, now we catch it.
-    # (A time we miss somethign is when a file only contains somethign of lev > 0
+    print "looking for missing permid",len(component.all_permid)
     for lev in range(6, -1, -1):
       for tag in component.tags_by_level[lev]:
         component.local_counter[tag] = 0
    #     print "BBB",lev,tag
         thetext = re.sub(r"<" + tag + r"( [^>]*|)>(.*?</" + tag + ">)",
             lambda match: add_permid_on(match, tag), thetext, 0, re.DOTALL)
+    print "done looking for missing permid",len(component.all_permid)
+
+    print "again looking for missing permid",len(component.all_permid)
+    for lev in range(6, -1, -1):
+      for tag in component.tags_by_level[lev]:
+        component.local_counter[tag] = 0
+   #     print "BBB",lev,tag
+        thetext = re.sub(r"<(" + tag + ")>",
+            naive_add_permid_on, thetext, 0, re.DOTALL)
+    print "done looking for missing permid",len(component.all_permid)
+
 
         # put back verbatim environments
 #    print "put back verbatim environments"
@@ -1559,6 +1570,7 @@ def add_permid_within(txt, parent_tag, level):
         parent_permid = re.search('permid="([^"]+)"', the_attributes).group(1)
     except AttributeError:
         print "ERROR: parent with no permid:", the_opening_tag, "aaa", the_text[:30]
+        parent_permid = "ERROR"
 #        try:
 #            parent_id = re.search('xml:id="([^"]+)"', the_attributes).group(1)
 #    #        parent_id = re.sub("-[0-9]", "", parent_id)
@@ -1602,6 +1614,20 @@ def shorten(permid):
     return the_permid
 
 #-------------#
+
+def naive_add_permid_on(txt):
+
+    tag = txt.group(1)
+
+    the_permid = utilities.next_permid_encoded()
+
+    permid_attribute = 'permid="'
+    permid_attribute += the_permid
+    permid_attribute += '"'
+
+    component.all_permid.append("+" + the_permid)
+
+    return "<" + tag + " " + permid_attribute + ">"
 
 def add_permid_on(txt, tag, parent_permid=""):
 

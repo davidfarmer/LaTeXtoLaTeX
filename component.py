@@ -40,7 +40,6 @@ prohibited_13 = [
     'jgs', 'yby', 'snt', 'xxx', 'fgq', 'yfq', 'tnl', 'wrj', 'jbc', 'wnc',
     'kkk', 'cbg', 'czf', 'tbq', 'ynl']
 
-permid_base = "dmoi"
 permid_base_number = 12345
 current_permid = permid_base_number
 permid_base_increment = 86901

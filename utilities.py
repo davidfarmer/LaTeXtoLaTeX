@@ -491,12 +491,16 @@ def tobase52(num, chars=3):
 
 def next_permid_encoded():
 
+    component.generic_counter += 1
+
     component.current_permid = (component.current_permid + component.permid_base_increment) % component.permid_base_mod
 
 #    print "component.current_permid", component.current_permid
     current_permid_encoded = tobase52(component.current_permid)
     current_permid_encoded_lc_13 = codecs.encode(current_permid_encoded.lower(), 'rot_13')
     if not any(s in current_permid_encoded_lc_13 for s in component.prohibited_13):
+        if component.generic_counter < 10:
+            print "permid",component.generic_counter,"is",current_permid_encoded,"encoded from",component.current_permid
         return current_permid_encoded
     else:
         print "prohibited:", current_permid_encoded

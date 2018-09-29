@@ -63,20 +63,8 @@ if len(sys.argv) == 5:
 print component.inputname
 print component.outputname
 
-component.permid_base_number = utilities.frombase52(component.permid_base)
-print "component.permid_base_number", component.permid_base_number
+print "component.current_permid", component.current_permid
 junk=[]
-
-#for n in range(120000):
-#   this_pid = utilities.next_permid_encoded()
-#   print "next permid:", n, "ttt", this_pid, "sss"
-##   new_permid_num = (component.permid_base_number + n*component.permid_base_increment) % component.permid_base_mod
-##   print "new_permid_num", new_permid_num
-##   new_permid_str = utilities.tobase52(new_permid_num)
-##   print n, "           new_permid_str", new_permid_str
-##   junk.append(new_permid_str)
-##print "junk", junk
-
 
 if component.filetype_plus not in conversion_options:
     print "Filetype not recognized."
@@ -269,6 +257,8 @@ if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid'] and com
             f.write(permid + "\n")
 print "permid~s", len(component.all_permid), "of which repeats:"
 print [x for x in component.all_permid if component.all_permid.count(x) > 1]
+
+print "component.current_permid", component.current_permid
 
 tmpcount=0
 if component.filetype_plus == "pgtombx":

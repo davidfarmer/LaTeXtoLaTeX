@@ -1655,13 +1655,13 @@ def add_permid_on(txt, tag, parent_permid=""):
 
 # above several lines are irrelevant
 
-    full_permid = utilities.next_permid_encoded()
+    the_permid = utilities.next_permid_encoded()
 
     permid_attribute = 'permid="'
-    permid_attribute += full_permid
+    permid_attribute += the_permid
     permid_attribute += '"'
 
-    component.all_permid.append(full_permid)
+    component.all_permid.append(parent_permid + "-" + the_permid)
 
     return "<" + tag + " " + permid_attribute + the_attribute + ">" + everything_else
 

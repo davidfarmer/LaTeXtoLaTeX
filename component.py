@@ -77,8 +77,10 @@ document_environments = ['proof',
 
 
 document_components = ['exercises', 'exercisegroup', 'row', 'cd',
+                       'webwork', 'instruction', 'instructions',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside',
-                       'interactive', 'static', 'instructions', 'investigation']
+                       'interactive', 'static', 'investigation',
+                       'webwork', 'setup', 'pg-code']
 
 document_pieces = ['title', 'subtitle', 'cell', 'caption',
                    'address', 'attribution', 'location', 'edition',
@@ -88,7 +90,7 @@ document_pieces = ['title', 'subtitle', 'cell', 'caption',
                    'usage', 'description', 'journal', 'volume', 'number',
                    'mrow', 'intertext', 'initialism',
                    'quantity',
-                   'webwork', 'setup', 'set', 'pg-code', 'pg-macros']
+                   'set', 'pg-macros']
 
 # empty tags that shoudl be on their own line
 document_pieces_empty = ['cell', 'col', 'notation-list', 'brandlogo',
@@ -105,7 +107,7 @@ nestable_tags = ["ul", "ol", "li", "p", "task", "figure", "sidebyside"]
 
 verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
                  'slate', 'sage', 'sageplot', 'asymptote', 'macros',
-                 'program', 'input', 'output', 'prompt', 'pre']
+                 'program', 'input', 'output', 'prompt', 'pre',]
 
 # these shoudl be listed from innermost to outermost
 

@@ -129,7 +129,7 @@ tags_by_level = [
          ['ul', 'ol', 'dl'],
          ['li'],
          ['p', 'figure'],
-         ['me', 'men', 'md', 'mdn', 'image', 'table', 'tabular'] ]
+         ['me', 'men', 'md', 'mdn', 'image', 'table', 'tabular', 'footnote'] ]
 
 abbreviation_of_tag = {
     'chapter': 'chap',
@@ -171,6 +171,7 @@ abbreviation_of_tag = {
     'note': 'n',
     'task': 'tk',
     'blockquote': 'bq',
+    'footnote': 'fn',
     'activity': 'act',
     'remark': 'rem',
     'warning': 'warn',

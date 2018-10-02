@@ -80,7 +80,7 @@ document_components = ['exercises', 'exercisegroup', 'row', 'cd',
                        'webwork', 'instruction', 'instructions',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside',
                        'interactive', 'static', 'investigation',
-                       'webwork', 'setup', 'pg-code']
+                       'webwork', 'setup']
 
 document_pieces = ['title', 'subtitle', 'cell', 'caption',
                    'address', 'attribution', 'location', 'edition',
@@ -107,7 +107,7 @@ nestable_tags = ["ul", "ol", "li", "p", "task", "figure", "sidebyside"]
 
 verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
                  'slate', 'sage', 'sageplot', 'asymptote', 'macros',
-                 'program', 'input', 'output', 'prompt', 'pre',]
+                 'program', 'input', 'output', 'prompt', 'pre', 'pg-code']
 
 # these shoudl be listed from innermost to outermost
 

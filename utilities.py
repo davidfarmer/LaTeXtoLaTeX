@@ -503,7 +503,7 @@ def next_permid_encoded():
             print "permid",component.generic_counter,"is",current_permid_encoded,"encoded from",component.current_permid
         return current_permid_encoded
     else:
-        print "prohibited:", current_permid_encoded
+     #   print "prohibited:", current_permid_encoded
         return next_permid_encoded()
 
 

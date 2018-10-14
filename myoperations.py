@@ -747,10 +747,50 @@ def mytransform_html(text):
     thetext = text
 
     # the white space before the end of an h5 makes a space before the "." added by CSS
-    thetext = re.sub(r"\s+</h5>", "</h5>", thetext)
+#    thetext = re.sub(r"\s+</h5>", "</h5>", thetext)
 
+  #  # this is for scraping the Stanford math dept email addresses
+  #  thetext = re.sub(r'mini-row-link">(.*?)</a>.*?mailto:(.*?)"', mytransform_ht, thetext, 0, re.DOTALL)
+    # and for the SJSU math dept
+  #  thetext = re.sub(".*he following are a list", "", thetext, 1, re.DOTALL)
+  #  thetext = re.sub("<h3>Information for</h3>.*", "", thetext, 1, re.DOTALL)
+  #  print "first alt"
+  #  thetext = re.sub(r'alt="([^"]+)".*?<br>([a-z\-\.]{,30}\@sjsu.edu)', mytransform_ht, thetext, 0, re.DOTALL)
+  #  print "then title"
+  #  thetext = re.sub(r'<a title="(.*?)" hre.*?<br>([a-z\-\.]{,30}\@\S*?)(\s|<strong)', mytransform_ht, thetext, 0, re.DOTALL)
+  #  print "then strong"
+  #  thetext = re.sub(r'<strong>(.*?)</strong>.*?<br>([a-z\-\.]{,30}\@\S*?)(\s|<strong)', mytransform_ht, thetext, 0, re.DOTALL)
+
+  #  print thetext
+
+    # UCSC math
+    thetext = re.sub(r'class="p-name">([^<>]+)</span>.*?mailto:([^"]+)"', mytransform_ht, thetext, 0, re.DOTALL)
+
+    for _ in component.people_list:
+        print _
+
+    print "found", len(component.people_list), "people"
     return thetext
 
+###################
+
+def mytransform_ht(txt):
+
+    this_name = txt.group(1)
+    this_email = txt.group(2)
+    print "this_name", this_name
+    if " " not in this_name:
+        return txt.group(0)
+    this_name = re.sub(" [A-Z] ", " ", this_name)
+
+#    this_ln, this_fn = this_name.split(", ")
+    this_fn, this_ln = this_name.split(" ",1)
+
+    if this_email:
+        the_ans = this_fn+";"+this_ln+";"+this_email
+        component.people_list.append(the_ans)
+
+    return ""
 ###################
 
 def mytransform_txt(text):
@@ -1192,6 +1232,9 @@ def add_permid_within_sections(text):
          thetext = re.sub(r"A(" + tag + ")B(.{40})ENDZ *",
                                     utilities.sha1undigest,thetext)
     thetext = re.sub(r" *ACOMMB(.{40})ENDZ *", utilities.sha1undigest,thetext)
+
+    # put permid as the last attribute
+    thetext = re.sub(r'( permid="[^\"]+")([^>]*)>', r"\2\1>", thetext)
 
     return thetext
 

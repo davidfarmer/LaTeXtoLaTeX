@@ -27,6 +27,8 @@ generic_counter = 0
 
 extra_macros = []
 
+people_list = []
+
 lipcounter = {}
 local_counter = {}
 
@@ -71,8 +73,8 @@ document_environments = ['proof',
                          'problem', 'exercise', 'question', 'note', 'blockquote',
                          'activity', 'remark', 'warning', 'table', 'tabular',
                          'list', 'listing', 'program', 'console', 'demonstration',
-                         'image',
-                         'subtask', 'notation', 'claim', 'biblio',
+                         'images', 'image',
+                         'fact', 'subtask', 'notation', 'claim', 'biblio',
                          'poem', 'stanza']
 
 
@@ -80,6 +82,7 @@ document_components = ['exercises', 'exercisegroup', 'row', 'cd',
                        'webwork', 'instruction', 'instructions',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside',
                        'interactive', 'static', 'investigation',
+                       'quantity',
                        'webwork', 'setup']
 
 document_pieces = ['title', 'subtitle', 'cell', 'caption',
@@ -89,7 +92,6 @@ document_pieces = ['title', 'subtitle', 'cell', 'caption',
                    'role', 'entity', 'year', 'minilicense', 'holder',
                    'usage', 'description', 'journal', 'volume', 'number',
                    'mrow', 'intertext', 'initialism',
-                   'quantity',
                    'set', 'pg-macros']
 
 # empty tags that shoudl be on their own line
@@ -123,7 +125,7 @@ tags_by_level = [
 #             'worksheet', 'example', 'assemblage', 'solutions'],
          ['objectives', 'theorem', 'proposition', 'lemma', 'definition',
              'conjecture', 'corollary', 'principle', 'algorithm',
-             'axiom', 'example', 'insight',
+             'axiom', 'example', 'insight', 'fact',
              'sbsgroup', 'sidebyside', 'introduction', 'conclusion',
              'exercise', 'investigation', 'activity', 'exploration'],
          ['task', 'solution', 'answer', 'hint', 'proof', 'blockquote',
@@ -172,6 +174,7 @@ abbreviation_of_tag = {
     'question': 'q',
     'note': 'n',
     'task': 'tk',
+    'fact': 'fc',
     'blockquote': 'bq',
     'footnote': 'fn',
     'activity': 'act',

@@ -248,7 +248,7 @@ if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid'] and com
     with open(outputdir + 'allpermid.txt', 'w') as f:
         for permid in component.all_permid:
             f.write(permid + "\n")
-print "permid~s", len(component.all_permid), "of which repeats:"
+print "Total number of permid~s:", len(component.all_permid), ", of which repeats:"
 print [x for x in component.all_permid if component.all_permid.count(x) > 1]
 
 print "component.current_permid", component.current_permid

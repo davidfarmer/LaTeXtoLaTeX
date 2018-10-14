@@ -24,6 +24,7 @@ something_changed = False
 
 substitution_counter = 0
 generic_counter = 0
+generic_list = []
 
 extra_macros = []
 
@@ -125,8 +126,9 @@ tags_by_level = [
 #             'worksheet', 'example', 'assemblage', 'solutions'],
          ['objectives', 'theorem', 'proposition', 'lemma', 'definition',
              'conjecture', 'corollary', 'principle', 'algorithm',
-             'axiom', 'example', 'insight', 'fact',
+             'axiom', 'example', 'insight', 'fact', 'remark', 'list',
              'sbsgroup', 'sidebyside', 'introduction', 'conclusion',
+             'aside',
              'exercise', 'investigation', 'activity', 'exploration'],
          ['task', 'solution', 'answer', 'hint', 'proof', 'blockquote',
           'note', 'warning'],
@@ -166,6 +168,7 @@ abbreviation_of_tag = {
     'assemblage': 'asm',
     'definition': 'd',
     'axiom': 'ax',
+    'aside': 'as',
     'example': 'ex',
     'insight': 'in',
     'exploration': 'expl',

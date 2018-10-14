@@ -742,6 +742,37 @@ def old_mytransform_mbx(text):
 
 ###################
 
+def mytransform_ptx(text):
+
+    thetext = text
+
+    # first hide comments
+    thetext = re.sub(r"(\s*(<!--)(.*?)(-->))",
+                     lambda match: utilities.sha1hide(match, "comment"),
+                     thetext, 0, re.DOTALL)
+
+    # hide verbatim content
+    for tag in component.verbatim_tags:
+        thetext = re.sub(r"(\s*(<" + tag + "(>| [^/>]*>))(.*?)(</" + tag + ">))",
+                         lambda match: utilities.sha1hide(match, tag),
+                         thetext, 0, re.DOTALL)
+
+    opening_tags = re.findall(r"(<[a-z]([^<>]+[^/]|)>)", thetext)
+
+    for tag in opening_tags:
+        the_tag = tag[0]
+        if "permid" not in the_tag:
+            tag_name = the_tag[1:]
+            if tag_name.startswith("o"): print "XXXXXXXXXXXXXXXXXXX  tag", tag
+            tag_name = re.sub(" .*","",tag_name)
+            tag_name = re.sub(">$","",tag_name)
+            
+            if tag_name not in component.generic_list:
+                component.generic_list.append(tag_name)
+
+    component.generic_list.sort()
+    print component.generic_list
+
 def mytransform_html(text):
 
     thetext = text
@@ -1223,6 +1254,8 @@ def add_permid_within_sections(text):
    #     print "BBB",lev,tag
         thetext = re.sub(r"<(" + tag + ")>",
             naive_add_permid_on, thetext, 0, re.DOTALL)
+        thetext = re.sub(r"<(" + tag + " [^<>/]+)>",
+            naive_add_permid_on, thetext, 0, re.DOTALL)
     print "done looking for missing permid",len(component.all_permid)
 
 
@@ -1299,6 +1332,9 @@ def shorten(permid):
 def naive_add_permid_on(txt):
 
     tag = txt.group(1)
+
+    if "permid" in tag:
+        return "<" + tag + ">"
 
     the_permid = utilities.next_permid_encoded()
 

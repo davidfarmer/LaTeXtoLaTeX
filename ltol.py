@@ -20,6 +20,7 @@ import myoperations
 
 conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
                       "txt",
+                      "ptx",
                       "mbx_permid", "xml_permid", "ptx_permid",
                       "tex", "tex_ptx",
                       "html"]
@@ -76,7 +77,7 @@ if component.inputname == component.outputname:
     print "try again"
     sys.exit()
 
-if component.filetype_plus in ["ptx_pp", "ptx_permid", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
+if component.filetype_plus in ["ptx", "ptx_pp", "ptx_permid", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
     fileextension_in = "ptx"
     fileextension_out = "ptx"
 elif component.filetype_plus in ["mbx_pp"]:
@@ -186,7 +187,9 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_txt(component.onefile)
     elif component.filetype_plus == 'html':
         component.onefile = myoperations.mytransform_html(component.onefile)
-    elif component.filetype_plus in ['ptx', 'mbx', 'xml']:
+    elif component.filetype_plus in ['ptx']:
+        component.onefile = myoperations.mytransform_ptx(component.onefile)
+    elif component.filetype_plus in ['mbx', 'xml']:
         component.onefile = myoperations.mytransform_mbx(component.onefile)
  #       component.onefile = transforms.mbx_pp(component.onefile)
     elif component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp']:
@@ -236,12 +239,13 @@ for inputfile, outputfile in component.iofilepairs:
     if component.filetype_plus == "tex_ptx":
         component.onefile = transforms.mbx_pp(component.onefile)
 
+    if component.onefile:
         # there is not actually a subtask tag
-    component.onefile = re.sub(r"<subtask\b", "<task", component.onefile)
-    component.onefile = re.sub(r"subtask>", "task>", component.onefile)
+        component.onefile = re.sub(r"<subtask\b", "<task", component.onefile)
+        component.onefile = re.sub(r"subtask>", "task>", component.onefile)
 
-    with open(outputfile, 'w') as outfile:
-        outfile.write(component.onefile)
+        with open(outputfile, 'w') as outfile:
+            outfile.write(component.onefile)
 
 if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid'] and component.all_permid:
     component.all_permid.sort()

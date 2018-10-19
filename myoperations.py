@@ -1172,10 +1172,16 @@ def fix_ptx_math_punctuation(text):
     # a spacing command at the end of math makes no sense, so delete it
     thetext = re.sub(r"\\,\s*</m>", "</m>", thetext)
 
+    # hide \right.
+    thetext = re.sub(r"\\right\.", "xxRIGHTDOTxx", thetext)
+
     thetext = re.sub(r"(\.|,)(\s*)(</me>|</men>|</mrow>\s*</md>|</mrow>\s*</mdn>)", r"\2\3\1", thetext)
 
 # and also after the closing inline math tag
     thetext = re.sub(r"(\.|,)(\s*)(</m>)", r"\3\1", thetext)
+
+    # unhide \right.
+    thetext = re.sub("xxRIGHTDOTxx", r"\\right.", thetext)
 
     return thetext
 

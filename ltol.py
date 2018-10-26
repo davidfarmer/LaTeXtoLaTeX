@@ -249,9 +249,9 @@ for inputfile, outputfile in component.iofilepairs:
 
 if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid'] and component.all_permid:
     component.all_permid.sort()
-    with open(outputdir + 'allpermid.txt', 'w') as f:
-        for permid in component.all_permid:
-            f.write(permid + "\n")
+#    with open(outputdir + 'allpermid.txt', 'w') as f:
+#        for permid in component.all_permid:
+#            f.write(permid + "\n")
 print "Total number of permid~s:", len(component.all_permid), ", of which repeats:"
 print [x for x in component.all_permid if component.all_permid.count(x) > 1]
 

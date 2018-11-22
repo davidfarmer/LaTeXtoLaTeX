@@ -1276,7 +1276,7 @@ def add_permid_within_sections(text):
     thetext = re.sub(r" *ACOMMB(.{40})ENDZ *", utilities.sha1undigest,thetext)
 
     # put permid as the last attribute
-    thetext = re.sub(r'( permid="[^\"]+")([^>]*)>', r"\2\1>", thetext)
+    thetext = re.sub(r'( permid="[^\"]+")([^>]*[^/])>', r"\2\1>", thetext)
 
     return thetext
 

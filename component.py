@@ -112,6 +112,9 @@ verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
                  'slate', 'sage', 'sageplot', 'asymptote', 'macros',
                  'program', 'input', 'output', 'prompt', 'pre', 'pg-code']
 
+# may or may not have white space after them:
+punctuatable_tags = ['fn', 'quantity']
+
 # these shoudl be listed from innermost to outermost
 
 tags_by_level = [

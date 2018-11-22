@@ -114,6 +114,11 @@ def mbx_pp(text):
                          lambda match: utilities.sha1hide(match, tag),
                          thetext, 0, re.DOTALL)
 
+    # some tags can have punctuation after them
+    for tag in component.punctuatable_tags:
+        thetext = re.sub(r"(</" + tag + ">)" + r"(\S)", r"\1UVUnooooSpACeVUV\2", thetext)
+        thetext = re.sub(r"(</" + tag + ">)" + r" ", r"\1UVUSpACeVUV", thetext)
+
     # empty tags that should be on their own line
     for tag in component.document_pieces_empty:
         thetext = re.sub(r"\s*(<" + tag + r"[^>]*/>)", "\n" + r"\1", thetext)
@@ -158,6 +163,12 @@ def mbx_pp(text):
         thetext = postprocess.tag_before_after(tag, "\n", "", "", "\n", thetext)
     for tag in component.footnote_like:
         thetext = postprocess.tag_before_after(tag, "", "\n", "\n", "", thetext)
+
+    for tag in component.punctuatable_tags:
+        thetext = re.sub(r"(\s)UVUSpACeVUV", r"\1", thetext)
+        thetext = re.sub(r"UVUSpACeVUV(\s)", r"\1", thetext)
+        thetext = re.sub(r"UVUSpACeVUV", " ", thetext)
+        thetext = re.sub(r"\s*UVUnooooSpACeVUV\s*(.)", r"\1", thetext)
 
     # sort-of hack for spacing after punctuation after display math
     thetext = re.sub(r"(</(md|mdn|me|men)>)\s*(;|:|,)\s*", r"\1\3" + "\n", thetext)

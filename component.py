@@ -79,7 +79,7 @@ document_environments = ['proof',
                          'poem', 'stanza']
 
 
-document_components = ['exercises', 'exercisegroup', 'row', 'cd',
+document_components = ['exercises', 'exercisegroup', 'row',
                        'webwork', 'instruction', 'instructions',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside',
                        'interactive', 'static', 'investigation',

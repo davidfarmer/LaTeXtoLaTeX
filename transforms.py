@@ -200,6 +200,10 @@ def mbx_pp(text):
     for tag in component.math_display:
         thetext = postprocess.add_space_within(tag, thetext)
 
+    # since cd is in document_pieces, it does not get spaces inside.
+    # but a cline inside a cd should get spaces in front of it
+    thetext = re.sub("<cline>", "  <cline>", thetext)
+
     thetext = postprocess.add_space_within("cell", thetext)
 
     # now put back the li and p

@@ -108,12 +108,14 @@ footnote_like = ['fn']
 
 nestable_tags = ["ul", "ol", "li", "p", "task", "figure", "sidebyside"]
 
+# note that c is special, because it is inline verbatim
 verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
                  'slate', 'sage', 'sageplot', 'asymptote', 'macros',
-                 'program', 'input', 'output', 'prompt', 'pre', 'pg-code']
+                 'program', 'input', 'output', 'prompt', 'pre', 'pg-code',
+                 'c']
 
 # may or may not have white space after them:
-punctuatable_tags = ['fn', 'quantity']
+punctuatable_tags = ['fn', 'quantity', 'c']
 
 # these shoudl be listed from innermost to outermost
 

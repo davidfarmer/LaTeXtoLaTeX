@@ -203,6 +203,16 @@ for inputfile, outputfile in component.iofilepairs:
                                         utilities.sha1undigest,component.onefile)
         component.onefile = re.sub(r" *ACOMMB(.{40})ENDZ *", utilities.sha1undigest,component.onefile)
 
+        component.onefile = re.sub(r" UVUSpACeVUV", " ", component.onefile)
+        component.onefile = re.sub(r"UVUSpACeVUV ", " ", component.onefile)
+        component.onefile = re.sub(r"UVUSpACeVUV", " ", component.onefile)
+        component.onefile = re.sub(r" *UVUnooooSpACeVUV *", "", component.onefile)
+
+        # special case of punctuation after quantity
+        component.onefile = re.sub(r"(</quantity>)\s*((\?|!|;|:|,|\.|\)|</)+) *?", r"\1\2", component.onefile)
+        # and parentheses or other markup before quantity
+        component.onefile = re.sub(r"(\(|>)\s*(<quantity>)", r"\1\2", component.onefile)
+
       # fix lines that only contain spaces
         component.onefile = re.sub(r"\n +\n", "\n\n", component.onefile)
         component.onefile = re.sub(r"\n +\n", "\n\n", component.onefile)

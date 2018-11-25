@@ -145,8 +145,11 @@ def add_line_fe(txt):
     for _ in range(20):   # can be many sentences in one paragraph
         the_text = re.sub(the_space + r"(\S.*?[0-9a-z>\)]+(\.|\?|!)) +([A-Z]|<xref|<init|<[a-z]+ ?/>)",
                           the_space + r"\1" + the_space + r"\3", the_text)
- #       the_text = re.sub(the_space + r"(\S.*?[0-9a-z>\)]+(\.|\?|!)) +([A-Z]|<xref)",
- #                         the_space + r"\1" + the_space + r"\3", the_text)
+    for _ in range(2):  # inline 'c' code at end of sentence
+        the_text = re.sub(the_space + r"(\S.*?SpACeVUV(\.|\?|!|:)) +([A-Z]|<[a-z]+)",
+                          the_space + r"\1" + the_space + r"\3", the_text)
+        the_text = re.sub(the_space + r"(\S.*?[0-9a-z>\)]+(\.|\?|!|:)) +([A-Z]|<[a-z]+)",
+                          the_space + r"\1" + the_space + r"\3", the_text)
 
 #    print "11111111111111111111111", the_tag
 #    print re.sub("Practice visualizing vector addition", "Practice visualizing vector33addition", the_text)
@@ -220,7 +223,7 @@ def add_line_fe(txt):
     for _ in range(3):
         the_text = re.sub(the_space + "(\S.*?[a-z>]) +(<url .*?</url>) +(\S)",
                           the_space + r"\1" + the_space + r"\2" + the_space + r"\3", the_text)
-        # erls ending sentences
+        # urls ending sentences
         the_text = re.sub(the_space + "(\S.*?[a-z>]) +(<url .*?</url>[.?!]+)",
                           the_space + r"\1" + the_space + r"\2", the_text)
 
@@ -268,6 +271,16 @@ def add_line_fe(txt):
         the_text = re.sub(the_space + "(\S.{8,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{50,}\n)",
                           the_space + r"\1" + the_space + r"\3", the_text)
         the_text = re.sub(the_space + "(\S.{50,}[a-z>\)]{2,}(:|;|,)) +(([a-z]|<).{8,}\n)",
+                          the_space + r"\1" + the_space + r"\3", the_text)
+    # space or not, after c verbatim
+    for _ in range(2):
+        the_text = re.sub(the_space + "(\S.{25,}SpACeVUV(:|;|,)) +(([a-z]|<).{30,}\n)",
+                          the_space + r"\1" + the_space + r"\3", the_text)
+        the_text = re.sub(the_space + "(\S.{8,}SpACeVUV(:|;|,)) +(([a-z]|<).{50,}\n)",
+                          the_space + r"\1" + the_space + r"\3", the_text)
+        the_text = re.sub(the_space + "(\S.{50,}SpACeVUV(:|;|,)) +(([a-z]|<).{8,}\n)",
+                          the_space + r"\1" + the_space + r"\3", the_text)
+        the_text = re.sub(the_space + "(\S.{10,}SpACeVUV(:|;|,)) +(([a-z]|<).{8,}\n)",
                           the_space + r"\1" + the_space + r"\3", the_text)
 
 #    print "7777777777777777", the_tag

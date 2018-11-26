@@ -13,3 +13,37 @@ The supported filetype_plus are: tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_
 
 You may wish to comment out the print statements.
 
+-------------
+
+For prettyprinting PreTeXt documents, 
+assuming the files to be
+converted are in the "src" directory:
+
+0) Get on a branch, of course.
+
+1) Copy the PTX files into src_orig for posible reuse later
+(this step not strictly necessary if you are a git guru).
+
+2) Make two new directories:  src1 and src2.
+
+3) If the file extension is "ptx", do:
+
+./ltol.py ptx_pp path_to_src path_to_src1
+
+(If the file extension is xml or mbx, replace ptx_pp
+by xml_pp or mbx_pp, and similarly in the next command.)
+
+Then do
+
+./ltol.py ptx_permid path_to_src1 path_to_src2
+
+Both of those may print out a possibly annoying number of
+useless messages.
+
+4) Check if the files in src2 are okay.  If they are, copy into src.
+
+The reason I save the src_orig files is that when I need to
+make a change after doing step 4), I want to start over with
+the original files.  I find it easier to use the files I saved in
+src_orig instead of stitching branches.
+

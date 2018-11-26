@@ -33,17 +33,20 @@ converted are in the "src" directory:
 (If the file extension is xml or mbx, replace ptx_pp
 by xml_pp or mbx_pp, and similarly in the next command.)
 
-Then do
+-------------
+
+4) If you also want to add permids, do
 
 ./ltol.py ptx_permid path_to_src1 path_to_src2
 
 Both of those may print out a possibly annoying number of
 useless messages.
 
-4) Check if the files in src2 are okay.  If they are, copy into src.
+5) Check if the files in src1 or src2 are okay, depending on whether you
+wanted to add permids.  If they are, copy into src.
 
 The reason I save the src_orig files is that when I need to
-make a change after doing step 4), I want to start over with
+make a change after doing step 5), I want to start over with
 the original files.  I find it easier to use the files I saved in
-src_orig instead of stitching branches.
+src_orig instead of switching branches or doing some other git thing.
 

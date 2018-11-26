@@ -8,7 +8,7 @@ Typically the new_directory is temporary, and after running ltol.py you
 do whatever you wish with the new files.  If you are working on a git branch,
 this should be safe.
 
-The supported filetype_plus are: tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, html
+The supported filetype_plus are: tex, mbx, mbx_pp, mbx_fix, mbx_strict_tex, mbx_strict_html, html, and more
 
 
 You may wish to comment out the print statements.

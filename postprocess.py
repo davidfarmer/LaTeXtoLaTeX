@@ -164,9 +164,9 @@ def add_line_fe(txt):
 #    print re.sub("Practice visualizing vector addition", "Practice visualizing vector33addition", the_text)
 
     for _ in range(3):
-        the_text = re.sub("(<idx>.{,70}</idx>)(\.|,)\s*", r"\2" + the_space + "    " + r"\1" + the_space, the_text)
+        the_text = re.sub("(<idx>.{,70}</idx>)(\.|,|:|;|\?|!)\s*", r"\2" + the_space + "    " + r"\1" + the_space, the_text)
     # and if in parentheses
-        the_text = re.sub("(<idx>.{,70}</idx>)\)(\.|,)\s*", r")\2" + the_space + "    " + r"\1" + the_space, the_text)
+        the_text = re.sub("(<idx>.{,70}</idx>)\)(\.|,|:|;|\?|!)\s*", r")\2" + the_space + "    " + r"\1" + the_space, the_text)
 
 #    print "1212121212121212212", the_tag
 #    print re.sub("Practice visualizing vector addition", "Practice visualizing vector44addition", the_text)

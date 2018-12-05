@@ -1,6 +1,7 @@
 
 filetype_plus = ""
 inputname = ""
+inputfilename = ""
 outputname = ""
 
 indent_num = 2
@@ -79,7 +80,7 @@ document_environments = ['proof',
                          'poem', 'stanza']
 
 
-document_components = ['exercises', 'exercisegroup', 'row',
+document_components = ['exercises', 'exercisegroup', 'row', 'reading-questions',
                        'webwork', 'instruction', 'instructions',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside',
                        'interactive', 'static', 'investigation',
@@ -123,6 +124,7 @@ tags_by_level = [
          ['book', 'chapter','appendix', 'section', 'frontmatter', 'backmatter'],
          [ 'subsection', 'subsubsection', 'preface',
              'exercises', 'exercisegroup', 'paragraphs',
+             'reading-questions',
              'worksheet', 'assemblage', 'solutions'],
 #         ['subsubsection', 'subsection', 'section', 'appendix',
 #             'book', 'chapter'],

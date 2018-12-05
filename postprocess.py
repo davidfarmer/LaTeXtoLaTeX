@@ -146,9 +146,9 @@ def add_line_fe(txt):
         the_text = re.sub(the_space + r"(\S.*?[0-9a-z>\)]+(\.|\?|!)) +([A-Z]|<xref|<init|<[a-z]+ ?/>)",
                           the_space + r"\1" + the_space + r"\3", the_text)
     for _ in range(2):  # inline 'c' code at end of sentence
-        the_text = re.sub(the_space + r"(\S.*?SpACeVUV(\.|\?|!|:)) +([A-Z]|<[a-z]+)",
+        the_text = re.sub(the_space + r"(\S.*?SpACeVUV(\.|\?|!)) +([A-Z]|<[a-z]+)",
                           the_space + r"\1" + the_space + r"\3", the_text)
-        the_text = re.sub(the_space + r"(\S.*?[0-9a-z>\)]+(\.|\?|!|:)) +([A-Z]|<[a-z]+)",
+        the_text = re.sub(the_space + r"(\S.*?[0-9a-z>\)]+(\.|\?|!)) +([A-Z]|<[a-z]+)",
                           the_space + r"\1" + the_space + r"\3", the_text)
 
 #    print "11111111111111111111111", the_tag
@@ -194,14 +194,6 @@ def add_line_fe(txt):
     # and at the start of a line
     the_text = re.sub(the_space + " *" + "(<idx>.{,70}</idx>)", the_space + "    " + r"\1", the_text)
 
-    # colons and semicolons.  commas later
-    for _ in range(3):
-        the_text = re.sub(the_space + "(\S.{25,}[0-9a-z>\)](:)) +(([a-z]|<).{20,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-    for _ in range(3):
-        the_text = re.sub(the_space + "(\S.{25,}[0-9a-z>\)](:|;)) +(([a-z]|<).{20,}\n)",
-                      the_space + r"\1" + the_space + r"\3", the_text)
-
     # put parentheses on their own line
     # parentheses that contain an entire sentence
     for _ in range(3):
@@ -218,6 +210,14 @@ def add_line_fe(txt):
                           the_space + r"\1" + the_space + r"\2", the_text)
 #    print "444444444444444", the_tag
 #    print re.sub("being the other option", "being the other2option", the_text)
+
+    # colons and semicolons.  commas later
+    for _ in range(3):
+        the_text = re.sub(the_space + "(\S.{25,}[0-9a-z>\)](:)) +(([a-z]|<).{20,}\n)",
+                      the_space + r"\1" + the_space + r"\3", the_text)
+    for _ in range(3):
+        the_text = re.sub(the_space + "(\S.{25,}[0-9a-z>\)](:|;)) +(([a-z]|<).{20,}\n)",
+                      the_space + r"\1" + the_space + r"\3", the_text)
 
     # urls on their own line, if not punctuated
     for _ in range(3):

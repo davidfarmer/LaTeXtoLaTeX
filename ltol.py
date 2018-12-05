@@ -111,13 +111,13 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) 
     outputdir = outputdir + "/"              # and then put it back
     thefiles = glob.glob(inputdir + "/*." + fileextension_in)
 
-    for inputfilename in thefiles:
-        outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", inputfilename)
+    for component.inputfilename in thefiles:
+        outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", component.inputfilename)
         if fileextension_in != fileextension_out:
             outputfilename = re.sub(fileextension_in + "$", fileextension_out, outputfilename)
-        if inputfilename == outputfilename:
+        if component.inputfilename == outputfilename:
             print "big problem, quitting"
-        component.iofilepairs.append([inputfilename, outputfilename])
+        component.iofilepairs.append([component.inputfilename, outputfilename])
   #  print thefiles
   #  print inputdir 
   #  print component.iofilepairs
@@ -164,6 +164,7 @@ for inputfile, outputfile in component.iofilepairs:
 
     component.inputstub = inputfile
     component.inputstub = re.sub(".*/","",component.inputstub)
+    component.inputfilename = component.inputstub
     component.inputstub = re.sub("\..*","",component.inputstub)
     print "file stub is ",component.inputstub
     component.filestubs.append(component.inputstub)
@@ -192,7 +193,8 @@ for inputfile, outputfile in component.iofilepairs:
     elif component.filetype_plus in ['mbx', 'xml']:
         component.onefile = myoperations.mytransform_mbx(component.onefile)
  #       component.onefile = transforms.mbx_pp(component.onefile)
-    elif component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp']:
+
+    if component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp', 'tex_ptx']:
         component.onefile = transforms.mbx_pp(component.onefile)
 
         component.onefile = myoperations.mytransform_mbx_linefeeds(component.onefile)
@@ -229,11 +231,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = re.sub("(\n +)(    <idx>.*?</idx>) *([A-Z])",
                                    r"\1\2\1\3", component.onefile)
 
-    elif component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:
+    if component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = myoperations.mbx_fix(component.onefile)
-    else:
-        pass
-        # print "doing nothing"
 
     if component.filetype_plus in ["mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = transforms.mbx_strict(component.onefile)
@@ -246,8 +245,8 @@ for inputfile, outputfile in component.iofilepairs:
     if component.filetype_plus == "mbx_fa":
         component.onefile = transforms.mbx_fa(component.onefile)
 
-    if component.filetype_plus == "tex_ptx":
-        component.onefile = transforms.mbx_pp(component.onefile)
+#    if component.filetype_plus == "tex_ptx":
+#        component.onefile = transforms.mbx_pp(component.onefile)
 
     if component.onefile:
         # there is not actually a subtask tag

@@ -890,63 +890,50 @@ def mytransform_tex_ptx(text):
 
     thetext = text
 
-    # first let's throw away stuff we can't use
-    thetext = re.sub(r"\\def\\labelenumi.*", "", thetext)
-    thetext = re.sub(r"[%].*", "", thetext)
-    # delete backslash followed by white space
-    thetext = re.sub(r"\\\s+", "", thetext)
+    thetext = re.sub(r"\\noindent *", "", thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\~*\\\\\[[^\[\]]+\] *", "", thetext, 0, re.DOTALL)
 
-    # 3 or more \n should just be 2 of them
-    thetext = re.sub("\n{3,}", "\n\n", thetext)
+    thetext = re.sub(r".*\{(Reading Questions|Questions)\}\s*(.*?)\\begin\{(enumerate|itemize)\}",
+                     "\n<reading-questions>\n<introduction>\n<p>\n" +
+                    r"\2" +
+                     "</p>\n</introduction>\n",
+                      thetext, 1, re.DOTALL)
 
-    # convert the math delimiters
-    # note that this substitution also puts one space befre and after
-    # inline math, because that seemed to be consistently wrong in the source
-    thetext = re.sub(r"\s*\\\(\s*", " <m>", thetext)
-    thetext = re.sub(r"\s*\\\)\s*", "</m> ", thetext)
+    thetext = re.sub(r"\\item", "</p></exercise>\n<exercise><p>", thetext)
+    thetext = re.sub("</p></exercise>\n", "", thetext, 1)
 
-    # would need to me more clever if there were multiline displays,
-    # but there doesnt seem to be any
-    thetext = re.sub(r"\\\[", "<md>", thetext)
-    thetext = re.sub(r"\\\]", "</md>", thetext)
+    thetext = re.sub(r"\\end{(enumerate|itemize)}(.*)", "\n</p></exercise>\n" + r"XXXX\2YYYY", thetext, 1, re.DOTALL)
 
-    # obviously it would be eassy  to fix the \title{...} by hand,
-    # but I wanted to show you how replacemacro works
-    thetext = utilities.replacemacro(thetext, "title", 1,
-           "<title>#1</title>")
+    the_end = re.sub(".*XXXX", "", thetext, 1, re.DOTALL)
+    if "enumerate" in the_end or "itemize" in the_end:
+        print "the_end", the_end
+    else:
+        thetext = re.sub("XXXX.*", "", thetext, 1, re.DOTALL)
 
-    # Convert enumerate to ol
-    # This approach is a bit sloppy, but works in many cases
-    thetext = re.sub(r"\s*\\begin{enumerate}\s*", "\n\n<ol>\n<li>", thetext)
-    thetext = re.sub(r"\s*\\end{enumerate}\s*", "</li>\n</ol>\n\n", thetext)
-    thetext = re.sub(r"\s*\\item\s*", "</li>\n<li>", thetext)
+    thetext = thetext + "\n" + "</reading-questions>" + "\n"
 
-    # see line 2608.  A good example of doing things in the right order
-    thetext = re.sub(r"\\emph{\\\\\s+", r"\\emph{", thetext)
-    # Hope that theorems contain no blank lines
-    thetext = re.sub(r"\\emph{THEOREM[^{}]*}(.*?)\n\n",
-                     r"<theorem><statement><p>\1</p></statement></theorem>",
-                     thetext, 0, re.DOTALL)
+    thetext = "\n" + re.sub(".*/", "", component.inputfilename) + "\n\n" + thetext
 
-    # guess that things in all caps are section titles
-    thetext = re.sub(r"\n\n([A-Z]{2,} [A-Z]+)\n\n",
-                     "</p></section>\n\n<section><title>" + r"\1" + r"</title>\n\n<p>",
-                     thetext)
-    # but now there is an extra </p></section> at the beginning, and a missing one at the end
-    thetext = re.sub(r"</p></section>", "", thetext, 1)
-    thetext = thetext + "</section>"
+    thetext = re.sub(r"\\par", "</p>\n<p>", thetext, 1)
+    
+    while "$" in thetext:
+        thetext = re.sub("\$", "<m>", thetext, 1)
+        thetext = re.sub("\$", "</m>", thetext, 1)
 
-    # feeble attempt at paragraph markup
-    thetext = re.sub(r"\.\n\n([A-Z][a-z ])", r"</p><p>\1", thetext)
+    thetext = re.sub(r"\\\[", "<me>", thetext)
+    thetext = re.sub(r"\\\]", "</me>", thetext)
 
-    thetext = re.sub(r"``(.+)''", r"<q>\1</q>", thetext)
+    thetext = re.sub(r"``(.*?)''", r"<q>\1</q>", thetext)
+    thetext = re.sub(r"\\verb\|(.*?)\|", r"<c>\1</c>", thetext)
+    thetext = re.sub(r"\\#", r"#", thetext)
 
-    # delete some garbage
-    # empty li
-    thetext = re.sub(r"<li>\s*</li>", "", thetext)
+    thetext = re.sub("\%.*", "", thetext)
 
+    thetext = utilities.replacemacro(thetext,"emph",1,"<emph>#1</emph>")
+    thetext = utilities.replacemacro(thetext,"textbf",1,"<emph>#1</emph>")
+    thetext = utilities.replacemacro(thetext,"url",1,'<url href="#1"/>')
 
-    return thetext
+    return thetext + "\n\n<!--  - - - - - - - - - - - - - - - - - -->"
 
 ###################
 

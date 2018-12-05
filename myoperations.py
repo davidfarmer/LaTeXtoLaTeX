@@ -1265,6 +1265,14 @@ def add_permid_within_sections(text):
                                     utilities.sha1undigest,thetext)
     thetext = re.sub(r" *ACOMMB(.{40})ENDZ *", utilities.sha1undigest,thetext)
 
+    # sage is verbatim, but it also needs a permid
+    for tag in ['sage']:
+        component.local_counter[tag] = 0
+        thetext = re.sub(r"<(" + tag + " [^<>/]+)>",
+            naive_add_permid_on, thetext, 0, re.DOTALL)
+        thetext = re.sub(r"<(" + tag + ")>",
+            naive_add_permid_on, thetext, 0, re.DOTALL)
+
     # put permid as the last attribute
     thetext = re.sub(r'( permid="[^\"]+")([^>]*[^/])>', r"\2\1>", thetext)
 

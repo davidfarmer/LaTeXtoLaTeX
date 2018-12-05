@@ -119,6 +119,7 @@ verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
 punctuatable_tags = ['fn', 'quantity', 'c']
 
 # these shoudl be listed from innermost to outermost
+# used for permid
 
 tags_by_level = [
          ['book', 'chapter','appendix', 'section', 'frontmatter', 'backmatter'],
@@ -135,7 +136,7 @@ tags_by_level = [
              'conjecture', 'corollary', 'principle', 'algorithm',
              'axiom', 'example', 'insight', 'fact', 'remark', 'list',
              'sbsgroup', 'sidebyside', 'introduction', 'conclusion',
-             'aside',
+             'aside', 'sage',
              'exercise', 'investigation', 'activity', 'exploration'],
          ['task', 'solution', 'answer', 'hint', 'proof', 'blockquote',
           'note', 'warning'],
@@ -176,6 +177,7 @@ abbreviation_of_tag = {
     'definition': 'd',
     'axiom': 'ax',
     'aside': 'as',
+    'sage': 'sage',
     'example': 'ex',
     'insight': 'in',
     'exploration': 'expl',

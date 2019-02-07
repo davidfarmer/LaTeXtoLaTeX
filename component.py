@@ -199,6 +199,7 @@ abbreviation_of_tag = {
     'program': 'prog',
     'console': 'con',
     'archetype': 'arch',
+    'reading-questions': 'rqs',
     'demonstration': 'demo',
     'image': 'im',
     'answer': 'a',

@@ -831,57 +831,77 @@ def mytransform_txt(text):
 
     thetext = text
 
-    lines = thetext.split("\n")
+    workshop_range = [55, 61, 96, 93, 94, 95, 64, 73, 82, 90, 91, 87, 89, 88, 98, 99,
+100, 101, 102, 103, 106, 107, 108, 109, 110, 111, 112, 113, 114,
+115, 116, 117, 118, 119, 120, 121, 122, 123, 130, 131, 134, 136,
+142, 141, 143, 144, 147, 148, 150, 151, 152, 153, 154, 155, 156,
+157, 158, 159, 160, 161, 162, 174, 178, 182, 183, 184, 212, 185,
+186, 187, 188, 189, 190, 191, 192, 200, 202, 201, 203, 204, 205,
+206, 207, 208, 221, 218, 219, 222, 223, 229, 230, 231, 232, 233,
+234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 305, 246,
+247, 248, 249, 250, 251, 265, 266, 267, 277, 275, 278, 279, 280,
+281, 302, 303, 304, 245, 306, 307, 308, 309, 310, 311, 312, 313,
+314, 315, 316, 317, 318, 319, 320, 326, 332, 343, 344, 353, 354,
+355, 356, 357, 358, 359, 360, 361, 362, 363, 380, 391, 392, 393,
+394, 398, 399, 400, 401, 402, 403, 405, 406, 407, 408, 409, 410,
+411, 412, 413, 431, 439, 449, 476, 477, 478, 479, 480, 481, 482,
+483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 497, 520,
+554, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567,
+568, 569, 570, 571, 572, 573, 574, 575, 578, 579, 588, 635, 636,
+637, 638, 639, 640, 641, 642, 643, 644]
 
-    url_stub = "http://linear.ups.edu/fcla/section-"
-    this_section = "WILA"
-    this_subsection = "LA"
+    totalpapers = 0
     the_answer = ""
 
+    papers_per_workshop = {}
+    authors_per_workshop = {}
+
+    thetext = re.sub("\nVolume.*", "", thetext)
+    thetext = re.sub("\n{3,}", "\n\n", thetext)
+
+    lines = thetext.split("\n\n")
+    print len(lines), "lines"
+#    print "part of thetext", thetext[:1000]
     for line in lines:
-        if line.startswith("\\sec"):
-            this_section = re.sub(" .*", "", line[5:])
-        #    print "xxx"+sec_abbr+"yyy"
-        elif line.startswith("\\ssec"):
-            this_subsection = re.sub(" .*", "", line[6:])
-        elif "::" in line:
-            try:
-                type_name, these_ids = line.split(" :: ")
-            except:
-                print "cccc", line, "dddd"
-            id_lis = these_ids.strip().split(",")
-            try:
-                this_type, this_name = type_name.split(" ")
-            except:
-                print "aaaa", type_name, "bbbb" 
-            for this_id in id_lis:
-                this_id = this_id.strip()
-                if not this_id:
-                    next
-                this_link = this_id
-                this_link += " "
-                this_link += url_stub
-                this_link += this_section
-                this_link += ".html" + "#"
-                if this_type in ["Definition", "Theorem", "Example"]:
-                    this_link += this_type.lower()
-                    this_link += "-"
-                    this_link += this_name
-                else:
-                    this_link += "subsection"
-                    this_link += "-"
-                    this_link += this_section
-                    this_link += "-"
-                    this_link += this_subsection
-                the_answer += this_link + "\n"
-        elif line:
-            print "skipping", line
+        totalpapers += 1
+        if "(Workshop " not in line and "(workshop " not in line:
+            continue
+        this_paper = line.split("\n")
 
-#    thetext = re.sub(r"^Hint for.*", "", thetext)
-#    thetext = re.sub(r".$", "", thetext,1,re.DOTALL)
-#
-#    thetext = "<hint>\n  <p>\n" + thetext.strip() + "\n  </p>\n</hint>\n"
+        this_workshop = re.search("orkshop\s+([0-9]+)", this_paper[4]).group(1)
 
+        if int(this_workshop) not in workshop_range:
+            print "Workshop not in range", this_workshop
+            continue
+        these_authors = this_paper[3]
+        these_authors = re.sub(",* and ", ", ", these_authors)
+        these_authors = re.sub("[^a-zA-Z, .\-]", "", these_authors)
+        author_list = these_authors.split(", ")
+        
+        if this_workshop in papers_per_workshop:
+        #    papers_per_workshop[this_workshop].append(author_list)
+            authors_per_workshop[this_workshop] += author_list
+            papers_per_workshop[this_workshop] += 1
+        else:
+            authors_per_workshop[this_workshop] = author_list
+            papers_per_workshop[this_workshop] = 1
+
+
+    all_papers = 0
+    all_authors = 0
+    print "totalpapers", totalpapers
+    found_workshops = papers_per_workshop.keys()
+    found_workshops.sort()
+    for w in found_workshops:
+        all_papers += papers_per_workshop[w]
+        all_authors += len(authors_per_workshop[w])
+        print w, len(set(authors_per_workshop[w])), "from total", len(authors_per_workshop[w]), "on", papers_per_workshop[w], "papers"
+        print authors_per_workshop[w]
+        print "possible workshops", len(workshop_range)
+        print "actual workshops", len(found_workshops)
+        print ""
+
+    print "all_papers", all_papers, "all_authors", all_authors
     return the_answer
 
 ###################

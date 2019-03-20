@@ -216,6 +216,42 @@ def mbx_fix(text):   # schmidt calc 3 temporary
     
     return thetext
 
+def mytransform_mbx_remove_linefeeds(text):
+
+    thetext = text
+
+#    print "should be deleting existing formatting, but check!"
+# kill existing formatting.
+# need to rethink this!
+
+    thetext = re.sub("\n +", "\n", thetext)
+
+#    thetext = fix_ptx_math_punctuation(thetext)
+
+    #  now we make all the p tags separate
+    for lip_tag in ["p", "li"]:
+        component.lipcounter[lip_tag] = 0
+        thetext = utilities.tag_to_numbered_tag(lip_tag, thetext)
+
+        print "counted", component.lipcounter[lip_tag], "of", lip_tag
+
+    for lip_tag in ["p", "li"]:
+        for n in range(component.lipcounter[lip_tag]):
+            thetext = re.sub(r"(<" + lip_tag + str(n) + "( |>))" +
+                                 r"(.*?)" + r"(</" + lip_tag + str(n) + ">)",
+                             postprocess.remove_line_feeds,
+                             thetext, 1, re.DOTALL)
+
+    # now put back the original p tags
+    for lip_tag in ["p", "li"]:
+        for n in range(component.lipcounter[lip_tag]):
+            thetext = re.sub(r"<" + lip_tag + str(n) + "( |>)", "<" + lip_tag + r"\1", thetext)
+            thetext = re.sub(r"</" + lip_tag + str(n) + ">", "</" + lip_tag + ">", thetext)
+
+    return thetext
+
+##################
+
 def mytransform_mbx_linefeeds(text):
 
     thetext = text

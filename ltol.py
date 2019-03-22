@@ -20,6 +20,7 @@ import myoperations
 
 conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
                       "txt",
+                      "svg",
                       "ptx",
                       "mbx_permid", "xml_permid", "ptx_permid",
                       "tex", "tex_ptx",
@@ -89,6 +90,9 @@ elif component.filetype_plus in ["xml", "xml_pp", "xml_permid"]:
 elif component.filetype_plus in ["tex_ptx"]:
     fileextension_in = "tex"
     fileextension_out = "ptx"
+elif component.filetype_plus in ["svg"]:
+    fileextension_in = "src"
+    fileextension_out = "svg"
 elif component.filetype_plus in ["mbx_permid"]:
     fileextension_in = "mbx"
     fileextension_out = "ptx"
@@ -190,6 +194,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_html(component.onefile)
     elif component.filetype_plus in ['ptx']:
         component.onefile = myoperations.mytransform_ptx(component.onefile)
+    elif component.filetype_plus in ['svg']:
+        component.onefile = myoperations.mytransform_svg(component.onefile)
     elif component.filetype_plus in ['mbx', 'xml']:
         component.onefile = myoperations.mytransform_mbx(component.onefile)
  #       component.onefile = transforms.mbx_pp(component.onefile)

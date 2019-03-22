@@ -863,6 +863,99 @@ def mytransform_ht(txt):
     return ""
 ###################
 
+def mytransform_svg(text):
+
+    thetext = text
+
+    blobparams = {
+        "blobx1" : 650,
+        "bloby1" : 550,
+        "blobsideheight1" : "200",
+        "blobsidewidth1" : "400",
+        "TheTitle1a" : "Primitive degree 2",
+        "TheTitle1b" : "L-functions",
+        "TheTitle1A" : "Gamma_C(s + nu)",
+        "TheTitle1B1" : "Gamma_C(s+1/2), chi=1, rational",
+        "TheTitle1B2" : "(not used)",
+        "blobbordercolor1" : "#ff8c00",
+        "blobfillcolor1" : "#fff6f6",
+        "blobx2" : 1315,
+        "bloby2" : 1020,
+        "blobsideheight2" : "80",
+        "blobsidewidth2" : "300",
+        "TheTitle2" : "Elliptic curves/Q",
+        "blobbordercolor2" : "#00aa00",
+        "blobfillcolor2" : "#f6fff6",
+        "blobx3" : 45,
+        "bloby3" : 950,
+        "blobsideheight3" : "140",
+        "blobsidewidth3" : "350",
+        "TheTitle3a" : "GL(2)/Q cusp forms",
+        "TheTitle3A" : "holomorphic",
+        "TheTitle3B" : "k=2, chi=1, rational",
+        "blobbordercolor3" : "#0000aa",
+        "blobfillcolor3" : "#f6f6ff",
+        "blobx4" : 1270,
+        "bloby4" : 300,
+        "blobsideheight4" : "140",
+        "blobsidewidth4" : "350",
+        "TheTitle4a" : "Compatible systems of",
+        "TheTitle4b" : "odd 2-dim irred geometric",
+        "TheTitle4c" : "ell-adic Galois repns",
+        "TheTitle4B1" : "H-T weight [0, 1],",
+	"TheTitle4B2" : "det=w, rational",
+        "blobbordercolor4" : "#0000aa",
+        "blobfillcolor4" : "#ccc",
+        "blobx5" : 600,
+        "bloby5" : 1100,
+        "blobsideheight5" : "20",
+        "blobsidewidth5" : "250",
+        "TheTitle5" : "isogeny class 112.c",
+        "blobbordercolor5" : "#f00",
+        "blobfillcolor5" : "none",
+        "blobx6" : 10,
+        "bloby6" : 300,
+        "blobsideheight6" : "200",
+        "blobsidewidth6" : "400",
+        "TheTitle6a" : "Cuspidal automorphic",
+        "TheTitle6b" : "representation of GL(2)/Q",
+        "TheTitle6A" : "pi_oo is (limit of) discrete series",
+        "TheTitle6B1" : "pi_oo has weight 2,",
+	"TheTitle6B2" : "chi_pi=1, rational",
+ #       "blobbordercolor6" : "#ff8c00",
+ #       "blobfillcolor6" : "#fff6f6",
+        "inneroffset2" : "translate(23,27)",
+        "inneroffset3" : "translate(47,52)",
+        "innerfontsize" : "24",
+        "titlex0" : "50",
+        "titley0" : "-66",
+        "titlex1" : "50",
+        "titley1" : "-33",
+        "titlex2" : "50",
+        "titley2" : "0",
+        "titlex3" : "45",
+        "titley3" : "18",
+        "titlefontsize" : "30",
+        "blobcornerheight" : "40",
+        "blobcornerwidth" : "40",
+        "objectxoffset" : "80",
+        "objectyoffset" : "85",
+        "linkcolor" : "black"
+    }
+
+    for key in blobparams:
+        the_key_val = blobparams[key]
+
+        thetext = re.sub(key, str(the_key_val), thetext)
+
+    thetext = re.sub(r"lline\((.*?),(.*?)\)",
+             r'<path d="M \1 L \2" stroke="black" stroke-width="2"/>',
+             thetext)
+
+    return thetext
+
+###################
+
 def mytransform_txt(text):
 
     thetext = text

@@ -82,7 +82,7 @@ if component.filetype_plus in ["ptx", "ptx_pp", "ptx_permid", "ptx_fix", "mbx_st
     fileextension_out = "ptx"
 elif component.filetype_plus in ["mbx_pp"]:
     fileextension_in = "mbx"
-    fileextension_out = "mbx"
+    fileextension_out = "ptx"
 elif component.filetype_plus in ["xml", "xml_pp", "xml_permid"]:
     fileextension_in = "xml"
     fileextension_out = "xml"
@@ -195,6 +195,8 @@ for inputfile, outputfile in component.iofilepairs:
  #       component.onefile = transforms.mbx_pp(component.onefile)
 
     if component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp', 'tex_ptx']:
+        if component.filetype_plus in ['mbx_pp']:
+            component.onefile = re.sub(r'\.mbx"', '.ptx"', component.onefile)
         component.onefile = transforms.mbx_pp(component.onefile)
 
         component.onefile = myoperations.mytransform_mbx_linefeeds(component.onefile)

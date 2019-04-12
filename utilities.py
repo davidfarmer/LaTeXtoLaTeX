@@ -506,4 +506,152 @@ def next_permid_encoded():
      #   print "prohibited:", current_permid_encoded
         return next_permid_encoded()
 
+###################
 
+def business_card(c_location, size, scale, contents, colors):
+    """
+    c_location: [center_x, center_y]
+    size: [[height, width], [title_font, corner_font, sig_font],
+           [title_y_offset, subtitle_y_offset],
+           [corner_offset_x, corner_offset_y], edge_width ]
+    scale: [overall, font]
+    contents: [[title, subtitle], url, [ur, ul, ll, lr], sig]
+    colors: [border, fill, title, corners, sig]
+    """
+
+    center_x, center_y = c_location
+    width, height = size[0]
+    overall_scale = scale[0]
+    half_width = overall_scale * width / 2
+    half_height = overall_scale * height / 2
+
+    left_x = center_x - half_width
+    left_x_str = str(left_x)
+    right_x = center_x + half_width
+    right_x_str = str(right_x)
+    top_y = center_y - half_height
+    top_y_str = str(top_y)
+    bottom_y = center_y + half_height
+    bottom_y_str = str(bottom_y)
+
+    border_color, fill_color, title_color, corner_color, sig_color = colors
+    print "border_color", border_color, "border_color"
+    print "fill_color", fill_color, "fill_color"
+    edge_width = size[4]
+
+    enclosing_rectangle = '<path d="'
+    enclosing_rectangle += 'M ' + left_x_str + ' ' + top_y_str + ' ' 
+    enclosing_rectangle += 'L ' + left_x_str + ' ' + bottom_y_str + ' ' 
+    enclosing_rectangle += 'L ' + right_x_str + ' ' + bottom_y_str + ' ' 
+    enclosing_rectangle += 'L ' + right_x_str + ' ' + top_y_str + ' ' 
+    enclosing_rectangle += 'L ' + left_x_str + ' ' + top_y_str + ' ' 
+    enclosing_rectangle += '" '
+
+    enclosing_rectangle += 'stroke="' + border_color + '" '
+    enclosing_rectangle += 'fill="' + fill_color + '" '
+    enclosing_rectangle += 'stroke-width="' + str(edge_width) + '" '
+
+    enclosing_rectangle += '/>'
+    enclosing_rectangle += '\n'
+
+    # title
+    font = "font-family:verdana"
+    title, subtitle = contents[0]
+    title_font, corner_font, sig_font = size[1]
+    font_scale = scale[1]
+    title_font_size = font_scale * title_font
+    title_y_offset, subtitle_y_offset = size[2]
+
+    title1 = ""
+    title2 = ""
+
+    title1 = '<text '
+    title1 += 'x="' + str(center_x) + '" '
+    if subtitle:  # subtitle
+        title1 += 'y="' + str(center_y + title_y_offset*title_font_size) + '" '
+    else:
+        title1 += 'y="' + str(center_y + title_font_size/4) + '" '
+   #     title1 += 'alignment-baseline="center" '
+    title1 += 'text-anchor="middle" '
+    title1 += 'fill="' + title_color + '" '
+    title1 += 'style="' + font + ';font-size:' + str(title_font_size) + '" '
+    title1 += '>'
+
+    title1 += title
+
+    title1 += '</text>'
+    title1 += '\n'
+
+    # corners
+    corner_offset_x, corner_offset_y = size[3]
+    corner_font_size = font_scale * corner_font
+    ur_content, ul_content, ll_content, lr_content = contents[2]
+
+    ul_corner = ll_corner = lr_corner = ur_corner = ''
+    # would it be better to have a loop instead of 4 similar constructions?
+    if ul_content:
+        ul_corner = '<text '
+        ul_corner += 'x="' + str(left_x + corner_offset_x*corner_font_size) + '" '
+        ul_corner += 'y="' + str(top_y + (0.6 + corner_offset_y)*corner_font_size) + '" '
+        ul_corner += 'text-anchor="start" '
+        ul_corner += 'fill="' + corner_color + '" '
+        ul_corner += 'style="' + font + ';font-size:' + str(corner_font_size) + '" '
+        ul_corner += '>'
+        ul_corner += ul_content
+        ul_corner += '</text>'
+        ul_corner += '\n'
+
+    if ll_content:
+        ll_corner = '<text '
+        ll_corner += 'x="' + str(left_x + corner_offset_x*corner_font_size) + '" '
+        ll_corner += 'y="' + str(bottom_y - corner_offset_y*corner_font_size) + '" '
+        ll_corner += 'text-anchor="start" '
+        ll_corner += 'fill="' + corner_color + '" '
+        ll_corner += 'style="' + font + ';font-size:' + str(corner_font_size) + '" '
+        ll_corner += '>'
+        ll_corner += ll_content
+        ll_corner += '</text>'
+        ll_corner += '\n'
+
+    if lr_content:
+        lr_corner = '<text '
+        lr_corner += 'x="' + str(right_x - corner_offset_x*corner_font_size) + '" '
+        lr_corner += 'y="' + str(bottom_y - corner_offset_y*corner_font_size) + '" '
+        lr_corner += 'text-anchor="end" '
+        lr_corner += 'fill="' + corner_color + '" '
+        lr_corner += 'style="' + font + ';font-size:' + str(corner_font_size) + '" '
+        lr_corner += '>'
+        lr_corner += lr_content
+        lr_corner += '</text>'
+        lr_corner += '\n'
+
+    if ur_content:
+        ur_corner = '<text '
+        ur_corner += 'x="' + str(right_x - corner_offset_x*corner_font_size) + '" '
+        ur_corner += 'y="' + str(top_y + (0.6 + corner_offset_y)*corner_font_size) + '" '
+        ur_corner += 'text-anchor="end" '
+        ur_corner += 'fill="' + corner_color + '" '
+        ur_corner += 'style="' + font + ';font-size:' + str(corner_font_size) + '" '
+        ur_corner += '>'
+        ur_corner += ur_content
+        ur_corner += '</text>'
+        ur_corner += '\n'
+
+    # sig refers to words that are below and to the right
+    the_sig = contents[3]
+    if the_sig:
+        sig_text = '<text '
+        sig_text += 'x="' + str(right_x - corner_offset_x*corner_font_size) + '" '
+        sig_text += 'y="' + str(bottom_y + (0.6 + corner_offset_y)*corner_font_size) + '" '
+        sig_text += 'text-anchor="end" '
+        sig_text += 'fill="' + corner_color + '" '
+        sig_text += 'style="' + font + ';font-size:' + str(corner_font_size) + '" '
+        sig_text += '>'
+        sig_text += the_sig
+        sig_text += '</text>'
+        sig_text += '\n'
+
+    the_object = enclosing_rectangle + title1 + title2 + ul_corner + ll_corner + lr_corner + ur_corner + sig_text
+
+
+    return the_object

@@ -952,6 +952,16 @@ def mytransform_svg(text):
              r'<path d="M \1 L \2" stroke="black" stroke-width="2"/>',
              thetext)
 
+    c_loc = [250, 300]
+    siz = [[100,50], [42,30,30], [1,-1], [0.3,0.4], 5]
+    scal = [3,1]
+    cont = [ ["This is title", ""], "", ["ab", "bc", "cd", "de"], "not optimal" ]
+    colo = ["#900", "none", "#6d6", "#000", "#999"]
+
+    thetext = re.sub("SUB_HERE",
+               utilities.business_card(c_loc, siz, scal, cont, colo),
+               thetext)
+
     return thetext
 
 ###################

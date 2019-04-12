@@ -95,6 +95,18 @@ def add_space_with(txt):
 
 ##################
 
+def remove_line_feeds(txt):
+
+    start_tag = txt.group(1)
+    tag_content = txt.group(3)
+    end_tag = txt.group(4)
+
+    tag_content = re.sub(" *\n *", " ", tag_content)
+
+    return start_tag + tag_content + end_tag
+
+##################
+
 def add_line_feeds(tag,text):
 
    # assumes tag is followed by line feed 

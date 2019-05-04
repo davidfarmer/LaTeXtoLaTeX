@@ -1,5 +1,6 @@
 
 import re
+import math
 
 import utilities
 import component
@@ -867,6 +868,15 @@ def mytransform_svg(text):
 
     thetext = text
 
+    the_output = '<?xml version="1.0" standalone="no" ?>'
+    the_output += '\n'
+    the_output += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">'
+    the_output += '\n'
+    the_output += '\n'
+    the_output += '<svg viewBox="0 0 2000 1500" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">'
+    the_output += '\n'
+    the_output += '\n'
+
     blobparams = {
         "blobx1" : 650,
         "bloby1" : 550,
@@ -952,17 +962,143 @@ def mytransform_svg(text):
              r'<path d="M \1 L \2" stroke="black" stroke-width="2"/>',
              thetext)
 
-    c_loc = [250, 300]
-    siz = [[100,50], [42,30,30], [1,-1], [0.3,0.4], 5]
-    scal = [3,1]
+    iso_vertices = [
+        {
+         "title": "112.c1",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 144,
+         "optimal": False
+        },
+        {
+         "title": "112.c3",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 48
+        },
+        {
+         "title": "112.c4",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 16,
+         "optimal": False
+        },
+        {
+         "title": "112.c6",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 24
+        },
+        {
+         "title": "112.c2",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 72
+        },
+        {
+         "title": "112.c5",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 8,
+         "optimal": True
+        }
+    ]
+
+    iso_edges = [
+        {"ends": [0,1], "label": "2"},
+        {"ends": [0,3], "label": "2"},
+        {"ends": [1,2], "label": "2"},
+        {"ends": [1,5], "label": "2"},
+        {"ends": [2,5], "label": "2"},
+        {"ends": [3,4], "label": "2"},
+        {"ends": [5,4], "label": "2"}
+        ]
+
+    c_loc = [[200, 125], [800, 125], [1400, 125], [200, 725], [800, 725], [1400, 725]]
+    siz = [[300,150], [21,15,15], [1,-1], [0.3,0.4], 5]
+    scal = [1,2]
     cont = [ ["This is title", ""], "", ["ab", "bc", "cd", "de"], "not optimal" ]
-    colo = ["#900", "none", "#6d6", "#000", "#999"]
+    colo = ["#900", "#fff", "#6d6", "#000", "#999"]
 
-    thetext = re.sub("SUB_HERE",
-               utilities.business_card(c_loc, siz, scal, cont, colo),
-               thetext)
 
-    return thetext
+
+#    thetext = re.sub("SUB_HERE",
+#               utilities.business_card(c_loc, siz, scal, cont, colo),
+#               thetext)
+
+    these_cards = {}
+
+    for j, dat in enumerate(iso_vertices):
+        this_location = c_loc[j]
+        this_data = [ [dat['title'], ""], "" ]
+        this_data.append([str(dat["degree"]), "", dat["sha_tamagawa"], str(dat["torsion"])])
+        if "optimal" in dat and dat["optimal"]:
+            this_data.append("optimal")
+        else:
+            this_data.append("")
+        these_cards[j] = utilities.business_card(this_location, siz, scal, this_data, colo)
+
+    these_edges = {}
+    for j, edge in enumerate(iso_edges):
+        start_v, end_v = edge["ends"]
+        start_pt = these_cards[start_v][1]
+        end_pt = these_cards[end_v][1]
+        this_edge = '<path d="'
+        this_edge += 'M ' + str(start_pt[0]) + ' ' + str(start_pt[1]) + ' '
+        this_edge += 'L ' + str(end_pt[0]) + ' ' + str(end_pt[1]) + ' '
+        this_edge += '" '
+
+        this_edge += 'stroke="' + '#3d8' + '" '
+        this_edge += 'stroke-width="' + '9' + '" '
+
+        this_edge += '/>'
+
+        label_offset = 30
+        font = "font-family:verdana"
+        if "label" in edge:
+            this_label = str(edge["label"])
+            line_mid_pt_x = (start_pt[0] + end_pt[0])/2.0
+            line_mid_pt_y = (start_pt[1] + end_pt[1])/2.0
+            x_offset = y_offset = 0
+            if start_pt[0] == end_pt[0]:
+                x_offset += math.copysign(label_offset, end_pt[1] - start_pt[1])
+            elif start_pt[1] == end_pt[1]:
+                y_offset -= math.copysign(label_offset, end_pt[0] - start_pt[0])
+            else:  # can make this more sophisticated and take the slope into account
+                x_offset += 0.7 * math.copysign(label_offset, end_pt[1] - start_pt[1])
+                y_offset -= 0.7 * math.copysign(label_offset, end_pt[0] - start_pt[0])
+
+            this_label_text = '<text '
+            this_label_text += 'x="' + str(line_mid_pt_x + x_offset) + '" '
+            this_label_text += 'y="' + str(line_mid_pt_y + y_offset) + '" '
+            this_label_text += 'text-anchor="middle" '
+            this_label_text += 'fill="' + '#d0d' + '" '
+            this_label_text += 'style="' + font + ';font-size:' + str(30) + '" '
+            this_label_text += '>'
+            this_label_text += this_label
+            this_label_text += '</text>'
+        else:
+            this_label_text = ''
+
+        print "this_edge", this_edge
+        these_edges[j] = this_edge
+        these_edges[j] += this_label_text
+
+    for j in these_edges:
+    #    the_output += utilities.business_card(this_location, siz, scal, this_data, colo)
+        print "j",j,"these_edges[j]", these_edges[j]
+        the_output += these_edges[j]
+
+    for j in these_cards:
+    #    the_output += utilities.business_card(this_location, siz, scal, this_data, colo)
+        print "j",j,"these_cards[j]", these_cards[j][0]
+        the_output += these_cards[j][0]
+
+    the_output += '\n'
+    the_output += '</svg>'
+    the_output += '\n'
+
+    return the_output
 
 ###################
 

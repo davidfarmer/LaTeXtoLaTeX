@@ -521,6 +521,7 @@ def business_card(c_location, size, scale, contents, colors):
 
     center_x, center_y = c_location
     width, height = size[0]
+    aspect_ratio = float(height)/float(width)
     overall_scale = scale[0]
     half_width = overall_scale * width / 2
     half_height = overall_scale * height / 2
@@ -650,8 +651,10 @@ def business_card(c_location, size, scale, contents, colors):
         sig_text += the_sig
         sig_text += '</text>'
         sig_text += '\n'
+    else:
+         sig_text = ''
 
     the_object = enclosing_rectangle + title1 + title2 + ul_corner + ll_corner + lr_corner + ur_corner + sig_text
 
 
-    return the_object
+    return [the_object, [center_x, center_y], [left_x, right_x, top_y, bottom_y], aspect_ratio]

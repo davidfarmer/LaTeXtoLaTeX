@@ -1005,13 +1005,14 @@ def mytransform_svg(text):
     ]
 
     iso_edges = [
-        {"ends": [0,1], "label": "2"},
-        {"ends": [0,3], "label": "2"},
-        {"ends": [1,2], "label": "2"},
-        {"ends": [1,5], "label": "2"},
-        {"ends": [2,5], "label": "2"},
-        {"ends": [3,4], "label": "2"},
-        {"ends": [5,4], "label": "2"}
+        {"ends": [0,1], "label": "88880000112"},
+        {"ends": [0,3], "label": "88880000222"},
+        {"ends": [1,2], "label": "88880000332"},
+        {"ends": [5,1], "label": "88880000442"},
+        {"ends": [3,1], "label": "8888000011442"},
+        {"ends": [5,2], "label": "88880000233443"},
+        {"ends": [3,4], "label": "88880000552"},
+        {"ends": [5,4], "label": "88880000662"}
         ]
 
     c_loc = [[200, 125], [800, 125], [1400, 125], [200, 725], [800, 725], [1400, 725]]
@@ -1054,6 +1055,7 @@ def mytransform_svg(text):
         this_edge += '/>'
 
         label_offset = 30
+        label_font_size = 40
         font = "font-family:verdana"
         if "label" in edge:
             this_label = str(edge["label"])
@@ -1061,19 +1063,38 @@ def mytransform_svg(text):
             line_mid_pt_y = (start_pt[1] + end_pt[1])/2.0
             x_offset = y_offset = 0
             if start_pt[0] == end_pt[0]:
-                x_offset += math.copysign(label_offset, end_pt[1] - start_pt[1])
+                if math.copysign(1, end_pt[1] - start_pt[1]) > 0:
+                    x_offset += label_offset
+                    this_text_anchor = "start"
+                else:
+                    x_offset -= label_offset
+                    this_text_anchor = "end"
             elif start_pt[1] == end_pt[1]:
-                y_offset -= math.copysign(label_offset, end_pt[0] - start_pt[0])
+                if math.copysign(1, end_pt[0] - start_pt[0]) > 0:
+                    y_offset -= label_offset
+                    this_text_anchor = "middle"
+                else:
+                    y_offset += label_offset + label_font_size
+                    this_text_anchor = "middle"
             else:  # can make this more sophisticated and take the slope into account
-                x_offset += 0.7 * math.copysign(label_offset, end_pt[1] - start_pt[1])
-                y_offset -= 0.7 * math.copysign(label_offset, end_pt[0] - start_pt[0])
+                if math.copysign(1, end_pt[1] - start_pt[1]) > 0:
+                    x_offset += 0.7 * label_offset
+                    y_offset -= 0.7 * label_offset
+                    this_text_anchor = "start"
+                else:
+                    x_offset -= 0.7 * label_offset
+                    this_text_anchor = "end"
+                if math.copysign(1, end_pt[0] - start_pt[0]) > 0:
+                    y_offset -= 0.7 * label_offset
+                else:
+                    y_offset += 0.7 * (label_offset + label_font_size)
 
             this_label_text = '<text '
             this_label_text += 'x="' + str(line_mid_pt_x + x_offset) + '" '
             this_label_text += 'y="' + str(line_mid_pt_y + y_offset) + '" '
-            this_label_text += 'text-anchor="middle" '
+            this_label_text += 'text-anchor="' + this_text_anchor + '" '
             this_label_text += 'fill="' + '#d0d' + '" '
-            this_label_text += 'style="' + font + ';font-size:' + str(30) + '" '
+            this_label_text += 'style="' + font + ';font-size:' + str(label_font_size) + '" '
             this_label_text += '>'
             this_label_text += this_label
             this_label_text += '</text>'

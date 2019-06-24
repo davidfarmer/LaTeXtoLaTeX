@@ -873,7 +873,7 @@ def mytransform_svg(text):
     the_output += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">'
     the_output += '\n'
     the_output += '\n'
-    the_output += '<svg viewBox="0 0 2000 1500" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">'
+    the_output += '<svg viewBox="0 0 1600 950" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">'
     the_output += '\n'
     the_output += '\n'
 
@@ -1004,17 +1004,90 @@ def mytransform_svg(text):
         }
     ]
 
-    iso_edges = [
-        {"ends": [0,1], "label": "3"},
-        {"ends": [0,3], "label": "2"},
-        {"ends": [1,2], "label": "3"},
-        {"ends": [1,4], "label": "2"},
-        {"ends": [2,5], "label": "2"},
-        {"ends": [3,4], "label": "3"},
-        {"ends": [4,5], "label": "3"}
-        ]
+    iso_vertices = [
+        {
+         "title": "21.a1",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 2,
+         "degree" : 4,
+         "optimal": False
+        },
+        {
+         "title": "21.a3",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 8,
+         "degree" : 2
+        },
+        {
+         "title": "21.a2",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 4,
+         "degree" : 2,
+         "optimal": False
+        },
+        {
+         "title": "21.a5",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 8,
+         "degree" : 1,
+         "optimal": True
+        },
+        {
+         "title": "21.a4",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 2,
+         "degree" : 4
+        },
+        {
+         "title": "21.a6",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 4,
+         "degree" : 2,
+        }
+    ]
 
-    c_loc = [[200, 125], [800, 125], [1400, 125], [200, 725], [800, 725], [1400, 725]]
+
+    iso_graph_window = {}
+    iso_graph_window = ["h"] = [[0,0], [1200, 950]]
+    iso_graph_layout = {}
+    graph_layout = "g"
+    graph_layout = "h"
+
+    iso_graph_layout["g"] = [
+              [[200, 125], [800, 125], [1400, 125], [200, 625], [800, 625], [1400, 625]],
+              [
+              {"ends": [0,1], "label": "3"},
+              {"ends": [0,3], "label": "2"},
+              {"ends": [1,2], "label": "3"},
+              {"ends": [1,4], "label": "2"},
+              {"ends": [2,5], "label": "2"},
+              {"ends": [3,4], "label": "3"},
+              {"ends": [4,5], "label": "3"}
+              ]
+    ]
+    iso_graph_layout["h"] = [
+              [[200, 125], [1400, 125], [500, 475], [1100, 475], [200, 825], [1400, 825]],
+       #       [[200, 125], [800, 125], [1400, 125], [200, 625], [800, 625], [1400, 625]],
+              [
+              {"ends": [0,2], "label": "2"},
+              {"ends": [2,3], "label": "2"},
+              {"ends": [3,1], "label": "2"},
+              {"ends": [4,2], "label": "2"},
+              {"ends": [3,5], "label": "2"}
+              ]
+    ]
+
+#    iso_edges["g"] = [
+#        {"ends": [0,1], "label": "3"},
+#        {"ends": [0,3], "label": "2"},
+#        {"ends": [1,2], "label": "3"},
+#        {"ends": [1,4], "label": "2"},
+#        {"ends": [2,5], "label": "2"},
+#        {"ends": [3,4], "label": "3"},
+#        {"ends": [4,5], "label": "3"}
+#        ]
+#    iso_vertices["g"] = [[200, 125], [800, 125], [1400, 125], [200, 625], [800, 625], [1400, 625]]
+
     siz = [[300,150], [21,15,15], [1,-1], [0.3,0.4], 5]
     scal = [1,2]
     cont = [ ["This is title", ""], "", ["ab", "bc", "cd", "de"], "not optimal" ]
@@ -1028,6 +1101,7 @@ def mytransform_svg(text):
 
     these_cards = {}
 
+    c_loc = iso_graph_layout[graph_layout][0]
     for j, dat in enumerate(iso_vertices):
         this_location = c_loc[j]
         this_data = [ [dat['title'], ""], "" ]
@@ -1039,6 +1113,7 @@ def mytransform_svg(text):
         these_cards[j] = utilities.business_card(this_location, siz, scal, this_data, colo)
 
     these_edges = {}
+    iso_edges = iso_graph_layout[graph_layout][1]
     for j, edge in enumerate(iso_edges):
         start_v, end_v = edge["ends"]
         start_pt = these_cards[start_v][1]
@@ -1104,6 +1179,13 @@ def mytransform_svg(text):
         these_edges[j] = this_edge
         these_edges[j] += this_label_text
 
+    the_output += '<svg viewBox="'
+    the_window = iso_graph_window[graph_layout]
+    the_output += the_window[0][0] + ' ' + the_window[0][0] + ' ' the_window[0][0] + ' ' the_window[0][0]
+oooooo
+    the_output += '0 0 1600 950" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">'
+    the_output += '\n'
+    the_output += '\n'
     for j in these_edges:
     #    the_output += utilities.business_card(this_location, siz, scal, this_data, colo)
         print "j",j,"these_edges[j]", these_edges[j]

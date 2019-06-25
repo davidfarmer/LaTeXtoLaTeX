@@ -1048,7 +1048,7 @@ def mytransform_svg(text):
 
 
     iso_graph_window = {}
-    iso_graph_window = ["h"] = [[0,0], [1200, 950]]
+    iso_graph_window["h"] = [[0,0], [1200, 950]]
     iso_graph_layout = {}
     graph_layout = "g"
     graph_layout = "h"
@@ -1181,8 +1181,8 @@ def mytransform_svg(text):
 
     the_output += '<svg viewBox="'
     the_window = iso_graph_window[graph_layout]
-    the_output += the_window[0][0] + ' ' + the_window[0][0] + ' ' the_window[0][0] + ' ' the_window[0][0]
-oooooo
+    the_output += the_window[0][0] + ' ' + the_window[0][0] + ' ' + the_window[0][0] + ' ' + the_window[0][0]
+
     the_output += '0 0 1600 950" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">'
     the_output += '\n'
     the_output += '\n'

@@ -155,6 +155,40 @@ else:
 
 # print component.iofilepairs
 
+listofpermids = []
+
+# if adding permids, need to find old permids
+if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid']:
+    for inputfile, outputfile in component.iofilepairs:
+        with open(inputfile) as infile:
+            thisfile = infile.read()
+        tmp_ct = 0
+        while 'permid=' in thisfile and tmp_ct < 100000:
+            this_permid = re.search(r'permid="([^"]+)"', thisfile).group(1)
+            thisfile = re.sub(r'permid="([^"]+)"', r'PERMID="\1"', thisfile, 1)
+            component.all_permid.append(this_permid)
+            listofpermids.append(utilities.tobase52(component.current_permid))
+            utilities.next_permid_encoded()
+            
+listofpermids.sort()
+component.all_permid.sort()
+
+print listofpermids
+print component.all_permid
+
+print len(listofpermids)
+print len(component.all_permid)
+
+print listofpermids == component.all_permid
+
+for nn in range(70,100):
+    print nn, listofpermids[nn], component.all_permid[nn]
+
+#for count, theid in enumerate(listofpermids):
+#    print count, theid == component.all_permid[count]
+
+die()
+
 print "about to loop over files:", component.iofilepairs
 
 for inputfile, outputfile in component.iofilepairs:

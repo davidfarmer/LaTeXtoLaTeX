@@ -279,8 +279,8 @@ for inputfile, outputfile in component.iofilepairs:
                                    r"\1\2\1\3", component.onefile)
 
         # somehow periods after a quote or url were ending up on the next line
-        component.onefile = re.sub(r">\n *(\.|,) *\n", r">\1" + "\n", component.onefile)
-        component.onefile = re.sub(r">\n( *)(\.|,) +", r">\2" + "\n" + r"\1", component.onefile)
+        component.onefile = re.sub(r">\n *(\)*(\.|,)) *\n", r">\1" + "\n", component.onefile)
+        component.onefile = re.sub(r">\n( *)(\)*(\.|,)) +", r">\2" + "\n" + r"\1", component.onefile)
         # and line feeds before a closing url
         component.onefile = re.sub(r"\s+</url>", "</url>", component.onefile)
         # and sometimes spaces at end of line  (often from idx)

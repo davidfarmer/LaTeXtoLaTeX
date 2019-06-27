@@ -181,13 +181,13 @@ print len(component.all_permid)
 
 print listofpermids == component.all_permid
 
-for nn in range(70,100):
-    print nn, listofpermids[nn], component.all_permid[nn]
+#for nn in range(70,100):
+#    print nn, listofpermids[nn], component.all_permid[nn]
 
 #for count, theid in enumerate(listofpermids):
 #    print count, theid == component.all_permid[count]
 
-die()
+#die()
 
 print "about to loop over files:", component.iofilepairs
 
@@ -262,21 +262,33 @@ for inputfile, outputfile in component.iofilepairs:
         # and parentheses or other markup before quantity
         component.onefile = re.sub(r"(\(|>)\s*(<quantity>)", r"\1\2", component.onefile)
 
-      # fix lines that only contain spaces
+        # fix lines that only contain spaces
         component.onefile = re.sub(r"\n +\n", "\n\n", component.onefile)
         component.onefile = re.sub(r"\n +\n", "\n\n", component.onefile)
-    # fix extra white space around comments
+        # fix extra white space around comments
         component.onefile = re.sub(r"\n+( *<!--)", "\n" + r"\1", component.onefile)
         component.onefile = re.sub(r"-->\n+", "-->\n", component.onefile)
-      # no need for more than one blank line
+        # no need for more than one blank line
         component.onefile = re.sub(r"\n{3,}", "\n\n", component.onefile)
-      # put short li on one line
+        # put short li on one line
         component.onefile = re.sub("(<li>)\s+(.{,50})\s+(</li>)", r"\1\2\3", component.onefile)
         for _ in range(10):
             component.onefile = re.sub("(\n +)(<idx>.*?</idx>) *(<idx>)",
                                        r"\1\2\1\3", component.onefile)
         component.onefile = re.sub("(\n +)(    <idx>.*?</idx>) *([A-Z])",
                                    r"\1\2\1\3", component.onefile)
+
+        # somehow periods after a quote or url were ending up on the next line
+        component.onefile = re.sub(r">\n *(\.|,) *\n", r">\1" + "\n", component.onefile)
+        component.onefile = re.sub(r">\n( *)(\.|,) +", r">\2" + "\n" + r"\1", component.onefile)
+        # and line feeds before a closing url
+        component.onefile = re.sub(r"\s+</url>", "</url>", component.onefile)
+        # and sometimes spaces at end of line  (often from idx)
+        component.onefile = re.sub(r"\s+\n", "\n", component.onefile)
+
+        # there should not be a blank line at the start or end of a file
+        component.onefile = re.sub(r"^\n+", "", component.onefile)
+        component.onefile = re.sub(r"\n+$", "", component.onefile)
 
     if component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = myoperations.mbx_fix(component.onefile)
@@ -291,9 +303,6 @@ for inputfile, outputfile in component.iofilepairs:
 
     if component.filetype_plus == "mbx_fa":
         component.onefile = transforms.mbx_fa(component.onefile)
-
-#    if component.filetype_plus == "tex_ptx":
-#        component.onefile = transforms.mbx_pp(component.onefile)
 
     if component.onefile:
         # there is not actually a subtask tag

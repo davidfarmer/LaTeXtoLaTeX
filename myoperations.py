@@ -284,27 +284,6 @@ def mytransform_mbx_linefeeds(text):
 
     return thetext
 
-
-
-
- # ----------- #
-
-    thetext = re.sub(r"<task\b(.*?)</task>", 
-          lambda match: mytransform_mbx_tag(match, "task", "statement", "conclusion", ["hint", "answer", "solution"]),
-          thetext,0, re.DOTALL)
-
-    # if an exploration contains a task or hint,
-    # then the introduction and conclusion needs to be wrapped
-    thetext = re.sub(r"<exploration\b(.*?)</exploration>", 
-          lambda match: mytransform_mbx_tag(match, "exploration", "introduction", "conclusion", ["task", "hint"]),
-          thetext,0, re.DOTALL)
-
-    thetext = re.sub(r"<example\b(.*?)</example>", 
-          lambda match: mytransform_mbx_tag(match, "example", "statement", "conclusion", ["hint", "answer", "solution"]),
-          thetext,0, re.DOTALL)
-
-    return thetext
-
 def mytransform_mbx_tag(txt, outertag, introtag, conclusiontag, innertags):
 
     the_text = txt.group(1)

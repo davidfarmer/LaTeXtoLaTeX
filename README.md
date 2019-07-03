@@ -50,3 +50,10 @@ make a change after doing step 5), I want to start over with
 the original files.  I find it easier to use the files I saved in
 src_orig instead of switching branches or doing some other git thing.
 
+-------------
+
+To convert all the files in a directory *and its subdirectories* then
+append 'R' to the command, as in
+
+./ltol.py ptx_permid path_to_src1 path_to_src2 R
+

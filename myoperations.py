@@ -1610,11 +1610,15 @@ def add_permid_within_sections(text):
         thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
             lambda match: add_permid_within(match, tag, 7), thetext, 0, re.DOTALL)
 
+    for lev in range(7, -1, -1):
+      for tag in component.tags_by_level[lev]:
+        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+            lambda match: add_permid_within(match, tag, 7), thetext, 0, re.DOTALL)
 
     # now we put permid "on" everything.  If there already is a permid,
     # then it should not change.  But if we missed somethign, now we catch it.
     print "looking for missing permid",len(component.all_permid)
-    for lev in range(6, -1, -1):
+    for lev in range(8, -1, -1):
       for tag in component.tags_by_level[lev]:
         component.local_counter[tag] = 0
    #     print "BBB",lev,tag
@@ -1623,7 +1627,7 @@ def add_permid_within_sections(text):
     print "done looking for missing permid",len(component.all_permid)
 
     print "again looking for missing permid",len(component.all_permid)
-    for lev in range(6, -1, -1):
+    for lev in range(8, -1, -1):
       for tag in component.tags_by_level[lev]:
         component.local_counter[tag] = 0
    #     print "BBB",lev,tag
@@ -1664,7 +1668,7 @@ def add_permid_within(txt, parent_tag, level):
     the_closing_tag = txt.group(4)
 
     try:
-        parent_permid = re.search('permid="([^"]+)"', the_attributes).group(1)
+        parent_permid = re.search(' permid="([^"]+)"', the_attributes).group(1)
     except AttributeError:
         print "ERROR: parent with no permid:", the_opening_tag, "aaa", the_text[:30]
         parent_permid = "ERROR"
@@ -1716,7 +1720,7 @@ def naive_add_permid_on(txt):
 
     tag = txt.group(1)
 
-    if "permid" in tag:
+    if " permid" in tag:
         return "<" + tag + ">"
 
     the_permid = utilities.next_permid_encoded()

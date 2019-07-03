@@ -175,7 +175,8 @@ if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid']:
         thisfile = re.sub(r'PERMID=', r'permid=', thisfile)
 
     component.permid_base_number = len(component.all_permid) + 123
-    print "starting permid:", component.permid_base_number
+    component.current_permid = component.permid_base_number
+    print "starting permid:", component.current_permid
 
 #listofpermids.sort()
 #component.all_permid.sort()

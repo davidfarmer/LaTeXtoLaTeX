@@ -37,7 +37,7 @@ if len(sys.argv) == 1 or sys.argv[1] == "-h":
     print ''
     print 'OR if you wish to convert an entire folder and subfolders, do'
     print '    ./ltol.py filetype_plus inputrootdir outputrootdir R'
-    print 'For recursion target directory should NOT already exist'
+#    print 'For recursion target directory should NOT already exist'
     print ''
     print 'Supported filetype_plus: '
     print conversion_options
@@ -50,6 +50,9 @@ if not len(sys.argv) >= 4:
     print 'to convert one file, or'
     print './ltol.py filetype_plus inputdirectory outputdirectory'
     print 'to convert all the "filetype" files in a directory.  The outputdirectory must already exist.'
+    print 'Or'
+    print './ltol.py filetype_plus inputdirectory outputdirectory R'
+    print 'to convert all the "filetype" files in a directory and its subdirectories.'
     print 'Supported filetype_plus: '
     print conversion_options
     sys.exit()
@@ -59,7 +62,7 @@ component.inputname = sys.argv[2]
 component.outputname = sys.argv[3]
 dorecursive = False
 
-if len(sys.argv) == 5:
+if len(sys.argv) == 5 and sys.argv[4] == 'R':
     dorecursive = True    
 
 print component.inputname
@@ -169,17 +172,21 @@ if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid']:
             component.all_permid.append(this_permid)
             listofpermids.append(utilities.tobase52(component.current_permid))
             utilities.next_permid_encoded()
-            
-listofpermids.sort()
-component.all_permid.sort()
+        thisfile = re.sub(r'PERMID=', r'permid=', thisfile)
 
-print listofpermids
-print component.all_permid
+    component.permid_base_number = len(component.all_permid) + 123
+    print "starting permid:", component.permid_base_number
 
-print len(listofpermids)
-print len(component.all_permid)
+#listofpermids.sort()
+#component.all_permid.sort()
+#
+#print listofpermids
+#print component.all_permid
+#
+#print len(listofpermids)
+#print len(component.all_permid)
 
-print listofpermids == component.all_permid
+#print listofpermids == component.all_permid
 
 #for nn in range(70,100):
 #    print nn, listofpermids[nn], component.all_permid[nn]

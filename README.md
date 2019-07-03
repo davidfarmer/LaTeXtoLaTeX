@@ -57,3 +57,4 @@ append 'R' to the command, as in
 
 ./ltol.py ptx_permid path_to_src1 path_to_src2 R
 
+With the 'R' option the target directory should not already exist.

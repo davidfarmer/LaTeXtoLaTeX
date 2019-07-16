@@ -184,19 +184,20 @@ def fa_conv(txt):
 
 ###################
 
-#def mytransform_mbx(text):   # schmidt calc 3 temporary
-def mbx_fix(text):   # schmidt calc 3 temporary
+def mytransform_mbx(text):   # schmidt calc 3 temporary
+#def mbx_fix(text):   # schmidt calc 3 temporary
 
 
     thetext = text
-    print "in mbx_fix"
 
-    thetext = re.sub(r"\\G\b", r"\\mathcal{G}", thetext)
-    thetext = re.sub(r"\\fatr\b", r"\\R", thetext)
-    thetext = re.sub(r"\\fatz\b", r"\\Z", thetext)
-    thetext = re.sub(r"\\fatq\b", r"\\Q", thetext)
-    thetext = re.sub(r"\\fatc\b", r"\\C", thetext)
-    thetext = re.sub(r"\\fatn\b", r"\\N", thetext)
+    thetext = re.sub(r"</c>([a-z])", r"</c> \1", thetext)
+
+#    thetext = re.sub(r"\\G\b", r"\\mathcal{G}", thetext)
+#    thetext = re.sub(r"\\fatr\b", r"\\R", thetext)
+#    thetext = re.sub(r"\\fatz\b", r"\\Z", thetext)
+#    thetext = re.sub(r"\\fatq\b", r"\\Q", thetext)
+#    thetext = re.sub(r"\\fatc\b", r"\\C", thetext)
+#    thetext = re.sub(r"\\fatn\b", r"\\N", thetext)
 
 #    thetext = re.sub(r"EXTRA\s*<fn>(.*?)</fn>\s*", r"\\extrafn{\1}", thetext, 0, re.DOTALL)
 #

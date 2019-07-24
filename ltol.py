@@ -270,6 +270,10 @@ for inputfile, outputfile in component.iofilepairs:
         # and parentheses or other markup before quantity
         component.onefile = re.sub(r"(\(|>)\s*(<quantity>)", r"\1\2", component.onefile)
 
+        # special case for <c> in the middle of a sentence
+        # this should not be needed, but there is a bug somewhere.
+        component.onefile = re.sub(r"(</c>)([a-z])", r"\1 \2", component.onefile)
+
         # fix lines that only contain spaces
         component.onefile = re.sub(r"\n +\n", "\n\n", component.onefile)
         component.onefile = re.sub(r"\n +\n", "\n\n", component.onefile)

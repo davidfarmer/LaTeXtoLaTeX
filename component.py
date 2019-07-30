@@ -34,6 +34,9 @@ people_list = []
 lipcounter = {}
 local_counter = {}
 
+collaboration_year = 2005
+these_collaborations = []
+
 sha1of = {}
 
 all_permid = []

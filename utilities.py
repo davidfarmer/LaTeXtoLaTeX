@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import logging
 import hashlib
@@ -505,6 +506,243 @@ def next_permid_encoded():
     else:
      #   print "prohibited:", current_permid_encoded
         return next_permid_encoded()
+
+###################
+
+html_to_latex_pairs = [
+    [r"&#xc1;",r"\\'A"],
+    [r"&#xc4;",r'\\"A'],
+    [r"&#xc8;",r"\\`E"],
+    [r"&#xc9;",r"\\'E"],
+    [r"&#xd6;",r'\\"O'],
+    [r"&#xe1;",r"\\'a"],
+    [r"&#xe4;",r'\\"a'],
+    [r"&#xe8;",r"\\`e"],
+    [r"&#xe9;",r"\\'e"],
+    [r"&#xf3;",r"\\'o"],
+    [r"&#xf8;",r"{\\o}"],
+    [r"&#xfa;",r"\\'u"],
+    [r"&#xfc;",r'\\"u'],
+    [r"&#xf1;",r'\\~n'],
+    [r"&#355;",r'\\c{t}'],
+    [r"&#169;",r'\\~u'],
+    [r"&#259;",r'\\u{a}'],
+    [r"&#287;",r'\\u{g}'],
+    [r"&#281;",r'\\c{e}'],
+    [r"&#301;",r'\\u{\\i}'],
+    [r"&#350;",r'\\c{S}'],
+    [r"&#351;",r'\\c{s}'],
+    [r"&#x107;",r"\\'c"],
+    [r"&#x10c;",r"\\v{C}"],
+    [r"&#x10d;",r"\\v{c}"],
+    [r"&#x11a;",r"\\v{E}"],
+    [r"&#x11b;",r"\\v{e}"],
+    [r"&#x141;",r"\\L"],
+    [r"&#x160;",r'\\v{S}'],
+    [r"&#x161;",r'\\v{s}'],
+    [r"&#x27;",r"'"],
+    [r"&iuml;",r'\\"{\\i}'],
+    [r"&szlig;",r'{\\ss}'],
+    [r"&ndash;",r'--'],
+    [r"&quot;",r'"']
+    ]
+
+
+def html_to_latex_alphabet(text):
+
+    thetext = text
+
+    for ht,la in html_to_latex_pairs:
+        thetext = re.sub(ht,la,thetext)
+
+    thetext = re.sub(r"&#34;",r'"',thetext)
+    thetext = re.sub(r"&#39;",r"'",thetext)
+
+    thetext = re.sub(r"&(.)uml;",r'\\"\1',thetext)
+    thetext = re.sub(r"&iacute;",r"\\'{\\i}",thetext)
+    thetext = re.sub(r"&(.)acute;",r"\\'\1",thetext)
+    thetext = re.sub(r"&(.)grave;",r"\\`\1",thetext)
+    thetext = re.sub(r"&(.)tilde;",r"\\~\1",thetext)
+    thetext = re.sub(r"&(.)caron;",r"\\v{\1}",thetext)
+    thetext = re.sub(r"&(.)cedil;",r"\\c{\1}",thetext)
+    thetext = re.sub(r"&(o|O)slash;",r"{\\\1}",thetext)
+
+
+    return thetext
+
+def other_alphabets_to_latex(text):  # including Word characters
+
+    thetext = text
+
+    # maybe use str.replace instead of a regular expression
+
+    thetext = re.sub('−',r"-",thetext)
+    thetext = re.sub('’',r"'",thetext)
+    thetext = re.sub('“',r"``",thetext)
+    thetext = re.sub('”',r"''",thetext)
+
+    thetext = re.sub('\xc3\xb3',r"\'o",thetext)
+    thetext = re.sub('\xc3\xa1',r"\'a",thetext)
+    thetext = re.sub('\xc5\x9f',r"\c{a}",thetext)
+    thetext = re.sub('\xc3\xb1',r"\~n",thetext)
+
+    thetext = re.sub('\xe2\x80\x22',r'-',thetext)   # not sure why that worked, but the clue was
+                                                    # looking at the html file.  That character is
+                                                    # the windows 0x2013 en dash
+
+    thetext = re.sub('\x91',r"'",thetext)
+    thetext = re.sub('\x92',r"'",thetext)
+    thetext = re.sub('\x93',r'"',thetext)
+    thetext = re.sub('\x94',r'"',thetext)
+    thetext = re.sub('\x96',r'-',thetext)
+    thetext = re.sub('\x97',r' - ',thetext)
+
+    thetext = re.sub('\x85',r' - ',thetext)
+    thetext = re.sub('\x8a',r'\\"a',thetext)
+    thetext = re.sub('\x9a',r'\\"o',thetext)
+    thetext = re.sub('\x96',r"-",thetext)
+    thetext = re.sub('\x9f',r'\\"u',thetext)
+    thetext = re.sub('\xa0'," ",thetext)
+    thetext = re.sub('\xb1',r"\\pm",thetext)
+    thetext = re.sub('\xb4',r"'",thetext)
+    thetext = re.sub('\xc2'," ",thetext)
+    thetext = re.sub('\xd5',r"'",thetext)
+    thetext = re.sub('\xdf',r"{\\ss}",thetext)
+    thetext = re.sub('ł',r"{\\l}",thetext)
+    thetext = re.sub('ồ',r"\\^o",thetext)   # note: not the correct translation
+    thetext = re.sub('á',r"\\'a",thetext)
+    thetext = re.sub('à',r"\\`a",thetext)
+    thetext = re.sub('ä',r'\\"a',thetext)
+    thetext = re.sub('ã',r'\\~a',thetext)
+    thetext = re.sub('é',r"\\'e",thetext)
+    thetext = re.sub('è',r"\\`e",thetext)
+    thetext = re.sub('É',r"\\'E",thetext)
+    thetext = re.sub('\xe0',r"\\`a",thetext)
+    thetext = re.sub('\xe1',r"\\'a",thetext)
+    thetext = re.sub('\xe9',r"\\'e",thetext)
+    thetext = re.sub('í',r"\\'{\\i}",thetext)
+    thetext = re.sub('\xed',r"\\'{\\i}",thetext)
+    thetext = re.sub('\xee',r"\\^{\\i}",thetext)
+    thetext = re.sub('Á',r"\\'{A}",thetext)
+    thetext = re.sub('Å',r"\\c{A}",thetext)
+    thetext = re.sub('ń',r"\\'n",thetext)
+    thetext = re.sub('ñ',r"\\~n",thetext)
+    thetext = re.sub('ó',r"\\'o",thetext)
+    thetext = re.sub('ú',r"\\'u",thetext)
+    thetext = re.sub('ü',r'\\"u',thetext)
+    thetext = re.sub('\xf1',r"\\~n",thetext)
+    thetext = re.sub('\xf3',r"\\'o",thetext)
+    thetext = re.sub('\xf6',r'\\"o',thetext)
+    thetext = re.sub('ö',r'\\"o',thetext)
+    thetext = re.sub('š',r'\\v{s}',thetext)
+    thetext = re.sub('ş',r'\\c{s}',thetext)
+    thetext = re.sub('ç',r'\\c{c}',thetext)
+    thetext = re.sub('č',r'\\v{c}',thetext)
+    thetext = re.sub("ć",r"\\'c",thetext)
+    thetext = re.sub('ř',r'\\v{r}',thetext)
+    thetext = re.sub('\xfc',r'\\"u',thetext)
+    thetext = re.sub('\xe8',r'\\`e',thetext)
+    thetext = re.sub('Ã ',r'\\`a',thetext)
+    thetext = re.sub('—',r'--',thetext)
+
+    return thetext
+
+def latex_to_ascii(text):
+
+    thetext = text
+
+    # these convert like \alpha -> alpha
+    latex_to_ascii_greek = ["alpha","beta","gamma","delta","epsilon"
+"zeta","eta","theta","mu","nu","tau","rho","sigma","xi","kappa",
+"iota","lambda","upsilon","omicron","phi","chi","omega","psi","pi"]
+
+    for letter in latex_to_ascii_greek:
+        the_sub =  "\\\\" + "(" + letter + ")" + r"\b"
+        thetext = re.sub(the_sub,r"\1",thetext,re.I)  # case insensitive
+
+    latex_to_ascii_symbol = [["ge",">="],["geq",">="],["le","<="],["leq","<="]]
+    for pair in latex_to_ascii_symbol:
+        the_sub =  "\\\\" + "(" + pair[0] + ")" + r"(\b|[0-9])"
+        the_target = " " + pair[1] + " "
+        thetext = re.sub(the_sub,the_target+r"\2",thetext,re.I)  # case insensitive
+
+    thetext = re.sub(r"\s*\\times\s*"," x ",thetext)
+
+    thetext = re.sub(r"\\tfrac",r"\\frac",thetext)
+    thetext = re.sub(r"\\widehat",r"\\hat",thetext)
+    thetext = re.sub(r"\\widetilde",r"\\tilde",thetext)
+    thetext = re.sub(r"\\widecheck",r"\\check",thetext)
+    thetext = re.sub(r"\\bar\b",r"\\overline",thetext)
+
+    thetext = re.sub(r"\\[\^\'\`\"\~\-\=]\s*","",thetext)  # remove latex accents
+
+    # in TeX, \\i is an i (without a dot), but usually \\. is a diacritical mark
+
+    # shuld put these into a list in mapping.py
+    thetext = re.sub(r"\\varphi","phi",thetext)
+    thetext = re.sub(r"\\varrho","rho",thetext)
+    thetext = re.sub(r"\\pm\b","+-",thetext)
+    thetext = re.sub(r"\\ell(\b|\s+)","l",thetext)
+    thetext = re.sub(r"{\\i}","i",thetext)
+    thetext = re.sub(r"\\i ([A-Z])",r"i \1",thetext)
+    thetext = re.sub(r"\\i\b","i",thetext)
+    thetext = re.sub(r"{\\l}","l",thetext)
+    thetext = re.sub(r"\\l ([A-Z])",r"l \1",thetext)
+    thetext = re.sub(r"\\l ","l",thetext)
+    thetext = re.sub(r"\\l\b","l",thetext)
+    thetext = re.sub(r"\\L ","L",thetext)
+    thetext = re.sub(r"{\\L}","L",thetext)
+    thetext = re.sub(r"{\\o}","oe",thetext)
+    thetext = re.sub(r"\\o\b","oe",thetext)
+    thetext = re.sub(r"{\\oe}","oe",thetext)
+    thetext = re.sub(r"{\\ss}","ss",thetext)
+    thetext = re.sub(r"\\ss\b","ss",thetext)
+    thetext = re.sub(r"\\H o","o",thetext)
+    thetext = re.sub(r"\\H{o}","o",thetext)
+
+    thetext = re.sub(r"\s*\\cprime\s*","'",thetext)
+    thetext = re.sub(r"\s*\\vert\b\s*","|",thetext)
+
+    thetext = re.sub(r"\s*\\left\b\s*","",thetext)
+    thetext = re.sub(r"\s*\\right\b\s*","",thetext)
+
+    latex_to_delete_from_ascii = ["rm","it","sl","bf","tt","em","emph",
+                       "Bbb","mathbb","bold",
+                       "scr",
+                       "roman",
+                       "Cal","cal","mathcal",
+                       "mathrm","mathit","mathsl","mathbf","mathsf","mathtt",
+                       "germ","frak", "mathfrak"]
+
+    for macro in latex_to_delete_from_ascii:
+        the_sub =  "\\\\" + macro + r"\b"
+        thetext = re.sub(the_sub,"",thetext)
+
+    other_latex_markup = ["v","u","c"]     # as in Nata\v sa or Altu\u{g} or Ho{\c{s}}ten/
+
+    for macro in other_latex_markup:
+        the_sub =  "\\\\" + "(" + macro + ")" + r"\s*{([a-zA-Z])}"
+        thetext = re.sub(the_sub,r"\2",thetext)
+        the_sub =  "\\\\" + "(" + macro + ")" + r"\b\s*"
+        thetext = re.sub(the_sub,"",thetext)
+
+    thetext = re.sub(r"{([^}])}",r"\1",thetext)  #  {.} --> .
+    thetext = re.sub(r"{([^}])}",r"\1",thetext)  #  {.} --> .  # Twice, because of {\v{S}}emrl
+
+    thetext = re.sub(r"\s+"," ",thetext)
+
+    return thetext
+
+
+def to_ascii(text):
+
+    thetext = text
+
+    thetext = html_to_latex_alphabet(thetext)
+    thetext = other_alphabets_to_latex(thetext)
+    thetext = latex_to_ascii(thetext)
+
+    return thetext
 
 ###################
 

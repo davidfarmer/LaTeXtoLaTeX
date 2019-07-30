@@ -814,13 +814,58 @@ def mytransform_html(text):
 
   #  print thetext
 
-    # UCSC math
-    thetext = re.sub(r'class="p-name">([^<>]+)</span>.*?mailto:([^"]+)"', mytransform_ht, thetext, 0, re.DOTALL)
+    these_papers = re.findall(r'<div class="cwitem">(.*?</div>\n(\n|</div></main></div>))', thetext, re.DOTALL)
 
-    for _ in component.people_list:
-        print _
+    print "found",len(these_papers),"papers"
 
-    print "found", len(component.people_list), "people"
+    for paper in these_papers:
+        this_paper = paper[0]
+  #      print "paper", this_paper
+        try:
+            this_year = re.search('<span class="year">([0-9]{4})</span>', this_paper).group(1)
+        except AttributeError:
+            this_year = re.search('<span class="fromyear">([0-9]{4})</span>', this_paper).group(1)
+        print "this_year", this_year
+        if int(this_year) <= component.collaboration_year:
+            print "good year"
+        else:
+            print "later year, skipping"
+            continue
+
+        # check year here (make int first)
+        these_authors = re.findall(r'<span class="author">(.*?)</span>', this_paper, re.DOTALL)[0]
+        print "these_authors", these_authors
+        these_authors_list = these_authors.split(",")
+        if len(these_authors_list) == 1:
+            these_authors_list = these_authors_list[0].split(" and ")
+        for j, auth in enumerate(these_authors_list):
+            auth = re.sub(" *and *", "", auth)
+            auth = auth.strip()
+            auth = re.sub("^[^>]*>", "", auth)
+            auth = re.sub("<[^<]*$", "", auth)
+            these_authors_list[j] = auth
+        print "these_authors_list", these_authors_list
+        these_authors_list.sort()
+
+        this_collaboration = ""
+        if len(these_authors_list) > 1:
+            for auth in these_authors_list:
+                auth = utilities.to_ascii(auth)
+                fi = auth[0].lower()
+                ln = re.sub(".* ","", auth).lower()
+                this_per = fi + "_" + ln
+                this_collaboration += this_per + " "
+            this_collaboration = this_collaboration.strip()
+            if this_collaboration not in component.these_collaborations:
+                component.these_collaborations.append(this_collaboration)
+            
+
+    print "component.these_collaborations", component.these_collaborations
+
+#    for _ in component.people_list:
+#        print _
+#
+#    print "found", len(component.people_list), "people"
     return thetext
 
 ###################

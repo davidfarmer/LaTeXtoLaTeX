@@ -302,6 +302,13 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = re.sub(r"^\n+", "", component.onefile)
         component.onefile = re.sub(r"\n+$", "", component.onefile)
 
+    # temporary, delete when you see this
+        component.onefile = re.sub(r"\n *<p>\n *(OLDNUMBER [0-9]+\.[0-9]+\.[0-9]+) *\n *</p>",
+                                   "\n\n\n" + r"\1" + "\n", component.onefile)
+        component.onefile = re.sub(r"(\n *<p>\n) *(OLDNUMBER [0-9]+\.[0-9]+\.[0-9]+) *\n( *<ol)",
+                                   "\n\n\n" + r"\2" + "\n" + r"\1" + r"\3", component.onefile)
+        component.onefile = re.sub(r'type="labelalph"', 'label="(a)"', component.onefile)
+
     if component.filetype_plus in ["ptx_fix", "mbx_strict_tex", "mbx_strict_html"]:
         component.onefile = myoperations.mbx_fix(component.onefile)
 

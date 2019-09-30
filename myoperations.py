@@ -1272,6 +1272,16 @@ def mytransform_html_ptx(text):
 
     thetext = text
 
+    if "<p>" in thetext and "</p>" not in thetext:  # p tags not properly closed
+        pass  # this needs to be implemented
+
+    thetext = re.sub("<br(|/)>", "</p>\n<p>", thetext)
+
+    thetext = re.sub('<span style="color:[^"]+">([^<]+)</span>',
+                     r"<alert>\1</alert>", thetext, 0, re.DOTALL)
+
+    # delete empty paragraphs
+    thetext = re.sub("<p>\s*</p>", "", thetext)
     return thetext
 
 ###################

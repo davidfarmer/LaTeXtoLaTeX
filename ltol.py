@@ -239,7 +239,7 @@ for inputfile, outputfile in component.iofilepairs:
     if component.filetype_plus == 'tex_ptx':
         component.onefile = myoperations.mytransform_tex_ptx(component.onefile)
     if component.filetype_plus == 'html_ptx':
-        component.onefile = myoperations.mytransform_tex_ptx(component.onefile)
+        component.onefile = myoperations.mytransform_html_ptx(component.onefile)
     elif component.filetype_plus == 'txt':
         component.onefile = myoperations.mytransform_txt(component.onefile)
     elif component.filetype_plus == 'html':

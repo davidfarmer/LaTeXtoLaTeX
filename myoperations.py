@@ -1268,6 +1268,14 @@ def mytransform_txt(text):
 
 ###################
 
+def mytransform_html_ptx(text):
+
+    thetext = text
+
+    return thetext
+
+###################
+
 def mytransform_tex_ptx(text):
 
     thetext = text

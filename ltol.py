@@ -23,6 +23,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "svg",
                       "iso",
                       "ptx",
+                      "html_ptx",
                       "mbx_permid", "xml_permid", "ptx_permid",
                       "tex", "tex_ptx",
                       "html"]
@@ -93,6 +94,9 @@ elif component.filetype_plus in ["xml", "xml_pp", "xml_permid"]:
     fileextension_out = "xml"
 elif component.filetype_plus in ["tex_ptx"]:
     fileextension_in = "tex"
+    fileextension_out = "ptx"
+elif component.filetype_plus in ["html_ptx"]:
+    fileextension_in = "html"
     fileextension_out = "ptx"
 elif component.filetype_plus in ["svg"]:
     fileextension_in = "src"
@@ -234,6 +238,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_tex(component.onefile)
     if component.filetype_plus == 'tex_ptx':
         component.onefile = myoperations.mytransform_tex_ptx(component.onefile)
+    if component.filetype_plus == 'html_ptx':
+        component.onefile = myoperations.mytransform_tex_ptx(component.onefile)
     elif component.filetype_plus == 'txt':
         component.onefile = myoperations.mytransform_txt(component.onefile)
     elif component.filetype_plus == 'html':
@@ -248,7 +254,7 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_mbx(component.onefile)
  #       component.onefile = transforms.mbx_pp(component.onefile)
 
-    if component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp', 'tex_ptx']:
+    if component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp', 'tex_ptx', 'html_ptx']:
         component.onefile = myoperations.mytransform_mbx_remove_linefeeds(component.onefile)
         component.onefile = transforms.mbx_pp(component.onefile)
 
@@ -336,10 +342,10 @@ if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid'] and com
 #    with open(outputdir + 'allpermid.txt', 'w') as f:
 #        for permid in component.all_permid:
 #            f.write(permid + "\n")
-print "Total number of permid~s:", len(component.all_permid), ", of which repeats:"
-print [x for x in component.all_permid if component.all_permid.count(x) > 1]
+    print "Total number of permid~s:", len(component.all_permid), ", of which repeats:"
+    print [x for x in component.all_permid if component.all_permid.count(x) > 1]
 
-print "component.current_permid", component.current_permid
+    print "component.current_permid", component.current_permid
 
 if component.generic_counter:
     print component.generic_counter
@@ -347,5 +353,8 @@ if component.generic_counter:
 
 if component.extra_macros:
     print "component.extra_macros", component.extra_macros
+
+print "done"
+
 sys.exit()
 

@@ -1207,6 +1207,8 @@ def mytransform_txt(text):
 568, 569, 570, 571, 572, 573, 574, 575, 578, 579, 588, 635, 636,
 637, 638, 639, 640, 641, 642, 643, 644]
 
+    workshop_range += [j for j in range(500,999)]
+
     totalpapers = 0
     the_answer = ""
 
@@ -1225,7 +1227,10 @@ def mytransform_txt(text):
             continue
         this_paper = line.split("\n")
 
-        this_workshop = re.search("orkshop\s+([0-9]+)", this_paper[4]).group(1)
+        try:
+            this_workshop = re.search("orkshop\s+([0-9]+)", this_paper[4]).group(1)
+        except:
+            this_workshop = 999
 
         if int(this_workshop) not in workshop_range:
             print "Workshop not in range", this_workshop

@@ -1275,6 +1275,7 @@ def mytransform_html_ptx(text):
     if "<p>" in thetext and "</p>" not in thetext:  # p tags not properly closed
         pass  # this needs to be implemented
 
+    thetext = re.sub("([a-zA-Z]<>)<br(|/)>", r"\1<placeholder/>", thetext)
     thetext = re.sub("<br(|/)>", "</p>\n<p>", thetext)
 
     thetext = re.sub('<span style="color:[^"]+">([^<]+)</span>',
@@ -1282,6 +1283,27 @@ def mytransform_html_ptx(text):
 
     # delete empty paragraphs
     thetext = re.sub("<p>\s*</p>", "", thetext)
+    return thetext
+
+###################
+
+def mytransform_to_semantic(text):
+
+    thetext = text
+
+    thetext = re.sub(r"(<m>\s*)(.*?)(\s*</m>)",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"(<mrow>\s*)(.*?)(\s*</mrow>)",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"(<me>\s*)(.*?)(\s*</me>)",   # if no permid
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"(<me [^<>]+>\s*)(.*?)(\s*</me>)",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"(<men>\s*)(.*?)(\s*</men>)",   # if no permid
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"(<men [^<>]+>\s*)(.*?)(\s*</men>)",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+
     return thetext
 
 ###################

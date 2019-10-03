@@ -24,6 +24,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "iso",
                       "ptx",
                       "html_ptx",
+                      "xml_semantic", "ptx_semantic",
                       "mbx_permid", "xml_permid", "ptx_permid",
                       "tex", "tex_ptx",
                       "html"]
@@ -83,13 +84,13 @@ if component.inputname == component.outputname:
     print "try again"
     sys.exit()
 
-if component.filetype_plus in ["ptx", "ptx_pp", "ptx_permid", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
+if component.filetype_plus in ["ptx", "ptx_pp", "ptx_permid", "ptx_fix", "ptx_semantic", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
     fileextension_in = "ptx"
     fileextension_out = "ptx"
 elif component.filetype_plus in ["mbx_pp"]:
     fileextension_in = "mbx"
     fileextension_out = "mbx"
-elif component.filetype_plus in ["xml", "xml_pp", "xml_permid"]:
+elif component.filetype_plus in ["xml", "xml_pp", "xml_permid", "xml_semantic"]:
     fileextension_in = "xml"
     fileextension_out = "xml"
 elif component.filetype_plus in ["tex_ptx"]:
@@ -240,6 +241,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_tex_ptx(component.onefile)
     if component.filetype_plus == 'html_ptx':
         component.onefile = myoperations.mytransform_html_ptx(component.onefile)
+    if component.filetype_plus in ['xml_semantic', 'ptx_semantic']:
+        component.onefile = myoperations.mytransform_to_semantic(component.onefile)
     elif component.filetype_plus == 'txt':
         component.onefile = myoperations.mytransform_txt(component.onefile)
     elif component.filetype_plus == 'html':

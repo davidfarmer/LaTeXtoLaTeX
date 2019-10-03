@@ -508,6 +508,190 @@ def next_permid_encoded():
 
 ###################
 
+def to_semantic_math(txt):
+
+    theopeningtag = txt.group(1)
+    thetext = txt.group(2)
+    theclosingtag = txt.group(3)
+
+    thetext = to_semantic_ma(thetext)
+
+    return theopeningtag + thetext + theclosingtag
+
+#--------------#
+
+def to_semantic_ma(text):
+
+    thetext = text
+
+    # hide all teh relations
+    thetext = re.sub(r"(=|\\lt\b|\\le\b|\\ne\b|\\gt\b|\\ge\b|\\approx\b)", r"@$\1$@", thetext)
+
+    # fix some common anomalies
+    thetext = re.sub(r"(\s|^)uv(\s|$)", r"\1u v\2", thetext)
+    thetext = re.sub(r"([a-zA-Z0-9])(\\(sin|cos|tan|sec|csc|cot|lo|log)\b)", r"\1 \2", thetext)
+    thetext = re.sub(r"([^\s\-])(\\frac{[^{}]+}{[^{}]+})", r"\1 \2", thetext)
+    thetext = re.sub(r"(\\frac{[^{}]+}{[^{}]+})(\S)", r"\1 \2", thetext)
+    thetext = re.sub(r"(\S) {2,}", r"\1 ", thetext)
+
+#    thetext = re.sub(r"\\frac",
+#                     r"\\xfrac", thetext)
+
+    # base of the natural log
+    thetext = re.sub(r"\be\^", r"\\eulerE^", thetext)
+
+    # roots
+    thetext = re.sub(r"\\sqrt\[([^\[\]]+)\]{([^{}]+)}",
+                     r"\\nthRoot{\1}{\2}", thetext)
+
+    #Delta in the sense of a small width
+    thetext = re.sub(r"\\Delta +(\S+)", r"\\deltaWidth{\1}", thetext)
+
+    # large parentheses
+    thetext = re.sub(r"\\left(\()(.*?)\\right\)",
+                     to_paren_group, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\\left(\[)(.*?)\\right\]",
+                     to_paren_group, thetext, 0, re.DOTALL)
+
+    # intervals (Note that (a,b) will be interpreted as an  open-openinterval)
+    thetext = re.sub(r"\[ *([0-9\.a-zA-Z\-+_]+) *, *([0-9\.a-zA-Z\-+_]+) *\]",
+                     r"\\ccinterval{\1}{\2}", thetext)
+
+    # factorial
+    thetext = re.sub(r"(\b[a-zA-Z]|[0-9]+)\!",
+                     r"\\factorial{\1}", thetext)
+
+    # derivatives
+    thetext = re.sub(r"\\frac{d}{d(\\?[a-z]+)} *([^ ]+)",
+                     r"\\functionapply{\\dderivativewrt{\1}}{\2}", thetext)
+    thetext = re.sub(r"\\frac{d(\\?[a-z]+)}{d(\\?[a-z]+)}",
+                     r"\\dderivative{\1}{\2}", thetext)
+
+    # integrals
+    thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
+                     to_semantic_integral, thetext, 0, re.DOTALL)
+
+    # differentials
+    thetext = re.sub(r"( |\)|^)d([a-z]'*|\\[a-z]+)",
+                     r"\1\\differential{\2}", thetext)
+
+    # function application
+    thetext = re.sub(r"((\b[a-zA-Z]'*|\\[a-zA-Z]+'*)\(([^\(\)]+)\))",
+                     r"\\functionApply{\2}{\3}", thetext)
+    thetext = re.sub(r"{([^{}]+)'''}", r"{\\thirdDerivative{\1}}", thetext)
+    thetext = re.sub(r"{([^{}]+)''}", r"{\\secondDerivative{\1}}", thetext)
+    thetext = re.sub(r"{([^{}]+)'}", r"{\\firstDerivative{\1}}", thetext)
+
+    # implied multiplication from thinspace
+    thetext = re.sub(r"([^ ]+) *\\, *([^ ]+)",
+                     r"\\impliedMultiplication{\1}{\2}", thetext)
+    # should do it multiple times because of several products.
+    # or make a function with an arbitrary number of arguments?
+    thetext = re.sub(r"([^ ]+) *\\, *([^ ]+)",
+                     r"\\impliedMultiplication{\1}{\2}", thetext)
+
+    #  multiplication with a dot (note that this is just for calculus)
+    thetext = re.sub(r"([^ ]+) \\cdot ([^ ]+)",
+                     r"\\dotMultiplication{\1}{\2}", thetext)
+    thetext = re.sub(r"([^ ]+) \\cdot ([^ ]+)",
+                     r"\\dotMultiplication{\1}{\2}", thetext)
+    #  multiplication with a times (note that this is just for calculus)
+    thetext = re.sub(r"([^ ]+) \\times ([^ ]+)",
+                     r"\\timesMultiplication{\1}{\2}", thetext)
+    thetext = re.sub(r"([^ ]+) \\times ([^ ]+)",
+                     r"\\timesMultiplication{\1}{\2}", thetext)
+
+    thetext = re.sub(r"( |^)([0-9]+) *([a-zA-Z\\\(\){}^_]+)( |$)",
+                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+
+    # tricky case is "backslash space"
+    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*)( |$)",
+                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*)( |$)",
+                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+
+    #unhide all the relations
+    thetext = re.sub(r"@\$(=|\\lt|\\le|\\ne|\\gt|\\ge|\\approx)\$@", r"\1", thetext)
+
+    return thetext
+
+#------------#
+
+def to_paren_group(txt):
+
+    thebracket = txt.group(1)
+    inside_parens = txt.group(2)
+
+    inside_parens = inside_parens.strip()
+
+    inside_parens = to_semantic_ma(inside_parens)
+
+    if thebracket == "(":
+        theanswer = "\\parenGroup"
+    elif thebracket == "[":
+        theanswer = "\\bracketGroup"
+    else:
+        theanswer = "\\ERROR"
+
+    theanswer += "{" + inside_parens + "}"
+
+    return theanswer
+
+#------------#
+
+def to_semantic_integral(txt):
+
+    lowerlimit = ""
+    upperlimit = ""
+
+    theintegrand = txt.group(2)
+    theintegrationvariable = txt.group(4)
+
+    if theintegrand.startswith("_"):
+        theintegrand = theintegrand[1:]   # remove the _
+        if theintegrand.startswith("{"):
+            lowerlimit, theintegrand = first_bracketed_string(theintegrand,0,"{","}")
+        else:  # in tex, one character lower limit
+            lowerlimit = "{" + theintegrand[0] + "}"
+            theintegrand = theintegrand[1:]
+
+    if theintegrand.startswith("^"):
+        theintegrand = theintegrand[1:]
+        if theintegrand.startswith("{"):
+            upperlimit, theintegrand = first_bracketed_string(theintegrand,0,"{","}")
+        else:  # in tex, one character lower limit
+            upperlimit = "{" + theintegrand[0] + "}"
+            theintegrand = theintegrand[1:]
+    
+
+    theintegrand = theintegrand.strip()
+    # remove the spacing before dx in the source
+    theintegrand = re.sub(r" *\\(,|;|$)$", "", theintegrand)
+
+    if "[" in theintegrand:
+         print "theintegrand", theintegrand
+    theintegrand = to_semantic_ma(theintegrand)
+
+    if lowerlimit and upperlimit:
+        theanswer = r"\definiteIntegralLimits"
+        theanswer += lowerlimit # the limits already are contained in brackets
+        theanswer += upperlimit
+        theanswer += "{" + theintegrand + "}"
+        theanswer += "{" + theintegrationvariable + "}"
+    elif lowerlimit and not upperlimit:
+        theanswer = r"\definiteIntegralSet"
+        theanswer += lowerlimit
+        theanswer += "{" + theintegrand + "}"
+        theanswer += "{" + theintegrationvariable + "}"
+    else:
+        theanswer = r"\indefiniteIntegral"
+        theanswer += "{" + theintegrand + "}"
+        theanswer += "{" + theintegrationvariable + "}"
+
+    return theanswer
+
+###################
+
 def business_card(c_location, size, scale, contents, colors):
     """
     c_location: [center_x, center_y]

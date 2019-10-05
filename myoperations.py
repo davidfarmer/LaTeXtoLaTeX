@@ -1275,14 +1275,31 @@ def mytransform_html_ptx(text):
     if "<p>" in thetext and "</p>" not in thetext:  # p tags not properly closed
         pass  # this needs to be implemented
 
-    thetext = re.sub("([a-zA-Z]<>)<br(|/)>", r"\1<placeholder/>", thetext)
-    thetext = re.sub("<br(|/)>", "</p>\n<p>", thetext)
-
     thetext = re.sub('<span style="color:[^"]+">([^<]+)</span>',
                      r"<alert>\1</alert>", thetext, 0, re.DOTALL)
+    thetext = re.sub('&quot;([^<]+)&quot;',
+                     r"<q>\1</q>", thetext, 0, re.DOTALL)
+    thetext = re.sub("&nbsp;", "<nbsp/>", thetext)
+    thetext = re.sub("&hellip;", "<ellipsis/>", thetext)
+    thetext = re.sub("&ldquo;", "<lq/>", thetext)
+    thetext = re.sub("&rdquo;", "<rq/>", thetext)
+    thetext = re.sub("&radic;", "<m>\sqrt{}</m>", thetext)
+    thetext = re.sub("&#39;", "'", thetext)
+    thetext = re.sub("&#123;", "<lbrace/>", thetext)
+    thetext = re.sub("&#125;", "<rbrace/>", thetext)
+    thetext = re.sub("&lt;", "<less/>", thetext)
+    thetext = re.sub("&gt;", "<greater/>", thetext)
+    thetext = re.sub("<br(|/)>", "</p>\n<p>", thetext)
+    thetext = re.sub("<br(| )(|/)>", "\n", thetext)
+    thetext = re.sub("<span .*?>","", thetext, re.DOTALL)
+    thetext = re.sub("</span>","", thetext)
+    thetext = re.sub("<strong>", "<alert>", thetext)
+    thetext = re.sub("</strong>", "</alert>", thetext)
+    thetext = re.sub("<(|/)h[1-4]>", "", thetext)
 
     # delete empty paragraphs
     thetext = re.sub("<p>\s*</p>", "", thetext)
+
     return thetext
 
 ###################

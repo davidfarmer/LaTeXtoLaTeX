@@ -531,23 +531,31 @@ def to_semantic_ma(text):
                      r'\\le\b',
                      r'\\leq\b',
                      r'\\ne\b',
+                     r'\\neq\b',
                      r'\\gt\b',
                      r'\\ge\b',
                      r'\\geq\b',
                      r'\\pm\b',
                      r'\\mp\b',
                      r'\\amp\b',   # not a relation, but serves as a divider
+                     r'\\to\b',   # not a relation, but serves as a separator
                      r'\\approx\b']
 #    thetext = re.sub(r"(=|\\lt\b|\\le\b|\\ne\b|\\gt\b|\\ge\b|\\approx\b)", r"@$\1$@", thetext)
     for this_relation in the_relations:
         thetext = re.sub(r"(" + this_relation + ")", r"@$\1$@", thetext)
     thetext = re.sub(r"(\\geq) ", r"@$\1$@ ", thetext)
 
+    known_functions = [r'sin', r'cos', r'tan', r'sec', r'csc', r'cot',
+                       r'arcsin', r'arccos', r'arctan', r'arcsec', r'arccsc', r'arccot',
+                       r'ln', r'ln', r'exp', r'erf']
+
     # fix some common anomalies
     thetext = re.sub(r"([0-9])(-|\+)([0-9])", r"\1 \2 \3", thetext)  # as in x^3-4x^2+8
     thetext = re.sub(r"([0-9])\\", r"\1 \\", thetext)  # as in 2\sqrt{x} or 2\\left(
     thetext = re.sub(r"(\s|^)uv(\s|$)", r"\1u v\2", thetext)
-    thetext = re.sub(r"([a-zA-Z0-9])(\\(sin|cos|tan|sec|csc|cot|ln|log)\b)", r"\1 \2", thetext)
+#    thetext = re.sub(r"([a-zA-Z0-9])(\\(sin|cos|tan|sec|csc|cot|ln|log)\b)", r"\1 \2", thetext)
+    for function in known_functions:
+        thetext = re.sub(r"([a-zA-Z0-9])(\\" + function + ")", r"\1 \2", thetext)
     thetext = re.sub(r"([0-9a-zA-Z}\)+])(\\frac{[^{}]+}{[^{}]+})", r"\1 \2", thetext)
     thetext = re.sub(r"([0-9])([a-zA-Z])", r"\1 \2", thetext)
     thetext = re.sub(r"(\\frac{[^{}]+}{[^{}]+})([0-9a-zA-Z\(+\-])", r"\1 \2", thetext)
@@ -568,19 +576,36 @@ def to_semantic_ma(text):
     # factorial
     thetext = re.sub(r"(\b[a-zA-Z]|[0-9]+)\!",
                      r"\\factorial{\1}", thetext)
+    thetext = re.sub(r"(\([^()]+\))\!",
+                     r"\\factorial{\1}", thetext)
 
     #Delta in the sense of a small width
     thetext = re.sub(r"\\Delta +(\S+)", r"\\deltaWidth{\1}", thetext)
 
     # function application
-    thetext = re.sub(r"((\b[a-zA-Z]'*|\\[a-zA-Z]+'*)\(([^\(\)]+)\))",
-                     r"\\functionApply{\2}{\3}", thetext)
+ #   thetext = re.sub(r"(\\ln|\\log)\(([^\(\)]+)\)",
+ #                    r"\\functionApply{\1}{\2}", thetext)
+    for function in known_functions:
+        thetext = re.sub(r"(\\" + function + ")\^([0-9a-z]) *\(([^\(\)]+)\)",
+                         r"\\functionApply{\\functionPower{\1}{\2}}{\3}", thetext)
+        thetext = re.sub(r"(\\" + function + ")\^{([^{}]+)} *\(([^\(\)]+)\)",
+                         r"\\functionApply{\\functionPower{\1}{\2}}{\3}", thetext)
+        thetext = re.sub(r"(\\" + function + ")\^\{-1\} *\(([^\(\)]+)\)",
+                         r"\\functionApply{\\functionInverse{\1}{\2}}{\3}", thetext)
+        thetext = re.sub(r"(\\" + function + ")\(([^\(\)]+)\)",
+                         r"\\functionApply{\1}{\2}", thetext)
+    thetext = re.sub(r"(\b[a-zA-Z]'*)\(([^\(\)]+)\)",
+                     r"\\functionApply{\1}{\2}", thetext)
+    thetext = re.sub(r"(\b[a-zA-Z]'*)\^\{-1\} *\(([^\(\)]+)\)",
+                     r"\\functionApply{\\functionInverse{\1}}{\2}", thetext)
     thetext = re.sub(r"{([^{}]+)'''}", r"{\\thirdDerivative{\1}}", thetext)
     thetext = re.sub(r"{([^{}]+)''}", r"{\\secondDerivative{\1}}", thetext)
     thetext = re.sub(r"{([^{}]+)'}", r"{\\firstDerivative{\1}}", thetext)
     thetext = re.sub(r"(\b[a-zA-Z]+)'''", r"\\thirdDerivative{\1}", thetext)
     thetext = re.sub(r"(\b[a-zA-Z]+)''", r"\\secondDerivative{\1}", thetext)
     thetext = re.sub(r"(\b[a-zA-Z]+)'", r"\\firstDerivative{\1}", thetext)
+    thetext = re.sub(r"(\b[a-zA-Z])\^\{\(([^()])\)\} *\(([^()]+)\)",
+                     r"\\functionApply{\\nthDerivative{\1}{\2}}{\3}", thetext)
 
     # large parentheses
     thetext = re.sub(r"\\left(\()(.*?)\\right\)",
@@ -602,32 +627,47 @@ def to_semantic_ma(text):
                      r"\\cartesianPoint{\1}{\2}", thetext)
 
     # absolute value
-    thetext = re.sub(r"\| *([0-9\.a-zA-Z\-+\\_{}\^\(\) ]+?) *\|",
+    thetext = re.sub(r"\| *([^\|]+?) *\|",
                      r"\\abs{\1}", thetext)
 
+    # anstract functions:
+    thetext = re.sub(r" *([a-zA-Z])[ \\,]*:[ \\,]*([0-9\.a-zA-Z\-+\\_{}]+) *@\$\\to\$@ *([0-9\.a-zA-Z\-+\\_{}]+)",
+                     r"\\functionDomainCodomain{\1}{\2}{\3}", thetext)
     # limits
-    thetext = re.sub(r"\\lim_\{([^{}]) *\\to *([^{}]+) *\} *(\S+)",
+    thetext = re.sub(r"\\lim_\{([^{}]) *@\$\\to\$@ *([^{}]+) *\} *([^$@]+)",
                      to_semantic_limit, thetext)
-    thetext = re.sub(r" *([0-9\.a-zA-Z\-+\\_{}]+) *\\to *([0-9\.a-zA-Z\-+\\_{}]+)",
+    thetext = re.sub(r" *([0-9\.a-zA-Z\-+\\_{}]+) *@\$\\to\$@ *([0-9\.a-zA-Z\-+\\_{}]+)",
                      r"\\goesTo{\1}{\2}", thetext)
 
     # derivatives
     thetext = re.sub(r"\\frac{d}{d(\\?[a-z]+)} *([^ ]+)",
-                     r"\\functionapply{\\dderivativewrt{\1}}{\2}", thetext)
+                     r"\\functionapply{\\dDerivativeWRT{\1}}{\2}", thetext)
     thetext = re.sub(r"\\frac{d(\\?[a-z]+)}{d(\\?[a-z]+)}",
-                     r"\\dderivative{\1}{\2}", thetext)
+                     r"\\dDerivative{\1}{\2}", thetext)
 
-#    # integrals
-#    thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
-#                     to_semantic_integral, thetext, 0, re.DOTALL)
-#
-#    # sumations
-#    thetext = re.sub(r"\\sum_\{([^{}]+)\}\^\{([^{}]+)\} *([0-9\.a-zA-Z\\\(\)^_\-+ ]+)",
-#                    to_semantic_summation, thetext, 0, re.DOTALL)
+    # integrals
+    if "\\log" in thetext and "\\sqrt" in thetext:
+        print "should see an integral", thetext
+    thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
+                     to_semantic_integral, thetext, 0, re.DOTALL)
+
+    thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
+                     to_semantic_integral, thetext, 0, re.DOTALL)
 
     # differentials
     thetext = re.sub(r"( |\)|^)d([a-z]'*|\\[a-z]+)",
                      r"\1\\differential{\2}", thetext)
+
+    # sumations
+    thetext = re.sub(r"\\sum_\{([^{}]+)\}\^\{([^{}]+)\} *([0-9\.a-zA-Z\\\(\){}^_\-+ *]+)",
+                    to_semantic_summation, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\\sum_\{([^{}]+)\}\^(\\infty|[a-zA-Z]) +([0-9\.a-zA-Z\\\(\){}^_\-+ ]+)",
+                    to_semantic_summation, thetext, 0, re.DOTALL)
+    # no upper limit
+    thetext = re.sub(r"\\sum_\{([^{}]+)\}() +([0-9\.a-zA-Z\\\(\){}^_\-+ ]+)",
+                    to_semantic_summation, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\\sum_\{([^{}]+)\}()() +([0-9\.a-zA-Z\\\(\){}^_\-+ ]+)",
+                    to_semantic_summation, thetext, 0, re.DOTALL)
 
     # implied multiplication from thinspace
     thetext = re.sub(r"([^ ]+) *\\, *([^ ]+)",
@@ -638,32 +678,27 @@ def to_semantic_ma(text):
                      r"\\impliedMultiplication{\1}{\2}", thetext)
 
     #  multiplication with a dot (note that this is just for calculus)
+    thetext = re.sub(r"([0-9\.]+) *\\cdot *([0-9\.]+)( |$)",
+                     r"\\dotMultiplication{\1}{\2}\3", thetext)
+    thetext = re.sub(r"([^ ()]+) \\cdot ([^ ()]+)",
+                     r"\\dotMultiplication{\1}{\2}", thetext)
     thetext = re.sub(r"([^ ]+) \\cdot ([^ ]+)",
                      r"\\dotMultiplication{\1}{\2}", thetext)
     thetext = re.sub(r"([^ ]+) \\cdot ([^ ]+)",
                      r"\\dotMultiplication{\1}{\2}", thetext)
     #  multiplication with a times (note that this is just for calculus)
+    thetext = re.sub(r"([0-9\.]+) *\\times *([0-9\.]+)( |$)",
+                     r"\\timesMultiplication{\1}{\2}\3", thetext)
+    thetext = re.sub(r"([^ ()]+) \\times ([^ ()]+)",
+                     r"\\timesMultiplication{\1}{\2}", thetext)
     thetext = re.sub(r"([^ ]+) \\times ([^ ]+)",
                      r"\\timesMultiplication{\1}{\2}", thetext)
     thetext = re.sub(r"([^ ]+) \\times ([^ ]+)",
                      r"\\timesMultiplication{\1}{\2}", thetext)
 
     # number implicit times something
-    thetext = re.sub(r"( |^)([0-9]+) *(\(?\\?[a-zA-Z][0-9a-zA-Z\\\(\){}^_]*)( |$)",
+    thetext = re.sub(r"( |^)([0-9]+) *(\(?[a-zA-Z][0-9a-zA-Z\\\(\){}^_]*)( |$)",
                      r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
-
-    # integrals
-    thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
-                     to_semantic_integral, thetext, 0, re.DOTALL)
-
-    # sumations
-    thetext = re.sub(r"\\sum_\{([^{}]+)\}\^\{([^{}]+)\} *([0-9\.a-zA-Z\\\(\){}^_\-+ ]+)",
-                    to_semantic_summation, thetext, 0, re.DOTALL)
-    thetext = re.sub(r"\\sum_\{([^{}]+)\}\^(\\infty|[a-zA-Z]) +([0-9\.a-zA-Z\\\(\){}^_\-+ ]+)",
-                    to_semantic_summation, thetext, 0, re.DOTALL)
-    # no upper limit
-    thetext = re.sub(r"\\sum_\{([^{}]+)\}() +([0-9\.a-zA-Z\\\(\){}^_\-+ ]+)",
-                    to_semantic_summation, thetext, 0, re.DOTALL)
 
     if "400" in thetext or "geq" in thetext:
         print "found 400", thetext
@@ -673,32 +708,39 @@ def to_semantic_ma(text):
     if "400" in thetext or "geq" in thetext:
         print "0 found 400", thetext
     # tricky case is "backslash space"
-    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\)^_]*) +(\(?\\?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\)^_\-+]*)( |$)",
+    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\)^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\)^_\-+]*)( |$)",
                      r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
     if "400" in thetext or "geq" in thetext:
         print "1 found 400", thetext
-    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?\\?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)( |$)",
+    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)( |$)",
                      r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
     if "400" in thetext or "geq" in thetext:
         print "2 found 400", thetext
-    thetext = re.sub(r"({)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?\\?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)(})",
+    thetext = re.sub(r"({)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)(})",
                      r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
     if "400" in thetext or "geq" in thetext:
         print "3 found 400", thetext
-    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?\\?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)( |$)",
+    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)( |$)",
                      r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
 
     if "400" in thetext:
         print "4 again found 400", thetext
 
+    thetext = re.sub(r"\\\{([^{}]+)\\\}_\{([^{}]+)\}",
+                     r"\\sequenceSet{\1}{\2}", thetext)
+    thetext = re.sub(r"\\\{([^{}]+)\\\}",
+                     r"\\sequenceElements{\1}", thetext)
     #unhide all the relations
  #   thetext = re.sub(r"@\$(=|\\lt|\\le|\\ne|\\gt|\\ge|\\approx)\$@", r"\1", thetext)
     for this_relation in the_relations:
-        thetext = re.sub(r"@\$(" + this_relation + ")\$@", r"\1", thetext)
+        thetext = re.sub(r" *@\$(" + this_relation + ")\$@ *", r" \1 ", thetext)
+    # we actually use @$ for other thigns
+    thetext = re.sub(r"(@\$|\$@)", r"", thetext)
 
     thetext = re.sub("ONESPACE", " ", thetext)
 
-    thetext = re.sub(r"(\s|{|^)ar\^([a-z])", r"\1\\impliedMultiplication{a}{r^\2}", thetext)
+    thetext = re.sub(r"(\s|{|\+|^)ar\^([a-z0-9\-+])", r"\1\\impliedMultiplication{a}{r^\2}", thetext)
+    thetext = re.sub(r"(\s|{|\+|^)ar\b", r"\1\\impliedMultiplication{a}{r}", thetext)
 
     return thetext
 
@@ -749,7 +791,7 @@ def to_semantic_limit(txt):
 
     the_answer += "{" + thevariable + "}"
     the_answer += "{" + thegoal + "}"
-    the_answer += "{" + thefunction + "}"
+    the_answer += "{@$" + thefunction + "$@}"
 
 #    print "     the_answer", the_answer
 
@@ -771,19 +813,24 @@ def to_semantic_summation(txt):
         thevariable, lowerlimit = lowerlimit_raw.split("=")
         thevariable = thevariable.strip()
         lowerlimit = lowerlimit.strip()
-    else:
+    elif lowerlimit_raw:
         lowerlimit = lowerlimit_raw   # wrong: need to do more than that
         thevariable = lowerlimit_raw[0]
+    else:
+        lowerlimit = ""
 
     if upperlimit:
         the_answer = r"\summationLimits"
         the_answer += "{" + lowerlimit + "}"
         the_answer += "{" + upperlimit + "}"
-    else:
+    elif lowerlimit:
         the_answer = r"\summationSet"
         the_answer += "{" + lowerlimit + "}"
+    else:
+        the_answer = r"\summationBare"
+        the_answer += "{@$" + summand + "$@}"
 
-    the_answer += "{" + summand + "}"
+    the_answer += "{@$" + summand + "$@}"
     the_answer += "{" + thevariable + "}"
 
     return the_answer
@@ -825,16 +872,16 @@ def to_semantic_integral(txt):
         theanswer = r"\definiteIntegralLimits"
         theanswer += lowerlimit # the limits already are contained in brackets
         theanswer += upperlimit
-        theanswer += "{" + theintegrand + "}"
+        theanswer += "{@$" + theintegrand + "$@}"
         theanswer += "{" + theintegrationvariable + "}"
     elif lowerlimit and not upperlimit:
         theanswer = r"\definiteIntegralSet"
         theanswer += lowerlimit
-        theanswer += "{" + theintegrand + "}"
+        theanswer += "{@$" + theintegrand + "$@}"
         theanswer += "{" + theintegrationvariable + "}"
     else:
         theanswer = r"\indefiniteIntegral"
-        theanswer += "{" + theintegrand + "}"
+        theanswer += "{@$" + theintegrand + "$@}"
         theanswer += "{" + theintegrationvariable + "}"
 
     return theanswer

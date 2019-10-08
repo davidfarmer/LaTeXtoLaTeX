@@ -607,6 +607,14 @@ def to_semantic_ma(text):
     thetext = re.sub(r"(\b[a-zA-Z])\^\{\(([^()])\)\} *\(([^()]+)\)",
                      r"\\functionApply{\\nthDerivative{\1}{\2}}{\3}", thetext)
 
+    # derivatives
+    thetext = re.sub(r"\\frac{d}{d(\\?[a-z]+)} *\[([^\[\]]+)\]",
+                     r"\\differentialOperatorApply{\\dDerivativeWRT{\1}}{@$\2$@}", thetext)
+    thetext = re.sub(r"\\frac{d}{d(\\?[a-z]+)} *\\left\[([^[]]+)\\right\]",
+                     r"\\differentialOperatorApply{\\dDerivativeWRT{\1}}{@$\2$@}", thetext)
+    thetext = re.sub(r"\\frac{d(\\?[a-z]+)}{d(\\?[a-z]+)}",
+                     r"\\dDerivative{\1}{\2}", thetext)
+
     # large parentheses
     thetext = re.sub(r"\\left(\()(.*?)\\right\)",
                      to_paren_group, thetext, 0, re.DOTALL)
@@ -638,12 +646,6 @@ def to_semantic_ma(text):
                      to_semantic_limit, thetext)
     thetext = re.sub(r" *([0-9\.a-zA-Z\-+\\_{}]+) *@\$\\to\$@ *([0-9\.a-zA-Z\-+\\_{}]+)",
                      r"\\goesTo{\1}{\2}", thetext)
-
-    # derivatives
-    thetext = re.sub(r"\\frac{d}{d(\\?[a-z]+)} *([^ ]+)",
-                     r"\\functionapply{\\dDerivativeWRT{\1}}{\2}", thetext)
-    thetext = re.sub(r"\\frac{d(\\?[a-z]+)}{d(\\?[a-z]+)}",
-                     r"\\dDerivative{\1}{\2}", thetext)
 
     # integrals
     if "\\log" in thetext and "\\sqrt" in thetext:

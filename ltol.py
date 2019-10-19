@@ -255,7 +255,6 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_iso(component.onefile)
     elif component.filetype_plus in ['mbx', 'xml']:
         component.onefile = myoperations.mytransform_mbx(component.onefile)
- #       component.onefile = transforms.mbx_pp(component.onefile)
 
     if component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp', 'tex_ptx', 'html_ptx']:
         component.onefile = myoperations.mytransform_mbx_remove_linefeeds(component.onefile)
@@ -278,6 +277,9 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = re.sub(r"(</quantity>)\s*((\?|!|;|:|,|\.|\)|</)+) *?", r"\1\2", component.onefile)
         # and parentheses or other markup before quantity
         component.onefile = re.sub(r"(\(|>)\s*(<quantity>)", r"\1\2", component.onefile)
+
+        # quote at end of sentence
+        component.onefile = re.sub(r"(</q>)\s+(!|\.|,|\?|:|;)", r"\1\2", component.onefile)
 
         # special case for <c> in the middle of a sentence
         # this should not be needed, but there is a bug somewhere.

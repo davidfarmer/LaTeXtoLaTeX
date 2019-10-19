@@ -27,6 +27,9 @@ substitution_counter = 0
 generic_counter = 0
 generic_list = []
 
+topic = "calculus_single"
+topic = "combinatorics"
+
 extra_macros = []
 
 people_list = []

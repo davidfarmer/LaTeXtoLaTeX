@@ -549,7 +549,7 @@ def to_semantic_ma(text):
 #    thetext = re.sub(r"(\\geq) ", r"@$\1$@ ", thetext)
 
     kelleralternatemacros = [
-        ["cong", "isomorphicTo"],
+ #       ["cong", "isomorphicTo"],
         ["ints", "rationalIntegers"],
         ["posints", "positiveRationalIntegers"],
         ["rats", "rationals"],
@@ -651,12 +651,12 @@ def to_semantic_ma(text):
 
     # probability
     thetext = re.sub(r"\bP\( *([^()\|]+) *\| *([^()\|]+) *\)",
-                     r"\\conditionalProbabilityOf{\1}{\2}", thetext)
+                     r"\\conditionalProbabilityOf{\probabilityFunctionSymbol{P}}{\1}{\2}", thetext)
     thetext = re.sub(r"\b(\\{prob|Prob}) *\( *([^()\|]+) *\)",
                      r"\\functionApply{\\probabilityFunctionSymbol{\1}}{\2}", thetext)
     if "P(" in thetext:  print "found probability", thetext
     thetext = re.sub(r"\bP\( *([^()]+?) *\)",
-                         r"\\functionApply{\\probabilityFunctionSymbol}{\1}", thetext)
+                         r"\\functionApply{\\probabilityFunctionSymbol{P}}{\1}", thetext)
     if "E(" in thetext:  print "found expected value", thetext
     thetext = re.sub(r"\bE\( *([^()]+?) *\)",
                          r"\\functionApply{\\expectedValueFunctionSymbol{E}}{\1}", thetext)
@@ -679,6 +679,11 @@ def to_semantic_ma(text):
                      r"\\functionApply{\1}{\2}", thetext)
     thetext = re.sub(r"(\b[a-zA-Z\\]'*)\^\{-1\} *\(([^\(\),]+)\)",
                      r"\\functionApply{\\functionInverse{\1}}{\2}", thetext)
+
+    # attempt at two variable functions.  Note:  C(n,m), for binomial coeffient already extractedent already extracted
+    thetext = re.sub(r"(\b[a-zA-Z\\])\(([^\(\),]+?) *, *([^\(\),]+?) *\)",
+                     r"\\functionApplyTwo{\1}{\2}{\3}", thetext)
+
     if component.topic in ["calculus_single"]:
         thetext = re.sub(r"{([^{}]+)'''}", r"{\\thirdDerivative{\1}}", thetext)
         thetext = re.sub(r"{([^{}]+)''}", r"{\\secondDerivative{\1}}", thetext)
@@ -753,6 +758,11 @@ def to_semantic_ma(text):
                      to_semantic_limit, thetext)
     thetext = re.sub(r" *([0-9\.a-zA-Z\-+\\_{}]+) *@\$\\to\$@ *([0-9\.a-zA-Z\-+\\_{}]+)",
                      r"\\goesTo{\1}{\2}", thetext)
+
+    # equivalence
+    thetext = re.sub(r"([^$@]+?) *@\$\\sim\$@ *([^$@]+)",
+                     r"@$\1 \\equivalenceRelationSymbol{\\sim} \2$@", thetext)
+
 
     if component.topic in ["calculus_single"]:
         # integrals

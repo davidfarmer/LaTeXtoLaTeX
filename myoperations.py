@@ -1268,6 +1268,61 @@ def mytransform_txt(text):
 
 ###################
 
+
+def mytransform_html_matrix(text):
+#
+#  a relevant line in the hat map looks like
+# <rect x="257385" y="710.0" width="5"  height="18.0" fill="rgb(0,98,221)" stroke-width="2.0" stroke="none" class="who51102821 "><title>tBU 17:57 51102821</title></rect>
+#
+# The x-coordinate is in absolute minutes multiplied by 5.
+# The y-coordinate is relative position in the viewed item, offset by -10
+#    and multiplied by 30.
+# The digits after "who" is the id of the person
+#
+# Other relevant lines include
+# <text class="chapteritem" x="251910" y="1145.0" fill="rgb(20,20,20)" text-anchor="middle" ><a href="http://books.aimath.org/fcla/section-LDS.html?#wYd">ssec-Linearly D..Spans</a></text>
+# which indicates an item was viewed.
+# We will count "chapteritem" to know how many lines are in the map.
+# The line
+# <g id="level3" transform="translate(-251820 150)" >
+# tells you the x-coordinate offset.
+
+    thetext = text
+
+    this_person = component.person_id
+    this_person_identifier = "who" + this_person
+
+    num_columns = 24*60   # one day of data, one column per minute
+
+    num_rows = thetext.count("chapteritem")
+    print "we have", num_rows, "rows"
+    print "and", num_columns, "columns"
+    x_offset = int(re.search("translate\(-([0-9]+) ", thetext).group(1))/5
+
+    the_matrix = [[0 for x in range(num_columns)] for y in range(num_rows)]
+    
+    lines = thetext.split("\n")
+    these_x = []  # temp
+
+    
+    for line in lines:
+        if line.startswith("<rect "):
+            if this_person_identifier in line:
+                x_coord = re.search(' x="([^"]+)"', line).group(1)
+                x_coord_index = int(x_coord)/5 - x_offset
+                these_x.append(x_coord_index)
+                y_coord = re.search(' y="([^"]+)"', line).group(1)
+                y_coord_index = (int(float(y_coord)) + 10)/30
+  #              print "x_coord_index, y_coord_index", x_coord_index, y_coord_index
+                the_matrix[y_coord_index][x_coord_index] = 1
+
+    these_x.sort()
+ #   print these_x
+ #   print    the_matrix[1]
+    return the_matrix
+
+###################
+
 def mytransform_html_ptx(text):
 
     thetext = text

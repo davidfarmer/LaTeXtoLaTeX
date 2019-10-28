@@ -24,6 +24,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "iso",
                       "ptx",
                       "html_ptx",
+                      "html_matrix",
                       "xml_semantic", "ptx_semantic",
                       "mbx_permid", "xml_permid", "ptx_permid",
                       "tex", "tex_ptx",
@@ -99,6 +100,9 @@ elif component.filetype_plus in ["tex_ptx"]:
 elif component.filetype_plus in ["html_ptx"]:
     fileextension_in = "html"
     fileextension_out = "ptx"
+elif component.filetype_plus in ["html_matrix"]:
+    fileextension_in = "html"
+    fileextension_out = "txt"
 elif component.filetype_plus in ["svg"]:
     fileextension_in = "src"
     fileextension_out = "svg"
@@ -241,6 +245,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_tex_ptx(component.onefile)
     if component.filetype_plus == 'html_ptx':
         component.onefile = myoperations.mytransform_html_ptx(component.onefile)
+    if component.filetype_plus == 'html_matrix':
+        component.onefile = myoperations.mytransform_html_matrix(component.onefile)
     if component.filetype_plus in ['xml_semantic', 'ptx_semantic']:
         component.onefile = myoperations.mytransform_to_semantic(component.onefile)
     elif component.filetype_plus == 'txt':
@@ -334,11 +340,26 @@ for inputfile, outputfile in component.iofilepairs:
     if component.filetype_plus == "mbx_fa":
         component.onefile = transforms.mbx_fa(component.onefile)
 
-    if component.onefile:
+    if "ptx" in component.filetype_plus:
         # there is not actually a subtask tag
         component.onefile = re.sub(r"<subtask\b", "<task", component.onefile)
         component.onefile = re.sub(r"subtask>", "task>", component.onefile)
 
+    if component.onefile and component.filetype_plus == 'html_matrix':
+        this_matrix = component.onefile
+        this_matrix_formatted = "[\n"
+        for row in this_matrix:
+            this_row = "["
+            for elt in row:
+                this_row += str(elt) + ","
+            this_row = this_row[:-1]   # was extra comma at end
+            this_matrix_formatted += this_row + '],\n'
+        this_matrix_formatted = this_matrix_formatted[:-2]  # delete comma and \n
+        this_matrix_formatted += '\n]\n'
+        with open(outputfile, 'w') as outfile:
+            outfile.write(this_matrix_formatted)
+                
+    elif component.onefile:
         with open(outputfile, 'w') as outfile:
             outfile.write(component.onefile)
 

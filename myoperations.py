@@ -1300,25 +1300,19 @@ def mytransform_html_matrix(text):
     x_offset = int(re.search("translate\(-([0-9]+) ", thetext).group(1))/5
 
     the_matrix = [[0 for x in range(num_columns)] for y in range(num_rows)]
-    
-    lines = thetext.split("\n")
-    these_x = []  # temp
 
-    
+    lines = thetext.split("\n")
+
     for line in lines:
         if line.startswith("<rect "):
             if this_person_identifier in line:
                 x_coord = re.search(' x="([^"]+)"', line).group(1)
                 x_coord_index = int(x_coord)/5 - x_offset
-                these_x.append(x_coord_index)
                 y_coord = re.search(' y="([^"]+)"', line).group(1)
                 y_coord_index = (int(float(y_coord)) + 10)/30
   #              print "x_coord_index, y_coord_index", x_coord_index, y_coord_index
                 the_matrix[y_coord_index][x_coord_index] = 1
 
-    these_x.sort()
- #   print these_x
- #   print    the_matrix[1]
     return the_matrix
 
 ###################

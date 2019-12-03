@@ -66,7 +66,7 @@ def mbx_strict_html(text):
     thetext = text
 
     # mathjax can cause a line feed between math and punctuation
-    thetext = re.sub("</m>\s*([,:;.!?\-\)'\"]+)\s+<m>", r"\\text{\1}</m><nbsp /><m>", thetext)
+    thetext = re.sub("</m>\s*([,:;.!?\-\)'\"]+)\s+<m>", r"\\text{\1}</m><nbsp/><m>", thetext)
     thetext = re.sub("</m>\s*([,:;.!?\-\)'\"]+)", r"\\text{\1}</m>", thetext)
 
     # there can also be puntuation before math: (<m> x = 9 </m>)
@@ -179,7 +179,7 @@ def mbx_pp(text):
     thetext = re.sub(r"(</fn>)([a-zA-Z])", r"\1 \2", thetext)
 
     # space around pagebreak
-    thetext = re.sub(r"\s*<pagebreak\s*/>\s*", "\n\n<pagebreak />\n\n", thetext)
+    thetext = re.sub(r"\s*<pagebreak\s*/>\s*", "\n\n<pagebreak/>\n\n", thetext)
 
     # sort-of hack for cells containing p paragraphs
     thetext = re.sub(r"(<cell>)(<p[0-9]*>)", r"\1" + "\n" + r"\2", thetext)

@@ -316,9 +316,9 @@ def argument_of_macro(text,mac,argnum=1):
 
 def magic_character_convert(text, mode):
     """ replace & and < by 
-        &amp; or \amp or <ampersand /> or TMPAMPAMP 
+        &amp; or \amp or <ampersand/> or TMPAMPAMP 
             and 
-        &lt; or \lt or <less /> or TMPLESSLESS
+        &lt; or \lt or <less/> or TMPLESSLESS
             depending on whether mode is
         code or math or text or hide
 
@@ -333,8 +333,8 @@ def magic_character_convert(text, mode):
     the_text = re.sub(r"<", "TMPhideLESSLESS", the_text)
 
     if mode == "code":
-        the_text = re.sub("TMPhideAMPAMP", r"<ampersand />", the_text)
-        the_text = re.sub("TMPhideLESSLESS", r"<less />", the_text)
+        the_text = re.sub("TMPhideAMPAMP", r"<ampersand/>", the_text)
+        the_text = re.sub("TMPhideLESSLESS", r"<less/>", the_text)
     elif mode == "math":
         the_text = re.sub("TMPhideAMPAMP", r"\\amp", the_text)
         the_text = re.sub("TMPhideLESSLESSvar", r"<var", the_text)
@@ -1063,7 +1063,7 @@ def business_card(c_location, size, scale, contents, colors):
 
     enclosing_rectangle += 'stroke="' + border_color + '" '
     enclosing_rectangle += 'fill="' + fill_color + '" '
-    enclosing_rectangle += 'stroke-width="' + str(edge_width) + '" '
+    enclosing_rectangle += 'stroke-width="' + str(edge_width) + '"'
 
     enclosing_rectangle += '/>'
     enclosing_rectangle += '\n'

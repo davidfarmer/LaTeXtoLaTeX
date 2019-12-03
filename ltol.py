@@ -268,6 +268,9 @@ for inputfile, outputfile in component.iofilepairs:
 
         component.onefile = myoperations.mytransform_mbx_linefeeds(component.onefile)
 
+        # no space in self-closing tag
+        component.onefile = re.sub(r" +/>", "/>", component.onefile)
+
         # put back verbatim environments
         for tag in component.verbatim_tags:
              component.onefile = re.sub(r"A(" + tag + ")B(.{40})ENDZ *",

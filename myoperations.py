@@ -580,24 +580,10 @@ def replacetag(txt):
 
     this_text = txt.group(1)
 
-#    if "draw" in this_text:
-#        return this_text
-
-#    this_text = re.sub(r"\\parbox\[[^\]]*\]",r"\\parbox",this_text)
-######    this_text = re.sub("\s*(<var [^<>]*/>)\s*", r" \1",this_text)
-
     if trimmed_text:
         print trimmed_text
     if "<var" in this_text:
         print this_text
-#    this_text = utilities.replacemacro(this_text,r"\parbox",2,"#2")
-
-#    this_text = re.sub(r"<answer>.*?</answer>\s*","",this_text,1,re.DOTALL)
-
-#    while '$' in this_text:
-#       # print "found $"
-#        this_text = re.sub(r"\$","<m>",this_text,1)
-#        this_text = re.sub(r"\$","</m>",this_text,1)
 
     return this_text
 
@@ -616,9 +602,6 @@ def fixp(txt):
         btext = re.sub(r"\\\(","<m>",btext)
         btext = re.sub(r"\\\)","</m>",btext)
         this_text = "<p>" + btext + the_remainder
-
- #   if component.inputstub == 'sec_series':
- #       print this_text[:10]
 
     return this_text
 
@@ -1104,7 +1087,7 @@ def mytransform_svg(text):
         this_edge += '" '
 
         this_edge += 'stroke="' + '#3d8' + '" '
-        this_edge += 'stroke-width="' + '9' + '" '
+        this_edge += 'stroke-width="' + '9' + '"'
 
         this_edge += '/>'
 

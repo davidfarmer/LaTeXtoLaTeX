@@ -30,6 +30,8 @@ generic_list = []
 topic = "calculus_single"
 topic = "combinatorics"
 
+startagain = ""
+
 person_id = "51102815"
 
 extra_macros = []

@@ -184,6 +184,48 @@ def fa_conv(txt):
 
 ###################
 
+def mytransform_ldata(text):
+
+    thetext = text.strip()
+
+    if not thetext.startswith('itemtosave = {"R0_R1_R1", '):
+        print "data file starts wrong, quitting"
+        die()
+
+    thetext = re.sub(r"\\\s+", "", thetext)
+    thetext = re.sub("\s", "", thetext)
+    thetext = re.sub("`[0-9]+\.[0-9]+", "", thetext)
+
+    thetext = re.sub('itemtosave *= *{"R0_R1_R1", *', "", thetext)
+    startval, thetext = utilities.first_bracketed_string(thetext)
+    thetext = re.sub("^\s*,*", "", thetext)
+#    thetext = re.sub('^{[^{}]+}, *', "", thetext)  # throw away the starting value
+
+    lamset, thetext = utilities.first_bracketed_string(thetext)
+    thetext = re.sub("^\s*,*", "", thetext)
+    func_eq, thetext = utilities.first_bracketed_string(thetext)
+    thetext = re.sub("^\s*,*", "", thetext)
+    euler_prod, thetext = utilities.first_bracketed_string(thetext)
+    thetext = re.sub("^\s*,*", "", thetext)
+    coefficients_set, thetext = utilities.first_bracketed_string(thetext)
+    thetext = re.sub("^\s*,*", "", thetext)
+    search_params, thetext = utilities.first_bracketed_string(thetext)
+    thetext = re.sub("^\s*,*", "", thetext)
+    eig_precision, thetext = utilities.first_bracketed_string(thetext)
+    thetext = re.sub("^\s*,*", "", thetext)
+    coeff_precision, thetext = utilities.first_bracketed_string(thetext)
+    thetext = re.sub("^\s*,*", "", thetext)
+    print "lamset", lamset, "coefficients_set", coefficients_set
+
+    if "Take" in text:
+        print "               NEED TO TRY AGAIN AT", startval
+        component.startagain += startval
+
+    return thetext
+
+#########3
+
+
 def mytransform_mbx(text):   # schmidt calc 3 temporary
 #def mbx_fix(text):   # schmidt calc 3 temporary
 

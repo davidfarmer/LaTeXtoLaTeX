@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 import sys
 import re
@@ -23,6 +23,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "svg",
                       "iso",
                       "ptx",
+                      "ldata",
                       "html_ptx",
                       "html_matrix",
                       "xml_semantic", "ptx_semantic",
@@ -106,6 +107,9 @@ elif component.filetype_plus in ["html_matrix"]:
 elif component.filetype_plus in ["svg"]:
     fileextension_in = "src"
     fileextension_out = "svg"
+elif component.filetype_plus in ["ldata"]:
+    fileextension_in = ""
+    fileextension_out = ""
 elif component.filetype_plus in ["iso"]:
     fileextension_in = "iso"
     fileextension_out = "html"
@@ -129,11 +133,17 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) 
     outputdir = component.outputname
     outputdir = re.sub(r"/*$","",outputdir)  # remove trailing slash
     outputdir = outputdir + "/"              # and then put it back
-    thefiles = glob.glob(inputdir + "/*." + fileextension_in)
+    if fileextension_in:
+        thefiles = glob.glob(inputdir + "/*." + fileextension_in)
+    else:
+        thefiles = glob.glob(inputdir + "/*")
 
     for component.inputfilename in thefiles:
-        outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", component.inputfilename)
-        if fileextension_in != fileextension_out:
+        if component.filetype_plus == "ldata":
+            outputfilename = outputdir + "summart.txt"
+        else:
+            outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", component.inputfilename)
+        if fileextension_in and fileextension_in != fileextension_out:
             outputfilename = re.sub(fileextension_in + "$", fileextension_out, outputfilename)
         if component.inputfilename == outputfilename:
             print "big problem, quitting"
@@ -257,6 +267,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_ptx(component.onefile)
     elif component.filetype_plus in ['svg']:
         component.onefile = myoperations.mytransform_svg(component.onefile)
+    elif component.filetype_plus in ['ldata']:
+        component.onefile = myoperations.mytransform_ldata(component.onefile)
     elif component.filetype_plus in ['iso']:
         component.onefile = myoperations.mytransform_iso(component.onefile)
     elif component.filetype_plus in ['mbx', 'xml']:
@@ -362,9 +374,16 @@ for inputfile, outputfile in component.iofilepairs:
         with open(outputfile, 'w') as outfile:
             outfile.write(this_matrix_formatted)
                 
-    elif component.onefile:
+    elif component.onefile and component.filetype_plus != "ldata":
         with open(outputfile, 'w') as outfile:
             outfile.write(component.onefile)
+
+    elif component.filetype_plus == "ldata":
+        print "the file starts", component.onefile[:150]
+
+if component.filetype_plus == "ldata":
+    with open(outputfile, 'w') as outfile:
+        outfile.write("just a text")
 
 if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid'] and component.all_permid:
     component.all_permid.sort()
@@ -382,6 +401,8 @@ if component.generic_counter:
 
 if component.extra_macros:
     print "component.extra_macros", component.extra_macros
+
+print "need to start again at",  component.startagain
 
 print "done"
 

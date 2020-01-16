@@ -236,17 +236,6 @@ def mytransform_ldata(text):
       thetext = re.sub("^\s*,*", "", thetext)
       print "lamset", lamset, "coefficients_set", coefficients_set[:20]
 
-#      checkwandering = 4
-#      if checkwandering and "." in startval:
-#          startva = re.sub("[{} ]", "", startval)
-#          startv = startva.split(",")
-##          lamse = re.sub("[{} ]", "", lamset)
-#          lams = lamse.split(",")
-#          for idx, val in enumerate(startv):
-#              if startv[idx][:checkwandering] != lams[idx][:checkwandering]:
-#                  print "WANDERING?", startval, lamset
-      
-
       if not eig_precision.startswith("{0.0") and "*^-" not in eig_precision:
           component.maybe_bad += 1
           print component.maybe_bad, "LOW PRECISION?", eig_precision

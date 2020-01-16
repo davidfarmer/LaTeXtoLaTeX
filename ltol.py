@@ -235,7 +235,7 @@ for inputfile, outputfile in component.iofilepairs:
     component.inputstub = re.sub(".*/","",component.inputstub)
     component.inputfilename = component.inputstub
     component.inputstub = re.sub("\..*","",component.inputstub)
-    print "file stub is ",component.inputstub
+    print "file is ",inputfile
     component.filestubs.append(component.inputstub)
 
     with open(inputfile) as infile:
@@ -381,9 +381,11 @@ for inputfile, outputfile in component.iofilepairs:
     elif component.filetype_plus == "ldata":
         print "the file starts", component.onefile[:150]
 
+component.foundvalues.sort()
 if component.filetype_plus == "ldata":
     with open(outputfile, 'w') as outfile:
-        outfile.write("just a text")
+        for lam1lam2 in component.foundvalues:
+            outfile.write(lam1lam2 + ",\n")
 
 if component.filetype_plus in ['mbx_permid', 'ptx_permid', 'xml_permid'] and component.all_permid:
     component.all_permid.sort()
@@ -403,6 +405,10 @@ if component.extra_macros:
     print "component.extra_macros", component.extra_macros
 
 print "need to start again at",  component.startagain
+
+print "all found values"
+for j in range(20):
+    print component.foundvalues[j]
 
 print "done"
 

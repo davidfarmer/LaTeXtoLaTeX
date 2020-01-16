@@ -30,7 +30,9 @@ generic_list = []
 topic = "calculus_single"
 topic = "combinatorics"
 
+foundvalues = []
 startagain = ""
+maybe_bad = 0
 
 person_id = "51102815"
 

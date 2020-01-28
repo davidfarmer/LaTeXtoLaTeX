@@ -27,6 +27,15 @@ substitution_counter = 0
 generic_counter = 0
 generic_list = []
 
+topic = "calculus_single"
+topic = "combinatorics"
+
+foundvalues = []
+startagain = ""
+maybe_bad = 0
+
+person_id = "51102815"
+
 extra_macros = []
 
 people_list = []
@@ -44,7 +53,7 @@ prohibited_13 = [
     'jgs', 'yby', 'snt', 'xxx', 'fgq', 'yfq', 'tnl', 'wrj', 'jbc', 'wnc',
     'kkk', 'cbg', 'czf', 'tbq', 'ynl']
 
-permid_base_number = 12345
+permid_base_number = 123
 current_permid = permid_base_number
 permid_base_increment = 86901
 permid_base_mod = 140608
@@ -91,6 +100,7 @@ document_pieces = ['title', 'subtitle', 'cell', 'caption',
                    'address', 'attribution', 'location', 'edition',
                    'personname', 'date', 'email', 'department', 'institution',
                    'cd', 'line', 'cline',
+                   'alert', 'url', 'q', 'pubtitle',
                    'role', 'entity', 'year', 'minilicense', 'holder',
                    'usage', 'description', 'journal', 'volume', 'number',
                    'mrow', 'intertext', 'initialism',
@@ -124,9 +134,12 @@ punctuatable_tags = ['fn', 'quantity', 'c']
 tags_by_level = [
          ['book', 'chapter','appendix', 'section', 'frontmatter', 'backmatter'],
          [ 'subsection', 'subsubsection', 'preface',
-             'exercises', 'exercisegroup', 'paragraphs',
+             'exercises',
+             'references',
              'reading-questions', 'archetype',
-             'worksheet', 'assemblage', 'solutions'],
+             'worksheet'],
+         [ 'exercisegroup', 'paragraphs',
+             'assemblage', 'solutions'],
 #         ['subsubsection', 'subsection', 'section', 'appendix',
 #             'book', 'chapter'],
 #         ['frontmatter', 'backmatter', 'preface',
@@ -139,6 +152,7 @@ tags_by_level = [
              'aside', 'sage',
              'exercise', 'investigation', 'activity', 'exploration'],
          ['task', 'solution', 'answer', 'hint', 'proof', 'blockquote',
+          'biblio',
           'note', 'warning'],
          ['ul', 'ol', 'dl'],
          ['li'],

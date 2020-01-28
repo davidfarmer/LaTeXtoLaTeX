@@ -316,9 +316,9 @@ def argument_of_macro(text,mac,argnum=1):
 
 def magic_character_convert(text, mode):
     """ replace & and < by 
-        &amp; or \amp or <ampersand /> or TMPAMPAMP 
+        &amp; or \amp or <ampersand/> or TMPAMPAMP 
             and 
-        &lt; or \lt or <less /> or TMPLESSLESS
+        &lt; or \lt or <less/> or TMPLESSLESS
             depending on whether mode is
         code or math or text or hide
 
@@ -333,8 +333,8 @@ def magic_character_convert(text, mode):
     the_text = re.sub(r"<", "TMPhideLESSLESS", the_text)
 
     if mode == "code":
-        the_text = re.sub("TMPhideAMPAMP", r"<ampersand />", the_text)
-        the_text = re.sub("TMPhideLESSLESS", r"<less />", the_text)
+        the_text = re.sub("TMPhideAMPAMP", r"<ampersand/>", the_text)
+        the_text = re.sub("TMPhideLESSLESS", r"<less/>", the_text)
     elif mode == "math":
         the_text = re.sub("TMPhideAMPAMP", r"\\amp", the_text)
         the_text = re.sub("TMPhideLESSLESSvar", r"<var", the_text)
@@ -508,6 +508,519 @@ def next_permid_encoded():
 
 ###################
 
+def to_semantic_math(txt):
+
+    theopeningtag = txt.group(1)
+    thetext = txt.group(2)
+    theclosingtag = txt.group(3)
+
+    thetext = to_semantic_ma(thetext)
+
+    return theopeningtag + thetext + theclosingtag
+
+#--------------#
+
+def to_semantic_ma(text):
+
+    thetext = text
+
+    # hide all teh relations
+#    the_relations = r'(=|\\lt\b|\\le\b|\\ne\b|\\gt\b|\\ge\b|\\approx\b)'
+    the_relations = [r'=',
+                     r'\\lt\b',
+                     r'\\le\b',
+                     r'\\leq\b',
+                     r'\\ne\b',
+                     r'\\neq\b',
+                     r'\\gt\b',
+                     r'\\ge\b',
+                     r'\\geq\b',
+                     r'\\sim\b',
+                     r'\\in\b',
+                     r'\\pm\b',
+                     r'\\mp\b',
+                     r'\\amp\b',   # not a relation, but serves as a divider
+                     r'\\to\b',   # not a relation, but serves as a separator
+                     r'\\rightarrow\b',   # not a relation, but serves as a separator
+                     r'\\approx\b']
+#    thetext = re.sub(r"(=|\\lt\b|\\le\b|\\ne\b|\\gt\b|\\ge\b|\\approx\b)", r"@$\1$@", thetext)
+    for this_relation in the_relations:
+        thetext = re.sub(r"(" + this_relation + ")", r"@$\1$@", thetext)
+#    thetext = re.sub(r"(\\geq) ", r"@$\1$@ ", thetext)
+
+    kelleralternatemacros = [
+ #       ["cong", "isomorphicTo"],
+        ["ints", "rationalIntegers"],
+        ["posints", "positiveRationalIntegers"],
+        ["rats", "rationals"],
+ #       ["reals", "reals"],  # same!
+ #       ["complexes", "complexes"],  # same!
+        ["twospace", "realNSpace{2}"],
+        ["threespace", "realNSpace{3}"],
+        ["dspace", "realNSpace{d}"],
+        ["binom", "binomialCoefficient"],
+        ["emptyset", "emptySet"],
+        ["nni", "nonnegativeRationalIntegers"],
+        ["nonnegints", "nonnegativeRationalIntegers"]
+    ]
+    for [oldmac, newmac] in kelleralternatemacros:
+         thetext = replacemacro(thetext, oldmac, 0, "\\" + newmac)
+
+    known_functions = [r'sin', r'cos', r'tan', r'sec', r'csc', r'cot',
+                       r'arcsin', r'arccos', r'arctan', r'arcsec', r'arccsc', r'arccot',
+                       r'ln', r'ln', r'exp', r'erf']
+
+    # fix some common anomalies
+    thetext = re.sub(r"(\))(\()", r"\1 \2", thetext)  # as in (x+1)(x-1)
+    thetext = re.sub(r"([^\^][0-9])(\()", r"\1 \2", thetext)  # as in 2(3+1) but not f^2(x)
+    thetext = re.sub(r"([0-9])(-|\+)([0-9])", r"\1 \2 \3", thetext)  # as in x^3-4x^2+8
+    thetext = re.sub(r"([0-9])\\", r"\1 \\", thetext)  # as in 2\sqrt{x} or 2\\left(
+    thetext = re.sub(r"(\s|^)uv(\s|$)", r"\1u v\2", thetext)
+
+    thetext = re.sub(r"\b(a|b|c)(m|n|j|k)\b", r"\1 \2", thetext)
+    thetext = re.sub(r"\b(m)(n|j|k)\b", r"\1 \2", thetext)
+    thetext = re.sub(r"\b(n|m|k|j)(\()", r"\1 \2", thetext)
+
+    for function in known_functions:
+        thetext = re.sub(r"([a-zA-Z0-9])(\\" + function + ")", r"\1 \2", thetext)
+
+    thetext = re.sub(r"([0-9a-zA-Z}\)+])(\\frac{[^{}]+}{[^{}]+})", r"\1 \2", thetext)
+    thetext = re.sub(r"([0-9])([a-zA-Z])", r"\1 \2", thetext)
+    thetext = re.sub(r"(\\frac{[^{}]+}{[^{}]+})([0-9a-zA-Z\(+\-])", r"\1 \2", thetext)
+    thetext = re.sub(r"(\S) {2,}", r"\1 ", thetext)
+
+#    thetext = re.sub(r"\\frac",
+#                     r"\\xfrac", thetext)
+
+    #specific types of graphs
+    if component.topic in ["combinatorics"]:
+        thetext = re.sub(r"\\bfP_([0-9a-zA-Z])", r"\\pathOnNVertices{\1}", thetext)
+        thetext = re.sub(r"\\bfP_{([^{}]+)}", r"\\pathOnNVertices{\1}", thetext)
+        thetext = re.sub(r"\\bfC_([0-9a-zA-Z])", r"\\cycleOnNVertices{\1}", thetext)
+        thetext = re.sub(r"\\bfC_{([^{}]+)}", r"\\cycleOnNVertices{\1}", thetext)
+        thetext = re.sub(r"\\bfK_{([^{},]+) *, *([^{},]+)}", r"\\completeBipartiteGraphOnNMVertices{\1}{\2}", thetext)
+        thetext = re.sub(r"\\bfK_([0-9a-zA-Z])", r"\\completeGraphOnNVertices{\1}", thetext)
+        thetext = re.sub(r"\\bfK_{([^{}]+)}", r"\\completeGraphOnNVertices{\1}", thetext)
+
+    if component.topic in ["combinatorics"]:
+
+        thetext = re.sub(r"\bC\(([^(),]+?), *([^()]+?) *\)",
+                         r"\\binomialCoefficientInline{\1}{\2}", thetext)
+        thetext = re.sub(r"\bP\(([^(),]+?), *([^()]+?) *\)",
+                         r"\\numberOfPermutations{\1}{\2}", thetext)
+
+        thetext = re.sub(r"\\deg_(\\[a-zA-Z]) *\(([^()]+)\)",
+                         r"\\degreeOfVertexInGraph{\1}{\2}", thetext)
+        thetext = re.sub(r"\\deg_{([^{}])} *\(([^()]+)\)",
+                         r"\\degreeOfVertexInGraph{\1}{\2}", thetext)
+        thetext = re.sub(r"\\deg *\(([^()]+)\)",
+                         r"\\degreeOfVertex{\1}", thetext)
+
+    # numbers to a given base
+    thetext = re.sub(r"\(([0-9]+)\)_\{([1-9]+)\}", r"\\numberBase{#1}{#2}", thetext)
+    thetext = re.sub(r"\(([0-9]+)\)_([1-9])", r"\\numberBase{#1}{#2}", thetext)
+
+    # base of the natural log
+    thetext = re.sub(r"\be\^", r"\\eulerE^", thetext)
+    if component.topic in ["calculus_single"]:
+        # the \pi which is approximately 3.14159
+        thetext = re.sub(r"\\pi\b", r"\\circlePi", thetext)
+
+    # roots
+    thetext = re.sub(r"\\sqrt\[([^\[\]]+)\]{([^{}]+)}",
+                     r"\\nthRoot{\1}{\2}", thetext)
+
+    # factorial
+    thetext = re.sub(r"(\b[a-zA-Z]|[0-9]+)\!",
+                     r"\\factorial{\1}", thetext)
+    thetext = re.sub(r"(\([^()]+\))\!",
+                     r"\\factorial{\1}", thetext)
+
+    if component.topic in ["calculus_single"]:
+        #Delta in the sense of a small width
+        thetext = re.sub(r"\\Delta +(\S+)", r"\\deltaWidth{\1}", thetext)
+
+    if component.topic in ["combinatorics"]:
+        thetext = re.sub(r"\\chi\( *([^()]+?) *\)",
+                         r"\\functionApply{\\chromaticNumberOfGraphFunctionSymbol}{\1}", thetext)
+        thetext = re.sub(r"\\omega\( *([^()]+?) *\)",
+                         r"\\functionApply{\\cliqueNumberOfGraphFunctionSymbol}{\1}", thetext)
+    if component.topic in ["combinatorics", "numbertheory"]:
+        thetext = re.sub(r"\\phi\( *([^()]+?) *\)",
+                         r"\\functionApply{\\eulerTotientFunctionSymbol}{\1}", thetext)
+
+    # probability
+    thetext = re.sub(r"\bP\( *([^()\|]+) *\| *([^()\|]+) *\)",
+                     r"\\conditionalProbabilityOf{\probabilityFunctionSymbol{P}}{\1}{\2}", thetext)
+    thetext = re.sub(r"\b(\\{prob|Prob}) *\( *([^()\|]+) *\)",
+                     r"\\functionApply{\\probabilityFunctionSymbol{\1}}{\2}", thetext)
+    if "P(" in thetext:  print "found probability", thetext
+    thetext = re.sub(r"\bP\( *([^()]+?) *\)",
+                         r"\\functionApply{\\probabilityFunctionSymbol{P}}{\1}", thetext)
+    if "E(" in thetext:  print "found expected value", thetext
+    thetext = re.sub(r"\bE\( *([^()]+?) *\)",
+                         r"\\functionApply{\\expectedValueFunctionSymbol{E}}{\1}", thetext)
+    thetext = re.sub(r"\\var\( *([^()]+?) *\)",
+                         r"\\functionApply{\\varianceOfRandomVariableFunctionSymbol{\\var}}{\1}", thetext)
+
+    # function application
+ #   thetext = re.sub(r"(\\ln|\\log)\(([^\(\)]+)\)",
+ #                    r"\\functionApply{\1}{\2}", thetext)
+    for function in known_functions:
+        thetext = re.sub(r"(\\" + function + ")\^([0-9a-z]) *\(([^\(\)]+)\)",
+                         r"\\functionApply{\\functionPower{\1}{\2}}{\3}", thetext)
+        thetext = re.sub(r"(\\" + function + ")\^{([^{}]+)} *\(([^\(\)]+)\)",
+                         r"\\functionApply{\\functionPower{\1}{\2}}{\3}", thetext)
+        thetext = re.sub(r"(\\" + function + ")\^\{-1\} *\(([^\(\)]+)\)",
+                         r"\\functionApply{\\functionInverse{\1}{\2}}{\3}", thetext)
+        thetext = re.sub(r"(\\" + function + ")\(([^\(\)]+)\)",
+                         r"\\functionApply{\1}{\2}", thetext)
+    thetext = re.sub(r"(\b[a-zA-Z\\]'*)\(([^\(\),]+)\)",
+                     r"\\functionApply{\1}{\2}", thetext)
+    thetext = re.sub(r"(\b[a-zA-Z\\]'*)\^\{-1\} *\(([^\(\),]+)\)",
+                     r"\\functionApply{\\functionInverse{\1}}{\2}", thetext)
+
+    # attempt at two variable functions.  Note:  C(n,m), for binomial coeffient already extractedent already extracted
+    thetext = re.sub(r"(\b[a-zA-Z\\])\(([^\(\),]+?) *, *([^\(\),]+?) *\)",
+                     r"\\functionApplyTwo{\1}{\2}{\3}", thetext)
+
+    if component.topic in ["calculus_single"]:
+        thetext = re.sub(r"{([^{}]+)'''}", r"{\\thirdDerivative{\1}}", thetext)
+        thetext = re.sub(r"{([^{}]+)''}", r"{\\secondDerivative{\1}}", thetext)
+        thetext = re.sub(r"{([^{}]+)'}", r"{\\firstDerivative{\1}}", thetext)
+        thetext = re.sub(r"(\b[a-zA-Z]+)'''", r"\\thirdDerivative{\1}", thetext)
+        thetext = re.sub(r"(\b[a-zA-Z]+)''", r"\\secondDerivative{\1}", thetext)
+        thetext = re.sub(r"(\b[a-zA-Z]+)'", r"\\firstDerivative{\1}", thetext)
+        thetext = re.sub(r"(\b[a-zA-Z])\^\{\(([^()])\)\} *\(([^()]+)\)",
+                         r"\\functionApply{\\nthDerivative{\1}{\2}}{\3}", thetext)
+
+        # derivatives
+        thetext = re.sub(r"\\frac{d}{d(\\?[a-z]+)} *\[([^\[\]]+)\]",
+                         r"\\differentialOperatorApply{\\dDerivativeWRT{\1}}{@$\2$@}", thetext)
+        thetext = re.sub(r"\\frac{d}{d(\\?[a-z]+)} *\\left\[([^[]]+)\\right\]",
+                         r"\\differentialOperatorApply{\\dDerivativeWRT{\1}}{@$\2$@}", thetext)
+        thetext = re.sub(r"\\frac{d(\\?[a-z]+)}{d(\\?[a-z]+)}",
+                         r"\\dDerivative{\1}{\2}", thetext)
+
+    # large parentheses
+    thetext = re.sub(r"\\left(\()(.*?)\\right\)",
+                     to_paren_group, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\\left(\[)(.*?)\\right\]",
+                     to_paren_group, thetext, 0, re.DOTALL)
+
+    # intervals 
+    thetext = re.sub(r"\[ *([0-9\.a-zA-Z\-+\\_{}]+) *, *([0-9\.a-zA-Z\-+\\_{}]+) *\]",
+                     r"\\ccInterval{\1}{\2}", thetext)
+    thetext = re.sub(r"\( *([0-9\.a-zA-Z\-+\\_{}]+) *, *([0-9\.a-zA-Z\-+\\_{}]+) *\]",
+                     r"\\ocInterval{\1}{\2}", thetext)
+    thetext = re.sub(r"\[ *([0-9\.a-zA-Z\-+\\_{}]+) *, *([0-9\.a-zA-Z\-+\\_{}]+) *\)",
+                     r"\\coInterval{\1}{\2}", thetext)
+    # in AC, (a,b) usuall means a point in the plane
+ #   thetext = re.sub(r"\( *([0-9\.a-zA-Z\-+\\_{}]+) *, *([0-9\.a-zA-Z\-+\\_{}]+) *\)",
+ #                    r"\\ooInterval{\1}{\2}", thetext)
+    thetext = re.sub(r"gcd\( *([^()]+) *, *([^()]+) *\)",
+                     r"\\gCD{\1}{\2}", thetext)
+
+    if component.topic in ["calculus_single"]:
+        thetext = re.sub(r"\( *([0-9\.a-zA-Z\-+\\_{}]+) *, *([0-9\.a-zA-Z\-+\\_{}]+) *\)",
+                         r"\\cartesianPoint{\1}{\2}", thetext)
+    if component.topic in ["combinatorics"]:
+        thetext = re.sub(r"\( *([0-9\.a-zA-Z\-+\\_{}]+) *, *([0-9\.a-zA-Z\-+\\_{}]+) *\)",
+                         r"\\orderedPair{\1}{\2}", thetext)
+
+    thetext = re.sub(r"\\lceil *([^\|]+?) *\\rceil",
+                     r"\\ceiling{\1}", thetext)
+    thetext = re.sub(r"\\lfloor *([^\|]+?) *\\rfloor",
+                     r"\\floor{\1}", thetext)
+
+    # absolute value
+    if component.topic in ["combinatorics"]:
+        thetext = re.sub(r"\| *([^\|]+?) *\|",
+                         r"\\cardinality{\1}", thetext)
+    else:
+        thetext = re.sub(r"\| *([^\|]+?) *\|",
+                         r"\\abs{\1}", thetext)
+
+    if component.topic in ["combinatorics"]:
+        thetext = re.sub(r"([a-zA-Z0-9_\\{}]+) *\\Vert *([a-zA-Z0-9_]+)",
+                         r"\\incomparableInPoset{\1}{\2}", thetext)
+    # set membership
+#    if "\\in" in thetext: print "found \\in", thetext
+    thetext = re.sub(r"([0-9a-zA-Z_,\\]+) *@\$\\in\$@ *([^$@]+)",
+                     r"\\elementOf{\1}{\2}", thetext)
+#    if "\\in" in thetext: print "again found \\in", thetext
+
+    # abstract functions:
+    thetext = re.sub(r" *([a-zA-Z\\]+)[ \\,]*(:|\\colon)[ \\,]*([0-9\.a-zA-Z\-+\\_{}]+) *@\$\\(to|rightarrow|longrightarrow)\$@ *([0-9\.a-zA-Z\-+\\_{}]+)",
+                     r"\\functionDomainCodomain{\1}{\3}{\5}", thetext)
+    # limits
+    thetext = re.sub(r"\\lim_\{([^{}]) *@\$\\to\$@ *([^{}]+) *\} *([^$@]+)",
+                     to_semantic_limit, thetext)
+    thetext = re.sub(r" *([0-9\.a-zA-Z\-+\\_{}]+) *@\$\\to\$@ *([0-9\.a-zA-Z\-+\\_{}]+)",
+                     r"\\goesTo{\1}{\2}", thetext)
+
+    # equivalence
+    thetext = re.sub(r"([^$@]+?) *@\$\\sim\$@ *([^$@]+)",
+                     r"@$\1 \\equivalenceRelationSymbol{\\sim} \2$@", thetext)
+
+
+    if component.topic in ["calculus_single"]:
+        # integrals
+        if "\\log" in thetext and "\\sqrt" in thetext:
+            print "should see an integral", thetext
+        thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
+                         to_semantic_integral, thetext, 0, re.DOTALL)
+
+        thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
+                         to_semantic_integral, thetext, 0, re.DOTALL)
+
+        # differentials
+        thetext = re.sub(r"( |\)|^)d([a-z]'*|\\[a-z]+)",
+                         r"\1\\differential{\2}", thetext)
+
+    if component.topic in ["calculus_single", "calculus_multiple", "combinatorics"]:
+        thetext = re.sub(r"([a-zA-Z0-9_\\{}]+) *\\cup *([a-zA-Z0-9_]+)",
+                         r"\\union{\1}{\2}", thetext)
+        thetext = re.sub(r"([a-zA-Z0-9_\\{}]+) *\\cap *([a-zA-Z0-9_]+)",
+                         r"\\intersection{\1}{\2}", thetext)
+
+    thetext = re.sub(r"(\\{[a-zA-Z0-9_\\,]+\\}) *\\(subseteq) *([a-zA-Z0-9_\\{}]+)",
+                     r"\\subsetOrEqual{\1}{\3}", thetext)
+    thetext = re.sub(r"([a-zA-Z0-9_]+) *\\(subseteq) *([a-zA-Z0-9_\\{}]+)",
+                     r"\\subsetOrEqual{\1}{\3}", thetext)
+
+    # sumations
+    thetext = re.sub(r"\\sum_\{([^{}]+)\}\^\{([^{}]+)\} *([0-9\.a-zA-Z\\\(\){}^_\-+ *]+)",
+                    to_semantic_summation, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\\sum_\{([^{}]+)\}\^(\\infty|[a-zA-Z]) +([0-9\.a-zA-Z\\\(\){}^_\-+ ]+)",
+                    to_semantic_summation, thetext, 0, re.DOTALL)
+    # no upper limit
+    thetext = re.sub(r"\\sum_\{([^{}]+)\}() +([0-9\.a-zA-Z\\\(\){}^_\-+ ]+)",
+                    to_semantic_summation, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"\\sum_\{([^{}]+)\}()() +([0-9\.a-zA-Z\\\(\){}^_\-+ ]+)",
+                    to_semantic_summation, thetext, 0, re.DOTALL)
+
+    # this assumes that \, is only otherwise used as in '\, dx', which has already been converted
+    # implied multiplication from thinspace
+    thetext = re.sub(r"([^ ]+) *\\, *([^ ]+)",
+                     r"\\impliedMultiplication{\1}{\2}", thetext)
+    # should do it multiple times because of several products.
+    # or make a function with an arbitrary number of arguments?
+    thetext = re.sub(r"([^ ]+) *\\, *([^ ]+)",
+                     r"\\impliedMultiplication{\1}{\2}", thetext)
+
+    if component.topic in ["calculus_single"]:
+        dotmeans = "dotMultiplication"
+    elif component.topic in ["combinatorics"]:
+        dotmeans = "dotMultiplication"
+    else:
+        dotmeans = "dotProduct"
+    #  multiplication with a dot
+    thetext = re.sub(r"([0-9\.]+) *\\cdot *([0-9\.]+)( |$)",
+                     r"\\" + dotmeans + r"{\1}{\2}\3", thetext)
+    thetext = re.sub(r"([^ ()]+) *\\cdot ([^ ()]+)",
+                     r"\\" + dotmeans + r"{\1}{\2}", thetext)
+    thetext = re.sub(r"([^ ]+) *\\cdot ([^ ]+)",
+                     r"\\" + dotmeans + r"{\1}{\2}", thetext)
+    thetext = re.sub(r"([^ ]+) *\\cdot ([^ ]+)",
+                     r"\\" + dotmeans + r"{\1}{\2}", thetext)
+    if component.topic in ["calculus_single"]:
+        timesmeans = "timesMultiplication"
+    elif component.topic in ["combinatorics"]:
+        timesmeans = "cartesianProduct"
+        #  multiplication with a times (note that this is just for calculus)
+    thetext = re.sub(r"([0-9\.]+) *\\times *([0-9\.]+)( |$)",
+                     r"\\" + timesmeans + r"{\1}{\2}\3", thetext)
+    thetext = re.sub(r"([^ ()]+) \\times ([^ ()]+)",
+                     r"\\" + timesmeans + r"{\1}{\2}", thetext)
+    thetext = re.sub(r"([^ ]+) \\times ([^ ]+)",
+                     r"\\" + timesmeans + r"{\1}{\2}", thetext)
+    thetext = re.sub(r"([^ ]+) \\times ([^ ]+)",
+                     r"\\" + timesmeans + r"{\1}{\2}", thetext)
+
+    # number implicit times something
+    thetext = re.sub(r"( |^)([0-9]+) *(\(?[a-zA-Z][0-9a-zA-Z\\\(\){}^_]*)( |$)",
+                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+
+    thetext = re.sub(r"( |{|^)(\-?[0-9\.]+) +(\\?[0-9\.a-zA-Z][0-9\.a-zA-Z\\^_]*)( |}|$)",
+                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+
+    # tricky case is "backslash space"
+    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\)^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\)^_\-+]*)( |$)",
+                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)( |$)",
+                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+    thetext = re.sub(r"({)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)(})",
+                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)( |$)",
+                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+
+    if component.topic in ["combinatorics"]:
+        thetext = re.sub(r"\\\{([^{}]+)\\\}",
+                         r"\\setElements{\1}", thetext)
+    if component.topic in ["combinatorics"]:
+        thetext = re.sub(r"\\bfG\b",
+                         r"\\abstractGraph{G}", thetext)
+
+    thetext = re.sub(r"\\\{([^{}]+)\\\}_\{([^{}]+)\}",
+                     r"\\sequenceSet{\1}{\2}", thetext)
+    thetext = re.sub(r"\\\{([^{}]+)\\\}",
+                     r"\\sequenceElements{\1}", thetext)
+    #unhide all the relations
+ #   thetext = re.sub(r"@\$(=|\\lt|\\le|\\ne|\\gt|\\ge|\\approx)\$@", r"\1", thetext)
+    for this_relation in the_relations:
+        thetext = re.sub(r" *@\$(" + this_relation + ")\$@ *", r" \1 ", thetext)
+    # we actually use @$ for other thigns
+    thetext = re.sub(r"(@\$|\$@)", r"", thetext)
+
+    thetext = re.sub("ONESPACE", " ", thetext)
+
+    return thetext
+
+#------------#
+
+def to_paren_group(txt):
+
+    thebracket = txt.group(1)
+    inside_parens = txt.group(2)
+
+    inside_parens = inside_parens.strip()
+
+#    print "inside_parens was", inside_parens
+    inside_parens = to_semantic_ma(inside_parens)
+#    print "inside_parens is ", inside_parens
+
+    inside_parens = re.sub(" ", "ONESPACE", inside_parens)
+
+    if thebracket == "(":
+        theanswer = "\\parenGroup"
+    elif thebracket == "[":
+        theanswer = "\\bracketGroup"
+    else:
+        theanswer = "\\ERROR"
+
+    theanswer += "{" + inside_parens + "}"
+
+    return theanswer
+
+#------------#
+
+def to_semantic_limit(txt):
+
+    thevariable = txt.group(1).strip()
+    thegoal = txt.group(2).strip()
+    thefunction = txt.group(3).strip()
+
+#    print "thegoal", thegoal+ "ttt"
+
+    if thegoal.endswith("^-"):
+        thegoal = thegoal[:-2]
+        the_answer = r"\limitLeft"
+    elif thegoal.endswith("^+"):
+        thegoal = thegoal[:-2]
+        the_answer = r"\limitRight"
+    else:
+        the_answer = r"\limitBoth"
+
+    the_answer += "{" + thevariable + "}"
+    the_answer += "{" + thegoal + "}"
+    the_answer += "{@$" + thefunction + "$@}"
+
+#    print "     the_answer", the_answer
+
+    return the_answer
+
+def to_semantic_summation(txt):
+
+    lowerlimit_raw = txt.group(1).strip()
+    upperlimit = txt.group(2)
+    summand = txt.group(3)
+
+    print "summand", summand
+
+#    if "@$" in lowerlimit_raw:
+#        lowerlimit_raw = re.sub("(@|\$)", "", lowerlimit_raw)
+    if "=" in lowerlimit_raw:
+        lowerlimit_raw = re.sub("(@|\$)", "", lowerlimit_raw)
+        print 'lowerlimit_raw.split("=")', lowerlimit_raw.split("=")
+        thevariable, lowerlimit = lowerlimit_raw.split("=")
+        thevariable = thevariable.strip()
+        lowerlimit = lowerlimit.strip()
+    elif lowerlimit_raw:
+        lowerlimit = lowerlimit_raw   # wrong: need to do more than that
+        thevariable = lowerlimit_raw[0]
+    else:
+        lowerlimit = ""
+
+    if upperlimit:
+        the_answer = r"\summationLimits"
+        the_answer += "{" + lowerlimit + "}"
+        the_answer += "{" + upperlimit + "}"
+    elif lowerlimit:
+        the_answer = r"\summationSet"
+        the_answer += "{" + lowerlimit + "}"
+    else:
+        the_answer = r"\summationBare"
+        the_answer += "{@$" + summand + "$@}"
+
+    the_answer += "{@$" + summand + "$@}"
+    the_answer += "{" + thevariable + "}"
+
+    return the_answer
+
+def to_semantic_integral(txt):
+
+    lowerlimit = ""
+    upperlimit = ""
+
+    theintegrand = txt.group(2)
+    theintegrationvariable = txt.group(4)
+
+    if theintegrand.startswith("_"):
+        theintegrand = theintegrand[1:]   # remove the _
+        if theintegrand.startswith("{"):
+            lowerlimit, theintegrand = first_bracketed_string(theintegrand,0,"{","}")
+        else:  # in tex, one character lower limit
+            lowerlimit = "{" + theintegrand[0] + "}"
+            theintegrand = theintegrand[1:]
+
+    if theintegrand.startswith("^"):
+        theintegrand = theintegrand[1:]
+        if theintegrand.startswith("{"):
+            upperlimit, theintegrand = first_bracketed_string(theintegrand,0,"{","}")
+        else:  # in tex, one character lower limit
+            upperlimit = "{" + theintegrand[0] + "}"
+            theintegrand = theintegrand[1:]
+    
+
+    theintegrand = theintegrand.strip()
+    # remove the spacing before dx in the source
+    theintegrand = re.sub(r" *\\(,|;|$)$", "", theintegrand)
+
+    if "[" in theintegrand:
+         print "theintegrand", theintegrand
+    theintegrand = to_semantic_ma(theintegrand)
+
+    if lowerlimit and upperlimit:
+        theanswer = r"\definiteIntegralLimits"
+        theanswer += lowerlimit # the limits already are contained in brackets
+        theanswer += upperlimit
+        theanswer += "{@$" + theintegrand + "$@}"
+        theanswer += "{" + theintegrationvariable + "}"
+    elif lowerlimit and not upperlimit:
+        theanswer = r"\definiteIntegralSet"
+        theanswer += lowerlimit
+        theanswer += "{@$" + theintegrand + "$@}"
+        theanswer += "{" + theintegrationvariable + "}"
+    else:
+        theanswer = r"\indefiniteIntegral"
+        theanswer += "{@$" + theintegrand + "$@}"
+        theanswer += "{" + theintegrationvariable + "}"
+
+    return theanswer
+
+###################
+
 def business_card(c_location, size, scale, contents, colors):
     """
     c_location: [center_x, center_y]
@@ -521,6 +1034,7 @@ def business_card(c_location, size, scale, contents, colors):
 
     center_x, center_y = c_location
     width, height = size[0]
+    aspect_ratio = float(height)/float(width)
     overall_scale = scale[0]
     half_width = overall_scale * width / 2
     half_height = overall_scale * height / 2
@@ -549,7 +1063,7 @@ def business_card(c_location, size, scale, contents, colors):
 
     enclosing_rectangle += 'stroke="' + border_color + '" '
     enclosing_rectangle += 'fill="' + fill_color + '" '
-    enclosing_rectangle += 'stroke-width="' + str(edge_width) + '" '
+    enclosing_rectangle += 'stroke-width="' + str(edge_width) + '"'
 
     enclosing_rectangle += '/>'
     enclosing_rectangle += '\n'
@@ -650,8 +1164,10 @@ def business_card(c_location, size, scale, contents, colors):
         sig_text += the_sig
         sig_text += '</text>'
         sig_text += '\n'
+    else:
+         sig_text = ''
 
     the_object = enclosing_rectangle + title1 + title2 + ul_corner + ll_corner + lr_corner + ur_corner + sig_text
 
 
-    return the_object
+    return [the_object, [center_x, center_y], [left_x, right_x, top_y, bottom_y], aspect_ratio]

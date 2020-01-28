@@ -115,7 +115,7 @@ def add_line_feeds(tag,text):
     thetag = tag
     thetext = text
 
-    findtag = "<(" + thetag + ")>" + "(\n *)" + r"(.*?)</\1>"
+    findtag = "<(" + thetag + ")(>| [^<>]*>)" + "(\n *)" + r"(.*?)</\1>"
     thetext = re.sub(findtag, add_line_fe, thetext, 0, re.DOTALL)
 
     # remove spaces after last attribute
@@ -128,8 +128,9 @@ def add_line_feeds(tag,text):
 def add_line_fe(txt):
 
     the_tag = txt.group(1)
-    the_space = txt.group(2)
-    the_text = txt.group(3)
+    the_tag_end = txt.group(2)
+    the_space = txt.group(3)
+    the_text = txt.group(4)
 
 #    print "0101010101010101010", the_tag
 #    print re.sub("Practice visualizing vector addition", "Practice visualizing vector11addition", the_text)
@@ -307,7 +308,8 @@ def add_line_fe(txt):
 #    print re.sub("being the other option", "being the other3option", the_text)
 
     the_text_trimmed = re.sub("^" + the_space + the_space, the_space, the_text)
-    the_answer = "<" + the_tag + ">" + the_text_trimmed + "</" + the_tag + ">"
+#    the_answer = "<" + the_tag + ">" + the_text_trimmed + "</" + the_tag + ">"
+    the_answer = "<" + the_tag + the_tag_end + the_text_trimmed + "</" + the_tag + ">"
 
 #    print "rrrrrrrrrrrrrrrrr", the_tag
 #    print the_answer

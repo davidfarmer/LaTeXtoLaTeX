@@ -1,5 +1,6 @@
 
 import re
+import math
 
 import utilities
 import component
@@ -183,19 +184,154 @@ def fa_conv(txt):
 
 ###################
 
-#def mytransform_mbx(text):   # schmidt calc 3 temporary
-def mbx_fix(text):   # schmidt calc 3 temporary
+def mytransform_ldata(text):
+
+    thetext = text.strip()
+
+    if "Take" in thetext:
+        return ""
+    if "Null" in thetext:
+        return ""
+
+    thetext = re.sub(r" +", "", thetext)
+
+    # hack becaise of different runs
+    thetext = re.sub(r'"cR', '"R', thetext)
+
+    if not thetext.startswith('itemtosave={"R'):
+        print "starts with", thetext[:50]
+        print "data file starts wrong, quitting"
+        die()
+
+    if thetext.startswith('itemtosave={"R0_R1_R1",'):
+
+      thetext = re.sub(r"\\\s+", "", thetext)
+      thetext = re.sub("\s", "", thetext)
+      thetext = re.sub("`[0-9]+\.[0-9]+", "", thetext)
+
+      thetext = re.sub('^itemtosave *= *{"R0_R1_R1", *', "", thetext)
+      startval, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      print thetext[:50]
+
+      if len(startval) > 40:  # startval is actually lamset
+          lamset = startval
+          startval = "{999, 999}"
+      else:
+          lamset, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+          print thetext[:50]
+
+      func_eq, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      euler_prod, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      coefficients_set, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      search_params, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      eig_precision, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      coeff_precision, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      print "lamset", lamset, "coefficients_set", coefficients_set[:20]
+
+      if not eig_precision.startswith("{0.0") and "*^-" not in eig_precision:
+          component.maybe_bad += 1
+          print component.maybe_bad, "LOW PRECISION?", eig_precision
+          component.startagain += startval
+          return ""
+
+      this_value = "{" + lamset + "," + coefficients_set + "," + eig_precision + "," + coeff_precision + "," + search_params + "}"
+
+      component.foundvalues.append(this_value)
+
+  #    if "Null" in text:
+  #        print "             Null:  NEED TO TRY AGAIN AT", startval
+  #        component.startagain += startval
+
+      thetext = thetext[1:]
+
+      if thetext:
+          thetext = mytransform_ldata(thetext)
+
+      return thetext
+
+    else:
+
+      thetext = re.sub(r"\\\s+", "", thetext)
+      thetext = re.sub("\s", "", thetext)
+      thetext = re.sub("`[0-9]+\.[0-9]+", "", thetext)
+
+      thesortofweight = re.search(r'^itemtosave *= *{"R[0,1]_C([0-9]+)",', thetext).group(1)
+      print "found thesortofweight", thesortofweight
+      thetext = re.sub('^itemtosave *= *{"R[0,1]_C([0-9]+)", *', "", thetext)
+      startval, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      print thetext[:50]
+
+      if len(startval) > 40:  # startval is actually lamset
+          lamset = startval
+          startval = "{999, 999}"
+      else:
+          lamset, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+          print thetext[:50]
+
+      lamset = re.sub(r"^{", "{" + thesortofweight + ",", lamset)
+
+      func_eq, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      euler_prod, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      coefficients_set, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      search_params, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      eig_precision, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      coeff_precision, thetext = utilities.first_bracketed_string(thetext)
+      thetext = re.sub("^\s*,*", "", thetext)
+      print "lamset", lamset, "coefficients_set", coefficients_set[:20]
+
+      if not eig_precision.startswith("{0.0") and "*^-" not in eig_precision:
+          component.maybe_bad += 1
+          print component.maybe_bad, "LOW PRECISION?", eig_precision
+          component.startagain += startval
+          return ""
+
+      this_value = "{" + lamset + "," + coefficients_set + "," + eig_precision + "," + coeff_precision + "," + search_params + "}"
+
+      component.foundvalues.append(this_value)
+
+  #    if "Null" in text:
+  #        print "             Null:  NEED TO TRY AGAIN AT", startval
+  #        component.startagain += startval
+
+      thetext = thetext[1:]
+
+      if thetext:
+          thetext = mytransform_ldata(thetext)
+
+      return thetext
+
+#########3
+
+
+def mytransform_mbx(text):   # schmidt calc 3 temporary
+#def mbx_fix(text):   # schmidt calc 3 temporary
 
 
     thetext = text
-    print "in mbx_fix"
 
-    thetext = re.sub(r"\\G\b", r"\\mathcal{G}", thetext)
-    thetext = re.sub(r"\\fatr\b", r"\\R", thetext)
-    thetext = re.sub(r"\\fatz\b", r"\\Z", thetext)
-    thetext = re.sub(r"\\fatq\b", r"\\Q", thetext)
-    thetext = re.sub(r"\\fatc\b", r"\\C", thetext)
-    thetext = re.sub(r"\\fatn\b", r"\\N", thetext)
+    thetext = re.sub(r"</c>([a-z])", r"</c> \1", thetext)
+
+#    thetext = re.sub(r"\\G\b", r"\\mathcal{G}", thetext)
+#    thetext = re.sub(r"\\fatr\b", r"\\R", thetext)
+#    thetext = re.sub(r"\\fatz\b", r"\\Z", thetext)
+#    thetext = re.sub(r"\\fatq\b", r"\\Q", thetext)
+#    thetext = re.sub(r"\\fatc\b", r"\\C", thetext)
+#    thetext = re.sub(r"\\fatn\b", r"\\N", thetext)
 
 #    thetext = re.sub(r"EXTRA\s*<fn>(.*?)</fn>\s*", r"\\extrafn{\1}", thetext, 0, re.DOTALL)
 #
@@ -280,27 +416,6 @@ def mytransform_mbx_linefeeds(text):
         for n in range(component.lipcounter[lip_tag]):
             thetext = re.sub(r"<" + lip_tag + str(n) + "( |>)", "<" + lip_tag + r"\1", thetext)
             thetext = re.sub(r"</" + lip_tag + str(n) + ">", "</" + lip_tag + ">", thetext)
-
-    return thetext
-
-
-
-
- # ----------- #
-
-    thetext = re.sub(r"<task\b(.*?)</task>", 
-          lambda match: mytransform_mbx_tag(match, "task", "statement", "conclusion", ["hint", "answer", "solution"]),
-          thetext,0, re.DOTALL)
-
-    # if an exploration contains a task or hint,
-    # then the introduction and conclusion needs to be wrapped
-    thetext = re.sub(r"<exploration\b(.*?)</exploration>", 
-          lambda match: mytransform_mbx_tag(match, "exploration", "introduction", "conclusion", ["task", "hint"]),
-          thetext,0, re.DOTALL)
-
-    thetext = re.sub(r"<example\b(.*?)</example>", 
-          lambda match: mytransform_mbx_tag(match, "example", "statement", "conclusion", ["hint", "answer", "solution"]),
-          thetext,0, re.DOTALL)
 
     return thetext
 
@@ -599,24 +714,10 @@ def replacetag(txt):
 
     this_text = txt.group(1)
 
-#    if "draw" in this_text:
-#        return this_text
-
-#    this_text = re.sub(r"\\parbox\[[^\]]*\]",r"\\parbox",this_text)
-######    this_text = re.sub("\s*(<var [^<>]*/>)\s*", r" \1",this_text)
-
     if trimmed_text:
         print trimmed_text
     if "<var" in this_text:
         print this_text
-#    this_text = utilities.replacemacro(this_text,r"\parbox",2,"#2")
-
-#    this_text = re.sub(r"<answer>.*?</answer>\s*","",this_text,1,re.DOTALL)
-
-#    while '$' in this_text:
-#       # print "found $"
-#        this_text = re.sub(r"\$","<m>",this_text,1)
-#        this_text = re.sub(r"\$","</m>",this_text,1)
 
     return this_text
 
@@ -635,9 +736,6 @@ def fixp(txt):
         btext = re.sub(r"\\\(","<m>",btext)
         btext = re.sub(r"\\\)","</m>",btext)
         this_text = "<p>" + btext + the_remainder
-
- #   if component.inputstub == 'sec_series':
- #       print this_text[:10]
 
     return this_text
 
@@ -867,6 +965,15 @@ def mytransform_svg(text):
 
     thetext = text
 
+    the_output = '<?xml version="1.0" standalone="no" ?>'
+    the_output += '\n'
+    the_output += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">'
+    the_output += '\n'
+    the_output += '\n'
+    the_output += '<svg viewBox="0 0 1600 950" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">'
+    the_output += '\n'
+    the_output += '\n'
+
     blobparams = {
         "blobx1" : 650,
         "bloby1" : 550,
@@ -952,17 +1059,245 @@ def mytransform_svg(text):
              r'<path d="M \1 L \2" stroke="black" stroke-width="2"/>',
              thetext)
 
-    c_loc = [250, 300]
-    siz = [[100,50], [42,30,30], [1,-1], [0.3,0.4], 5]
-    scal = [3,1]
+    iso_vertices = [
+        {
+         "title": "112.c1",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 144,
+         "optimal": False
+        },
+        {
+         "title": "112.c3",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 48
+        },
+        {
+         "title": "112.c4",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 16,
+         "optimal": False
+        },
+        {
+         "title": "112.c6",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 24
+        },
+        {
+         "title": "112.c2",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 72
+        },
+        {
+         "title": "112.c5",
+         "sha_tamagawa" : "1.4",
+         "torsion" : [2],
+         "degree" : 8,
+         "optimal": True
+        }
+    ]
+
+    iso_vertices = [
+        {
+         "title": "21.a1",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 2,
+         "degree" : 4,
+         "optimal": False
+        },
+        {
+         "title": "21.a3",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 8,
+         "degree" : 2
+        },
+        {
+         "title": "21.a2",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 4,
+         "degree" : 2,
+         "optimal": False
+        },
+        {
+         "title": "21.a5",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 8,
+         "degree" : 1,
+         "optimal": True
+        },
+        {
+         "title": "21.a4",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 2,
+         "degree" : 4
+        },
+        {
+         "title": "21.a6",
+         "sha_tamagawa" : "1.4",
+         "torsion" : 4,
+         "degree" : 2,
+        }
+    ]
+
+
+    iso_graph_window = {}
+    iso_graph_window["h"] = [[0,0], [1200, 950]]
+    iso_graph_layout = {}
+    graph_layout = "g"
+    graph_layout = "h"
+
+    iso_graph_layout["g"] = [
+              [[200, 125], [800, 125], [1400, 125], [200, 625], [800, 625], [1400, 625]],
+              [
+              {"ends": [0,1], "label": "3"},
+              {"ends": [0,3], "label": "2"},
+              {"ends": [1,2], "label": "3"},
+              {"ends": [1,4], "label": "2"},
+              {"ends": [2,5], "label": "2"},
+              {"ends": [3,4], "label": "3"},
+              {"ends": [4,5], "label": "3"}
+              ]
+    ]
+    iso_graph_layout["h"] = [
+              [[200, 125], [1400, 125], [500, 475], [1100, 475], [200, 825], [1400, 825]],
+       #       [[200, 125], [800, 125], [1400, 125], [200, 625], [800, 625], [1400, 625]],
+              [
+              {"ends": [0,2], "label": "2"},
+              {"ends": [2,3], "label": "2"},
+              {"ends": [3,1], "label": "2"},
+              {"ends": [4,2], "label": "2"},
+              {"ends": [3,5], "label": "2"}
+              ]
+    ]
+
+#    iso_edges["g"] = [
+#        {"ends": [0,1], "label": "3"},
+#        {"ends": [0,3], "label": "2"},
+#        {"ends": [1,2], "label": "3"},
+#        {"ends": [1,4], "label": "2"},
+#        {"ends": [2,5], "label": "2"},
+#        {"ends": [3,4], "label": "3"},
+#        {"ends": [4,5], "label": "3"}
+#        ]
+#    iso_vertices["g"] = [[200, 125], [800, 125], [1400, 125], [200, 625], [800, 625], [1400, 625]]
+
+    siz = [[300,150], [21,15,15], [1,-1], [0.3,0.4], 5]
+    scal = [1,2]
     cont = [ ["This is title", ""], "", ["ab", "bc", "cd", "de"], "not optimal" ]
-    colo = ["#900", "none", "#6d6", "#000", "#999"]
+    colo = ["#900", "#fff", "#6d6", "#000", "#999"]
 
-    thetext = re.sub("SUB_HERE",
-               utilities.business_card(c_loc, siz, scal, cont, colo),
-               thetext)
 
-    return thetext
+
+#    thetext = re.sub("SUB_HERE",
+#               utilities.business_card(c_loc, siz, scal, cont, colo),
+#               thetext)
+
+    these_cards = {}
+
+    c_loc = iso_graph_layout[graph_layout][0]
+    for j, dat in enumerate(iso_vertices):
+        this_location = c_loc[j]
+        this_data = [ [dat['title'], ""], "" ]
+        this_data.append([str(dat["degree"]), "", dat["sha_tamagawa"], str(dat["torsion"])])
+        if "optimal" in dat and dat["optimal"]:
+            this_data.append("optimal")
+        else:
+            this_data.append("")
+        these_cards[j] = utilities.business_card(this_location, siz, scal, this_data, colo)
+
+    these_edges = {}
+    iso_edges = iso_graph_layout[graph_layout][1]
+    for j, edge in enumerate(iso_edges):
+        start_v, end_v = edge["ends"]
+        start_pt = these_cards[start_v][1]
+        end_pt = these_cards[end_v][1]
+        this_edge = '<path d="'
+        this_edge += 'M ' + str(start_pt[0]) + ' ' + str(start_pt[1]) + ' '
+        this_edge += 'L ' + str(end_pt[0]) + ' ' + str(end_pt[1]) + ' '
+        this_edge += '" '
+
+        this_edge += 'stroke="' + '#3d8' + '" '
+        this_edge += 'stroke-width="' + '9' + '"'
+
+        this_edge += '/>'
+
+        label_offset = 30
+        label_font_size = 40
+        font = "font-family:verdana"
+        if "label" in edge:
+            this_label = str(edge["label"])
+            line_mid_pt_x = (start_pt[0] + end_pt[0])/2.0
+            line_mid_pt_y = (start_pt[1] + end_pt[1])/2.0
+            x_offset = y_offset = 0
+            if start_pt[0] == end_pt[0]:
+                if math.copysign(1, end_pt[1] - start_pt[1]) > 0:
+                    x_offset += label_offset
+                    this_text_anchor = "start"
+                else:
+                    x_offset -= label_offset
+                    this_text_anchor = "end"
+            elif start_pt[1] == end_pt[1]:
+                if math.copysign(1, end_pt[0] - start_pt[0]) > 0:
+                    y_offset -= label_offset
+                    this_text_anchor = "middle"
+                else:
+                    y_offset += label_offset + label_font_size
+                    this_text_anchor = "middle"
+            else:  # can make this more sophisticated and take the slope into account
+                if math.copysign(1, end_pt[1] - start_pt[1]) > 0:
+                    x_offset += 0.7 * label_offset
+                    y_offset -= 0.7 * label_offset
+                    this_text_anchor = "start"
+                else:
+                    x_offset -= 0.7 * label_offset
+                    this_text_anchor = "end"
+                if math.copysign(1, end_pt[0] - start_pt[0]) > 0:
+                    y_offset -= 0.7 * label_offset
+                else:
+                    y_offset += 0.7 * (label_offset + label_font_size)
+
+            this_label_text = '<text '
+            this_label_text += 'x="' + str(line_mid_pt_x + x_offset) + '" '
+            this_label_text += 'y="' + str(line_mid_pt_y + y_offset) + '" '
+            this_label_text += 'text-anchor="' + this_text_anchor + '" '
+            this_label_text += 'fill="' + '#d0d' + '" '
+            this_label_text += 'style="' + font + ';font-size:' + str(label_font_size) + '" '
+            this_label_text += '>'
+            this_label_text += this_label
+            this_label_text += '</text>'
+        else:
+            this_label_text = ''
+
+        print "this_edge", this_edge
+        these_edges[j] = this_edge
+        these_edges[j] += this_label_text
+
+    the_output += '<svg viewBox="'
+    the_window = iso_graph_window[graph_layout]
+    the_output += the_window[0][0] + ' ' + the_window[0][0] + ' ' + the_window[0][0] + ' ' + the_window[0][0]
+
+    the_output += '0 0 1600 950" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">'
+    the_output += '\n'
+    the_output += '\n'
+    for j in these_edges:
+    #    the_output += utilities.business_card(this_location, siz, scal, this_data, colo)
+        print "j",j,"these_edges[j]", these_edges[j]
+        the_output += these_edges[j]
+
+    for j in these_cards:
+    #    the_output += utilities.business_card(this_location, siz, scal, this_data, colo)
+        print "j",j,"these_cards[j]", these_cards[j][0]
+        the_output += these_cards[j][0]
+
+    the_output += '\n'
+    the_output += '</svg>'
+    the_output += '\n'
+
+    return the_output
 
 ###################
 
@@ -989,6 +1324,8 @@ def mytransform_txt(text):
 568, 569, 570, 571, 572, 573, 574, 575, 578, 579, 588, 635, 636,
 637, 638, 639, 640, 641, 642, 643, 644]
 
+    workshop_range += [j for j in range(500,999)]
+
     totalpapers = 0
     the_answer = ""
 
@@ -1007,7 +1344,10 @@ def mytransform_txt(text):
             continue
         this_paper = line.split("\n")
 
-        this_workshop = re.search("orkshop\s+([0-9]+)", this_paper[4]).group(1)
+        try:
+            this_workshop = re.search("orkshop\s+([0-9]+)", this_paper[4]).group(1)
+        except:
+            this_workshop = 999
 
         if int(this_workshop) not in workshop_range:
             print "Workshop not in range", this_workshop
@@ -1042,6 +1382,112 @@ def mytransform_txt(text):
 
     print "all_papers", all_papers, "all_authors", all_authors
     return the_answer
+
+###################
+
+
+def mytransform_html_matrix(text):
+#
+#  a relevant line in the hat map looks like
+# <rect x="257385" y="710.0" width="5"  height="18.0" fill="rgb(0,98,221)" stroke-width="2.0" stroke="none" class="who51102821 "><title>tBU 17:57 51102821</title></rect>
+#
+# The x-coordinate is in absolute minutes multiplied by 5.
+# The y-coordinate is relative position in the viewed item, offset by -10
+#    and multiplied by 30.
+# The digits after "who" is the id of the person
+#
+# Other relevant lines include
+# <text class="chapteritem" x="251910" y="1145.0" fill="rgb(20,20,20)" text-anchor="middle" ><a href="http://books.aimath.org/fcla/section-LDS.html?#wYd">ssec-Linearly D..Spans</a></text>
+# which indicates an item was viewed.
+# We will count "chapteritem" to know how many lines are in the map.
+# The line
+# <g id="level3" transform="translate(-251820 150)" >
+# tells you the x-coordinate offset.
+
+    thetext = text
+
+    this_person = component.person_id
+    this_person_identifier = "who" + this_person
+
+    num_columns = 24*60   # one day of data, one column per minute
+
+    num_rows = thetext.count("chapteritem")
+    print "we have", num_rows, "rows"
+    print "and", num_columns, "columns"
+    x_offset = int(re.search("translate\(-([0-9]+) ", thetext).group(1))/5
+
+    the_matrix = [[0 for x in range(num_columns)] for y in range(num_rows)]
+
+    lines = thetext.split("\n")
+
+    for line in lines:
+        if line.startswith("<rect "):
+            if this_person_identifier in line:
+                x_coord = re.search(' x="([^"]+)"', line).group(1)
+                x_coord_index = int(x_coord)/5 - x_offset
+                y_coord = re.search(' y="([^"]+)"', line).group(1)
+                y_coord_index = (int(float(y_coord)) + 10)/30
+  #              print "x_coord_index, y_coord_index", x_coord_index, y_coord_index
+                the_matrix[y_coord_index][x_coord_index] = 1
+
+    return the_matrix
+
+###################
+
+def mytransform_html_ptx(text):
+
+    thetext = text
+
+    if "<p>" in thetext and "</p>" not in thetext:  # p tags not properly closed
+        pass  # this needs to be implemented
+
+    thetext = re.sub('<span style="color:[^"]+">([^<]+)</span>',
+                     r"<alert>\1</alert>", thetext, 0, re.DOTALL)
+    thetext = re.sub('&quot;([^<]+)&quot;',
+                     r"<q>\1</q>", thetext, 0, re.DOTALL)
+    thetext = re.sub("&nbsp;", "<nbsp/>", thetext)
+    thetext = re.sub("&hellip;", "<ellipsis/>", thetext)
+    thetext = re.sub("&ldquo;", "<lq/>", thetext)
+    thetext = re.sub("&rdquo;", "<rq/>", thetext)
+    thetext = re.sub("&radic;", "<m>\sqrt{}</m>", thetext)
+    thetext = re.sub("&#39;", "'", thetext)
+    thetext = re.sub("&#123;", "<lbrace/>", thetext)
+    thetext = re.sub("&#125;", "<rbrace/>", thetext)
+    thetext = re.sub("&lt;", "<less/>", thetext)
+    thetext = re.sub("&gt;", "<greater/>", thetext)
+    thetext = re.sub("<br(|/)>", "</p>\n<p>", thetext)
+    thetext = re.sub("<br(| )(|/)>", "\n", thetext)
+    thetext = re.sub("<span .*?>","", thetext, re.DOTALL)
+    thetext = re.sub("</span>","", thetext)
+    thetext = re.sub("<strong>", "<alert>", thetext)
+    thetext = re.sub("</strong>", "</alert>", thetext)
+    thetext = re.sub("<(|/)h[1-4]>", "", thetext)
+
+    # delete empty paragraphs
+    thetext = re.sub("<p>\s*</p>", "", thetext)
+
+    return thetext
+
+###################
+
+def mytransform_to_semantic(text):
+
+    thetext = text
+
+    thetext = re.sub(r"(<m>\s*)(.*?)(\s*</m>)",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"(<mrow>\s*)(.*?)(\s*</mrow>)",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"(<me>\s*)(.*?)(\s*</me>)",   # if no permid
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"(<me [^<>]+>\s*)(.*?)(\s*</me>)",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"(<men>\s*)(.*?)(\s*</men>)",   # if no permid
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+    thetext = re.sub(r"(<men [^<>]+>\s*)(.*?)(\s*</men>)",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+
+    return thetext
 
 ###################
 
@@ -1393,11 +1839,15 @@ def add_permid_within_sections(text):
         thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
             lambda match: add_permid_within(match, tag, 7), thetext, 0, re.DOTALL)
 
+    for lev in range(7, -1, -1):
+      for tag in component.tags_by_level[lev]:
+        thetext = re.sub(r"(<" + tag + r"( [^>]*|)>)(.*?)(</" + tag + ">)",
+            lambda match: add_permid_within(match, tag, 7), thetext, 0, re.DOTALL)
 
     # now we put permid "on" everything.  If there already is a permid,
     # then it should not change.  But if we missed somethign, now we catch it.
     print "looking for missing permid",len(component.all_permid)
-    for lev in range(6, -1, -1):
+    for lev in range(8, -1, -1):
       for tag in component.tags_by_level[lev]:
         component.local_counter[tag] = 0
    #     print "BBB",lev,tag
@@ -1406,7 +1856,7 @@ def add_permid_within_sections(text):
     print "done looking for missing permid",len(component.all_permid)
 
     print "again looking for missing permid",len(component.all_permid)
-    for lev in range(6, -1, -1):
+    for lev in range(8, -1, -1):
       for tag in component.tags_by_level[lev]:
         component.local_counter[tag] = 0
    #     print "BBB",lev,tag
@@ -1447,7 +1897,7 @@ def add_permid_within(txt, parent_tag, level):
     the_closing_tag = txt.group(4)
 
     try:
-        parent_permid = re.search('permid="([^"]+)"', the_attributes).group(1)
+        parent_permid = re.search(' permid="([^"]+)"', the_attributes).group(1)
     except AttributeError:
         print "ERROR: parent with no permid:", the_opening_tag, "aaa", the_text[:30]
         parent_permid = "ERROR"
@@ -1499,7 +1949,7 @@ def naive_add_permid_on(txt):
 
     tag = txt.group(1)
 
-    if "permid" in tag:
+    if " permid" in tag:
         return "<" + tag + ">"
 
     the_permid = utilities.next_permid_encoded()

@@ -197,6 +197,10 @@ def mytransform_ldata(text):
 
     # hack becaise of different runs
     thetext = re.sub(r'"cR', '"R', thetext)
+    thetext = re.sub(r'retry', '', thetext)
+    thetext = re.sub(r'HRmoreB', '', thetext)
+    thetext = re.sub(r'HRmore', '', thetext)
+    thetext = re.sub(r'HR', '', thetext)
 
     if not thetext.startswith('itemtosave={"R'):
         print "starts with", thetext[:50]
@@ -236,15 +240,16 @@ def mytransform_ldata(text):
       thetext = re.sub("^\s*,*", "", thetext)
       print "lamset", lamset, "coefficients_set", coefficients_set[:20]
 
-      if not eig_precision.startswith("{0.0") and "*^-" not in eig_precision:
+      if not (eig_precision.startswith("{0.0") or eig_precision.startswith("{0``")) and "*^-" not in eig_precision:
           component.maybe_bad += 1
           print component.maybe_bad, "LOW PRECISION?", eig_precision
           component.startagain += startval
-          return ""
+      #    return ""
 
-      this_value = "{" + lamset + "," + coefficients_set + "," + eig_precision + "," + coeff_precision + "," + search_params + "}"
+      else:
+          this_value = "{" + lamset + "," + coefficients_set + "," + eig_precision + "," + coeff_precision + "," + search_params + "}"
 
-      component.foundvalues.append(this_value)
+          component.foundvalues.append(this_value)
 
   #    if "Null" in text:
   #        print "             Null:  NEED TO TRY AGAIN AT", startval
@@ -294,15 +299,17 @@ def mytransform_ldata(text):
       thetext = re.sub("^\s*,*", "", thetext)
       print "lamset", lamset, "coefficients_set", coefficients_set[:20]
 
-      if not eig_precision.startswith("{0.0") and "*^-" not in eig_precision:
+      if not (eig_precision.startswith("{0.0") or eig_precision.startswith("{0``")) and "*^-" not in eig_precision:
+    #  if not eig_precision.startswith("{0.0") and "*^-" not in eig_precision:
           component.maybe_bad += 1
           print component.maybe_bad, "LOW PRECISION?", eig_precision
           component.startagain += startval
-          return ""
+    #      return ""
 
-      this_value = "{" + lamset + "," + coefficients_set + "," + eig_precision + "," + coeff_precision + "," + search_params + "}"
+      else:
+          this_value = "{" + lamset + "," + coefficients_set + "," + eig_precision + "," + coeff_precision + "," + search_params + "}"
 
-      component.foundvalues.append(this_value)
+          component.foundvalues.append(this_value)
 
   #    if "Null" in text:
   #        print "             Null:  NEED TO TRY AGAIN AT", startval

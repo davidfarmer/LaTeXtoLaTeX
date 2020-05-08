@@ -26,7 +26,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "ldata",
                       "html_ptx",
                       "html_matrix",
-                      "xml_semantic", "ptx_semantic",
+                      "xml_semantic", "ptx_semantic", "html_semantic",
                       "mbx_permid", "xml_permid", "ptx_permid",
                       "tex", "tex_ptx",
                       "html"]
@@ -106,6 +106,9 @@ elif component.filetype_plus in ["html_ptx"]:
 elif component.filetype_plus in ["html_matrix"]:
     fileextension_in = "html"
     fileextension_out = "txt"
+elif component.filetype_plus in ["html_semantic"]:
+    fileextension_in = "html"
+    fileextension_out = "html"
 elif component.filetype_plus in ["svg"]:
     fileextension_in = "src"
     fileextension_out = "svg"
@@ -259,7 +262,7 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_html_ptx(component.onefile)
     if component.filetype_plus == 'html_matrix':
         component.onefile = myoperations.mytransform_html_matrix(component.onefile)
-    if component.filetype_plus in ['xml_semantic', 'ptx_semantic']:
+    if component.filetype_plus in ['xml_semantic', 'ptx_semantic', 'html_semantic']:
         component.onefile = myoperations.mytransform_to_semantic(component.onefile)
     elif component.filetype_plus == 'txt':
         component.onefile = myoperations.mytransform_txt(component.onefile)
@@ -415,9 +418,9 @@ if component.extra_macros:
 
 print "need to start again at",  component.startagain
 
-print "all found values"
-for j in range(20):
-    print component.foundvalues[j]
+#print "all found values"
+#for j in range(20):
+#    print component.foundvalues[j]
 
 print "done"
 

@@ -883,6 +883,15 @@ def mytransform_ptx(text):
 
     thetext = text
 
+    thetext = re.sub(r"<li>\s*<p>\s*<em>(.*?)</em>\s*</p>",
+                     r"<li><title>\1</title>", thetext)
+
+    thetext = re.sub(r"\.</title>", "</title>", thetext)
+
+    return thetext
+
+# below is old abd will not be reached
+
     # first hide comments
     thetext = re.sub(r"(\s*(<!--)(.*?)(-->))",
                      lambda match: utilities.sha1hide(match, "comment"),
@@ -1473,6 +1482,15 @@ def mytransform_html_ptx(text):
 def mytransform_to_semantic(text):
 
     thetext = text
+
+    if "\\(" in thetext or "\\[" in thetext:
+        thetext = re.sub(r"(\\\(\s*)(.*?)(\s*\\\))",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+        thetext = re.sub(r"(\\\[\s*)(.*?)(\s*\\\])",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+        thetext = re.sub(r"(\\begin{equation\**})(.*?)(\s*\\end{equation\**})",
+            utilities.to_semantic_math, thetext, 0, re.DOTALL)
+        return thetext
 
     thetext = re.sub(r"(<m>\s*)(.*?)(\s*</m>)",
             utilities.to_semantic_math, thetext, 0, re.DOTALL)

@@ -145,7 +145,7 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) 
 
     for component.inputfilename in thefiles:
         if component.filetype_plus == "ldata":
-            outputfilename = outputdir + "summart.txt"
+            outputfilename = outputdir + "summary.txt"
         else:
             outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", component.inputfilename)
         if fileextension_in and fileextension_in != fileextension_out:

@@ -188,6 +188,8 @@ def mytransform_ldata(text):
 
     thetext = text.strip()
 
+    refineddata = True
+
     if "Take" in thetext:
         return ""
     if "Null" in thetext:
@@ -202,7 +204,7 @@ def mytransform_ldata(text):
     thetext = re.sub(r'HRmore', '', thetext)
     thetext = re.sub(r'HR', '', thetext)
 
-    if not thetext.startswith('itemtosave={"R'):
+    if not thetext.startswith('itemtosave={"R') and not thetext.startswith('itemtosave={"ckappa'):
         print "starts with", thetext[:50]
         print "data file starts wrong, quitting"
         die()
@@ -264,64 +266,109 @@ def mytransform_ldata(text):
 
     else:
 
-      thetext = re.sub(r"\\\s+", "", thetext)
-      thetext = re.sub("\s", "", thetext)
-      thetext = re.sub("`[0-9]+\.[0-9]+", "", thetext)
-
-      thesortofweight = re.search(r'^itemtosave *= *{"R[0,1]_C([0-9]+)",', thetext).group(1)
-      print "found thesortofweight", thesortofweight
-      thetext = re.sub('^itemtosave *= *{"R[0,1]_C([0-9]+)", *', "", thetext)
-      startval, thetext = utilities.first_bracketed_string(thetext)
-      thetext = re.sub("^\s*,*", "", thetext)
-      print thetext[:50]
-
-      if len(startval) > 40:  # startval is actually lamset
-          lamset = startval
-          startval = "{999, 999}"
-      else:
-          lamset, thetext = utilities.first_bracketed_string(thetext)
+        thetext = re.sub(r"\\\s+", "", thetext)
+        thetext = re.sub("\s", "", thetext)
+        thetext = re.sub("`[0-9]+\.[0-9]+", "", thetext)
+  
+        if refineddata:
+   #     thesortofweight = re.search(r'^itemtosave *= *{"R[0,1]_C([0-9]+)",', thetext).group(1)
+          thesortofweight = re.search(r'^itemtosave *= *{"ckappa_rdelta_([0-9]+)",', thetext).group(1)
+          print "found thesortofweight", thesortofweight
+   #     thetext = re.sub('^itemtosave *= *{"R[0,1]_C([0-9]+)", *', "", thetext)
+          thetext = re.sub('^itemtosave *= *{"R[0,1]_C([0-9]+)[^"]+", *', "", thetext)
+  
+          # save version
+          version = re.search('^([^,]+),', thetext).group(1)
+          thetext = re.sub('^([^,]+),', "", thetext)
+  
+          # save equationlist
+          equationlist = re.search('^([^,]+),', thetext).group(1)
+          thetext = re.sub('^([^,]+),', "", thetext)
+  
+          thedata, thetext = utilities.first_bracketed_string(thetext)
           thetext = re.sub("^\s*,*", "", thetext)
-          print thetext[:50]
+  
+          errormeasures, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+  
+          searchparameters, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+  
+          parameterchanges, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+  
+          startingvalues, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
 
-      lamset = re.sub(r"^{", "{" + thesortofweight + ",", lamset)
-
-      func_eq, thetext = utilities.first_bracketed_string(thetext)
-      thetext = re.sub("^\s*,*", "", thetext)
-      euler_prod, thetext = utilities.first_bracketed_string(thetext)
-      thetext = re.sub("^\s*,*", "", thetext)
-      coefficients_set, thetext = utilities.first_bracketed_string(thetext)
-      thetext = re.sub("^\s*,*", "", thetext)
-      search_params, thetext = utilities.first_bracketed_string(thetext)
-      thetext = re.sub("^\s*,*", "", thetext)
-      eig_precision, thetext = utilities.first_bracketed_string(thetext)
-      thetext = re.sub("^\s*,*", "", thetext)
-      coeff_precision, thetext = utilities.first_bracketed_string(thetext)
-      thetext = re.sub("^\s*,*", "", thetext)
-      print "lamset", lamset, "coefficients_set", coefficients_set[:20]
-
-      if not (eig_precision.startswith("{0.0") or eig_precision.startswith("{0``")) and "*^-" not in eig_precision:
-    #  if not eig_precision.startswith("{0.0") and "*^-" not in eig_precision:
-          component.maybe_bad += 1
-          print component.maybe_bad, "LOW PRECISION?", eig_precision
-          component.startagain += startval
-    #      return ""
-
-      else:
-          this_value = "{" + lamset + "," + coefficients_set + "," + eig_precision + "," + coeff_precision + "," + search_params + "}"
+          this_value = "{" + thesortofweight + "," + thedata + "}"
 
           component.foundvalues.append(this_value)
+    
+          thetext = thetext[1:]
 
-  #    if "Null" in text:
-  #        print "             Null:  NEED TO TRY AGAIN AT", startval
-  #        component.startagain += startval
+          if thetext:
+              thetext = mytransform_ldata(thetext)
 
-      thetext = thetext[1:]
+          return thetext
 
-      if thetext:
-          thetext = mytransform_ldata(thetext)
+        else:
 
-      return thetext
+          thesortofweight = re.search(r'^itemtosave *= *{"R[0,1]_C([0-9]+)",', thetext).group(1)
+          print "found thesortofweight", thesortofweight
+          thetext = re.sub('^itemtosave *= *{"R[0,1]_C([0-9]+)", *', "", thetext)
 
+  
+          startval, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+          print thetext[:50]
+  
+          if len(startval) > 40:  # startval is actually lamset
+              lamset = startval
+              startval = "{999, 999}"
+          else:
+              lamset, thetext = utilities.first_bracketed_string(thetext)
+              thetext = re.sub("^\s*,*", "", thetext)
+              print thetext[:50]
+  
+          lamset = re.sub(r"^{", "{" + thesortofweight + ",", lamset)
+  
+          func_eq, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+          euler_prod, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+          coefficients_set, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+          search_params, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+          eig_precision, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+          coeff_precision, thetext = utilities.first_bracketed_string(thetext)
+          thetext = re.sub("^\s*,*", "", thetext)
+          print "lamset", lamset, "coefficients_set", coefficients_set[:20]
+  
+          if not (eig_precision.startswith("{0.0") or eig_precision.startswith("{0``")) and "*^-" not in eig_precision:
+      #  if not eig_precision.startswith("{0.0") and "*^-" not in eig_precision:
+              component.maybe_bad += 1
+              print component.maybe_bad, "LOW PRECISION?", eig_precision
+              component.startagain += startval
+      #      return ""
+  
+          else:
+              this_value = "{" + lamset + "," + coefficients_set + "," + eig_precision + "," + coeff_precision + "," + search_params + "}"
+  
+              component.foundvalues.append(this_value)
+  
+    #    if "Null" in text:
+    #        print "             Null:  NEED TO TRY AGAIN AT", startval
+    #        component.startagain += startval
+  
+          thetext = thetext[1:]
+  
+          if thetext:
+              thetext = mytransform_ldata(thetext)
+  
+          return thetext
+  
 #########3
 
 

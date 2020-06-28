@@ -92,8 +92,6 @@ if component.filetype_plus in ["ptx", "ptx_pp", "ptx_permid", "ptx_fix", "ptx_se
 elif component.filetype_plus in ["mbx_pp"]:
     fileextension_in = "mbx"
     fileextension_out = "ptx"
-elif component.filetype_plus in ["xml", "xml_pp", "xml_permid"]:
-    fileextension_out = "mbx"
 elif component.filetype_plus in ["xml", "xml_pp", "xml_permid", "xml_semantic"]:
     fileextension_in = "xml"
     fileextension_out = "xml"

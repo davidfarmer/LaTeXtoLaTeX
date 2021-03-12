@@ -621,7 +621,13 @@ def to_semantic_ma(text):
     thetext = re.sub(r"\(([0-9]+)\)_([1-9])", r"\\numberBase{#1}{#2}", thetext)
 
     # base of the natural log
+    thetext = re.sub(r"\bx *e\^x", r"\\impliedMultiplication{x}{e^x}", thetext)
+    thetext = re.sub(r"\b([a-z]) *e\^([a-z])", r"\\impliedMultiplication{\1}{e^\2}", thetext)
+    thetext = re.sub(r"\b([a-z]) *e\^({[^{}]+})", r"\\impliedMultiplication{\1}{e^\2}", thetext)
     thetext = re.sub(r"\be\^", r"\\eulerE^", thetext)
+    thetext = re.sub(r"(\\eulerE)\^([a-zA-Z])", r"\\exponentialWithBase{\1}{\2}", thetext)
+    thetext = re.sub(r"(\\eulerE)\^{([^{}]+)}", r"\\exponentialWithBase{\1}{\2}", thetext)
+
     if component.topic in ["calculus_single"]:
         # the \pi which is approximately 3.14159
         thetext = re.sub(r"\\pi\b", r"\\circlePi", thetext)
@@ -702,10 +708,17 @@ def to_semantic_ma(text):
         thetext = re.sub(r"\\frac{d(\\?[a-z]+)}{d(\\?[a-z]+)}",
                          r"\\dDerivative{\1}{\2}", thetext)
 
+        thetext = re.sub(r"\\frac{d}{d(\\?[a-z]+)}",
+                         r"\\dOperator{\1}", thetext)
+
     # large parentheses
     thetext = re.sub(r"\\left(\()(.*?)\\right\)",
                      to_paren_group, thetext, 0, re.DOTALL)
     thetext = re.sub(r"\\left(\[)(.*?)\\right\]",
+                     to_paren_group, thetext, 0, re.DOTALL)
+
+    # hide space in text
+    thetext = re.sub(r"(\\text{)([^{}]+)}",
                      to_paren_group, thetext, 0, re.DOTALL)
 
     # intervals 
@@ -764,16 +777,16 @@ def to_semantic_ma(text):
                      r"@$\1 \\equivalenceRelationSymbol{\\sim} \2$@", thetext)
 
 
+    # integrals
+    if "\\log" in thetext and "\\sqrt" in thetext:
+        print "should see an integral", thetext
+    thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
+                     to_semantic_integral, thetext, 0, re.DOTALL)
+
+    thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
+                     to_semantic_integral, thetext, 0, re.DOTALL)
+
     if component.topic in ["calculus_single"]:
-        # integrals
-        if "\\log" in thetext and "\\sqrt" in thetext:
-            print "should see an integral", thetext
-        thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
-                         to_semantic_integral, thetext, 0, re.DOTALL)
-
-        thetext = re.sub(r"(\\int(.*?[^\\])(d([a-zA-Z]|\\[a-z]+)\b))",
-                         to_semantic_integral, thetext, 0, re.DOTALL)
-
         # differentials
         thetext = re.sub(r"( |\)|^)d([a-z]'*|\\[a-z]+)",
                          r"\1\\differential{\2}", thetext)
@@ -810,33 +823,36 @@ def to_semantic_ma(text):
                      r"\\impliedMultiplication{\1}{\2}", thetext)
 
     if component.topic in ["calculus_single"]:
-        dotmeans = "dotMultiplication"
+        dotmeans = "explicitMultiplication"
     elif component.topic in ["combinatorics"]:
-        dotmeans = "dotMultiplication"
+        dotmeans = "explicitMultiplication"
     else:
         dotmeans = "dotProduct"
     #  multiplication with a dot
-    thetext = re.sub(r"([0-9\.]+) *\\cdot *([0-9\.]+)( |$)",
-                     r"\\" + dotmeans + r"{\1}{\2}\3", thetext)
-    thetext = re.sub(r"([^ ()]+) *\\cdot ([^ ()]+)",
-                     r"\\" + dotmeans + r"{\1}{\2}", thetext)
-    thetext = re.sub(r"([^ ]+) *\\cdot ([^ ]+)",
-                     r"\\" + dotmeans + r"{\1}{\2}", thetext)
-    thetext = re.sub(r"([^ ]+) *\\cdot ([^ ]+)",
-                     r"\\" + dotmeans + r"{\1}{\2}", thetext)
-    if component.topic in ["calculus_single"]:
-        timesmeans = "timesMultiplication"
+    thetext = re.sub(r"([0-9\.]+) *(\\cdot) *([0-9\.]+)( |$)",
+                     r"\\" + dotmeans + r"{\1}{\2}{\3}\4", thetext)
+    thetext = re.sub(r"([^ ()]+) *(\\cdot) ([^ ()]+)",
+                     r"\\" + dotmeans + r"{\1}{\2}{\3}", thetext)
+    thetext = re.sub(r"([^ ]+) *(\\cdot) ([^ ]+)",
+                     r"\\" + dotmeans + r"{\1}{\2}{\3}", thetext)
+    thetext = re.sub(r"([^ ]+) *(\\cdot) ([^ ]+)",
+                     r"\\" + dotmeans + r"{\1}{\2}{\3}", thetext)
+    if component.topic in ["calculus_multiple"]:
+        timesmeans = "crossProduct"
     elif component.topic in ["combinatorics"]:
         timesmeans = "cartesianProduct"
+    else:
+        timesmeans = "explicitMultiplication"
+    
         #  multiplication with a times (note that this is just for calculus)
-    thetext = re.sub(r"([0-9\.]+) *\\times *([0-9\.]+)( |$)",
-                     r"\\" + timesmeans + r"{\1}{\2}\3", thetext)
-    thetext = re.sub(r"([^ ()]+) \\times ([^ ()]+)",
-                     r"\\" + timesmeans + r"{\1}{\2}", thetext)
-    thetext = re.sub(r"([^ ]+) \\times ([^ ]+)",
-                     r"\\" + timesmeans + r"{\1}{\2}", thetext)
-    thetext = re.sub(r"([^ ]+) \\times ([^ ]+)",
-                     r"\\" + timesmeans + r"{\1}{\2}", thetext)
+    thetext = re.sub(r"([0-9\.]+) *(\\times) *([0-9\.]+)( |$)",
+                     r"\\" + timesmeans + r"{\1}{\2}{\3}\4", thetext)
+    thetext = re.sub(r"([^ ()]+) (\\times) ([^ ()]+)",
+                     r"\\" + timesmeans + r"{\1}{\2}{\3}", thetext)
+    thetext = re.sub(r"([^ ]+) (\\times) ([^ ]+)",
+                     r"\\" + timesmeans + r"{\1}{\2}{\3}", thetext)
+    thetext = re.sub(r"([^ ]+) (\\times) ([^ ]+)",
+                     r"\\" + timesmeans + r"{\1}{\2}{\3}", thetext)
 
     # number implicit times something
     thetext = re.sub(r"( |^)([0-9]+) *(\(?[a-zA-Z][0-9a-zA-Z\\\(\){}^_]*)( |$)",
@@ -845,15 +861,20 @@ def to_semantic_ma(text):
     thetext = re.sub(r"( |{|^)(\-?[0-9\.]+) +(\\?[0-9\.a-zA-Z][0-9\.a-zA-Z\\^_]*)( |}|$)",
                      r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
 
+    thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\)^_]*) +(\([^()]+\))( |$)",
+                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
     # tricky case is "backslash space"
     thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\)^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\)^_\-+]*)( |$)",
                      r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
     thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)( |$)",
-                     r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+                     r"\1\\impliedMultiplication{a\2b}{c\3d}\4", thetext)
     thetext = re.sub(r"({)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)(})",
                      r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
     thetext = re.sub(r"( |^)(\(?\\?[0-9a-zA-Z][0-9a-zA-Z\\\(\){}^_]*) +(\(?[0-9a-zA-Z][0-9\.a-zA-Z\\\(\){}^_]*)( |$)",
                      r"\1\\impliedMultiplication{\2}{\3}\4", thetext)
+
+    thetext = re.sub(r"([^ +-]+) +(\\function[^ ]+)( |$|\\)",
+                     r"\\impliedMultiplication{\1}{\2}\3", thetext)
 
     if component.topic in ["combinatorics"]:
         thetext = re.sub(r"\\\{([^{}]+)\\\}",
@@ -875,6 +896,8 @@ def to_semantic_ma(text):
 
     thetext = re.sub("ONESPACE", " ", thetext)
 
+    thetext = re.sub(r"(\\text{[^{}]+})}", r"}\1", thetext)
+
     return thetext
 
 #------------#
@@ -883,6 +906,11 @@ def to_paren_group(txt):
 
     thebracket = txt.group(1)
     inside_parens = txt.group(2)
+
+    if thebracket == "\\text{":
+        inside_parens = re.sub(" ", "ONESPACE", inside_parens)
+        theanswer = "\\text{" + inside_parens + "}"
+        return theanswer
 
     inside_parens = inside_parens.strip()
 
@@ -893,13 +921,14 @@ def to_paren_group(txt):
     inside_parens = re.sub(" ", "ONESPACE", inside_parens)
 
     if thebracket == "(":
-        theanswer = "\\parenGroup"
+     #   theanswer = "\\parenGroup" + "{(}" + "{" + inside_parens + "}" + "{)}"
+        theanswer = "\\bracketGroup" + "{(}" + "{" + inside_parens + "}" + "{)}"
     elif thebracket == "[":
-        theanswer = "\\bracketGroup"
+        theanswer = "\\bracketGroup" + "{[}" + "{" + inside_parens + "}" + "{]}"
     else:
         theanswer = "\\ERROR"
 
-    theanswer += "{" + inside_parens + "}"
+#    theanswer += "{" + inside_parens + "}"
 
     return theanswer
 

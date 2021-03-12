@@ -26,7 +26,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "ldata",
                       "html_ptx",
                       "html_matrix",
-                      "xml_semantic", "ptx_semantic",
+                      "xml_semantic", "ptx_semantic", "html_semantic",
                       "mbx_permid", "xml_permid", "ptx_permid",
                       "tex", "tex_ptx",
                       "html"]
@@ -92,8 +92,6 @@ if component.filetype_plus in ["ptx", "ptx_pp", "ptx_permid", "ptx_fix", "ptx_se
 elif component.filetype_plus in ["mbx_pp"]:
     fileextension_in = "mbx"
     fileextension_out = "ptx"
-elif component.filetype_plus in ["xml", "xml_pp", "xml_permid"]:
-    fileextension_out = "mbx"
 elif component.filetype_plus in ["xml", "xml_pp", "xml_permid", "xml_semantic"]:
     fileextension_in = "xml"
     fileextension_out = "xml"
@@ -106,6 +104,9 @@ elif component.filetype_plus in ["html_ptx"]:
 elif component.filetype_plus in ["html_matrix"]:
     fileextension_in = "html"
     fileextension_out = "txt"
+elif component.filetype_plus in ["html_semantic"]:
+    fileextension_in = "html"
+    fileextension_out = "html"
 elif component.filetype_plus in ["svg"]:
     fileextension_in = "src"
     fileextension_out = "svg"
@@ -142,7 +143,7 @@ elif os.path.isdir(component.inputname) and os.path.isdir(component.outputname) 
 
     for component.inputfilename in thefiles:
         if component.filetype_plus == "ldata":
-            outputfilename = outputdir + "summart.txt"
+            outputfilename = outputdir + "summary.txt"
         else:
             outputfilename = re.sub(".*/([^/]+)", outputdir + r"\1", component.inputfilename)
         if fileextension_in and fileextension_in != fileextension_out:
@@ -259,7 +260,7 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_html_ptx(component.onefile)
     if component.filetype_plus == 'html_matrix':
         component.onefile = myoperations.mytransform_html_matrix(component.onefile)
-    if component.filetype_plus in ['xml_semantic', 'ptx_semantic']:
+    if component.filetype_plus in ['xml_semantic', 'ptx_semantic', 'html_semantic']:
         component.onefile = myoperations.mytransform_to_semantic(component.onefile)
     elif component.filetype_plus == 'txt':
         component.onefile = myoperations.mytransform_txt(component.onefile)

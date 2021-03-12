@@ -27,8 +27,8 @@ substitution_counter = 0
 generic_counter = 0
 generic_list = []
 
-topic = "calculus_single"
 topic = "combinatorics"
+topic = "calculus_single"
 
 foundvalues = []
 startagain = ""
@@ -123,6 +123,7 @@ nestable_tags = ["ul", "ol", "li", "p", "task", "figure", "sidebyside"]
 verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
                  'slate', 'sage', 'sageplot', 'asymptote', 'macros',
                  'program', 'input', 'output', 'prompt', 'pre', 'pg-code',
+                 'tikzpicture', 'tikz',
                  'c']
 
 # may or may not have white space after them:

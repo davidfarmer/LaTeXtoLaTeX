@@ -23,6 +23,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "svg",
                       "iso",
                       "ptx",
+                      "fixptx",
                       "ldata",
                       "html_ptx",
                       "html_matrix",
@@ -86,7 +87,7 @@ if component.inputname == component.outputname:
     print "try again"
     sys.exit()
 
-if component.filetype_plus in ["ptx", "ptx_pp", "ptx_permid", "ptx_fix", "ptx_semantic", "mbx_strict_tex", "mbx_strict_html", "mbx_fa"]:
+if component.filetype_plus in ["ptx", "ptx_pp", "ptx_permid", "ptx_fix", "ptx_semantic", "mbx_strict_tex", "mbx_strict_html", "mbx_fa", "fixptx"]:
     fileextension_in = "ptx"
     fileextension_out = "ptx"
 elif component.filetype_plus in ["mbx_pp"]:
@@ -258,6 +259,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_tex_ptx(component.onefile)
     if component.filetype_plus == 'html_ptx':
         component.onefile = myoperations.mytransform_html_ptx(component.onefile)
+    if component.filetype_plus == 'fixptx':
+        component.onefile = myoperations.mytransform_fixptx(component.onefile)
     if component.filetype_plus == 'html_matrix':
         component.onefile = myoperations.mytransform_html_matrix(component.onefile)
     if component.filetype_plus in ['xml_semantic', 'ptx_semantic', 'html_semantic']:

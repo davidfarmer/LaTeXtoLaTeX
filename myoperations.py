@@ -933,6 +933,86 @@ def old_mytransform_mbx(text):
 
 ###################
 
+def mytransform_fixptx(text):
+
+    thetext = text
+
+    level = 0
+
+    theanswer = ""
+    sawleft = False
+    inopeningtag = False
+    inclosingtag = False
+    thistag = ""
+    activetags = []
+    prevch = ""
+
+    for ch in thetext:
+      if ch == "<":
+        sawleft = True
+      elif ch == "/":
+        sawleft = False
+        if prevch == "<":
+           inclosingtag = True
+      elif ch == " ":
+        if prevch == "<":
+          sawleft = False
+        elif inopeningtag:  # space before attributes
+          sawleft = False
+          activetags.append(thistag)
+          inopeningtag = False
+          thistag = ""
+      elif ch == ">":  # ended an openingn or closing tag
+        if prevch == "/":   # self-closing tag
+          if not inopeningtag:  # then pop the tag which was already saved
+            print "removing self-closing tag", activetags, "thistag", thistag, "so far",theanswer[-50:] 
+            activetags.pop()
+          else:
+            print "tag so far", thistag, "activetags", activetags
+            inopeningtag = False
+          if inclosingtag:
+            print theanswer[-120:]
+            print "error tracking tags"
+          inopeningtag = False
+          thistag = ""
+        elif inopeningtag:
+          activetags.append(thistag)
+          inopeningtag = False
+          thistag = ""
+        elif inclosingtag:
+          inclosingtag = False
+          if thistag != activetags[-1]:
+            print theanswer[-120:]
+            print "thistag", thistag, "activetags", activetags
+            print "tag error", activetags[-1], "closed by", thistag
+            die
+          else:
+            activetags.pop()
+            thistag = ""
+        elif True:
+          pass
+        else:
+          print theanswer[-120:]
+          print "thistag", thistag, "activetags", activetags
+          print "tag out of place", thistag
+          die
+      else:
+        if sawleft:
+          inopeningtag = True
+          thistag = ch
+        elif inopeningtag or inclosingtag:
+          thistag += ch
+        sawleft = False
+
+      if thistag == "times":
+        print "found times", activetags, theanswer[-120:]
+      theanswer += ch
+      prevch = ch
+
+    return theanswer
+
+#############
+
 def mytransform_ptx(text):
 
     thetext = text
@@ -944,7 +1024,7 @@ def mytransform_ptx(text):
 
     return thetext
 
-# below is old abd will not be reached
+# below is old and will not be reached
 
     # first hide comments
     thetext = re.sub(r"(\s*(<!--)(.*?)(-->))",

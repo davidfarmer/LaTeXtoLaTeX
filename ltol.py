@@ -293,6 +293,11 @@ for inputfile, outputfile in component.iofilepairs:
 
         component.onefile = myoperations.mytransform_mbx_linefeeds(component.onefile)
 
+            # if the number of columns is more than 6, set it to 6
+            #  (should only occur as an artifact of an imperfect LaTeX conversion
+        component.onefile = re.sub(r'cols="[7-9]"', 'cols="6"', component.onefile)
+        component.onefile = re.sub(r'cols="[1-9][0-9]"', 'cols="6"', component.onefile)
+
         # no space in self-closing tag
         component.onefile = re.sub(r" +/>", "/>", component.onefile)
 

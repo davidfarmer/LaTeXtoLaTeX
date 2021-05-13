@@ -935,6 +935,13 @@ def old_mytransform_mbx(text):
 
 def mytransform_fixptx(text):
 
+    taglevel = {
+        "chapter": 1,
+        "section": 2,
+        "li": 8.
+        "p": 8
+    }
+
     thetext = text
 
     level = 0
@@ -985,6 +992,10 @@ def mytransform_fixptx(text):
             print theanswer[-120:]
             print "thistag", thistag, "activetags", activetags
             print "tag error", activetags[-1], "closed by", thistag
+            if taglevel[thistag] > taglevel[activetags[-1]]:
+                print "minor tag", thistag, "closed major tag", activetags[-1]
+            else:
+                print "minor tag", thistag, "failed to close"
             die
           else:
             activetags.pop()

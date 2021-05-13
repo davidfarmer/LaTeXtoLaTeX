@@ -938,7 +938,9 @@ def mytransform_fixptx(text):
     taglevel = {
         "chapter": 1,
         "section": 2,
-        "li": 8.
+        "theorem": 3,
+        "statement": 4,
+        "li": 8,
         "p": 8
     }
 

@@ -935,14 +935,38 @@ def old_mytransform_mbx(text):
 
 def mytransform_fixptx(text):
 
-    taglevel = {
-        "chapter": 1,
-        "section": 2,
-        "theorem": 3,
-        "statement": 4,
-        "li": 8,
-        "p": 8
-    }
+    tags = [["pretext"], ["book"], ["chapter", "titlepage", "frontmatter", "backmatter", "docinfo"],
+            ["author", "section", "references", "index"], ["objectives", "subsection"], ["paragraphs", "latex-image-preamble", "sidebyside"],
+            ["personname", "theorem", "proposition", "lemma", "insight", "axiom", "corollary", "conjecture",
+             "example", "exercise", "definition", "remark"],
+            ["introduction", "statement", "proof", "figure"],
+            ["ol", "ul", "dl", "tabular", "image", "blockquote"],
+            ["hint", "answer", "solution", "latex-image"],
+            ["li", "p", "caption"],
+            ["title", "em", "m", "md", "me", "men", "mdn", "term", "q", "fn"],
+            ["row", "mrow", "idx"],
+            ["cell", "macros", "h"]
+           ];
+
+    text = re.sub(r"<!\[", "HIDECDATASTART", text);
+    text = re.sub(r"\]>", "HIDECDATAEND", text);
+    taglevel = {}
+
+    for lev, tag_of_lev in enumerate(tags):
+      for tag in tag_of_lev:
+        taglevel[tag] = lev
+        
+
+#    taglevel = {
+#        "chapter": 1,
+#        "section": 2,
+#        "theorem": 3,
+#        "exercise": 3,
+#        "statement": 4,
+#        "solution": 4,
+#        "li": 8,
+#        "p": 8
+#    }
 
     thetext = text
 
@@ -974,10 +998,10 @@ def mytransform_fixptx(text):
       elif ch == ">":  # ended an openingn or closing tag
         if prevch == "/":   # self-closing tag
           if not inopeningtag:  # then pop the tag which was already saved
-            print "removing self-closing tag", activetags, "thistag", thistag, "so far",theanswer[-50:] 
+#            print "removing self-closing tag", activetags, "thistag", thistag, "so far",theanswer[-50:] 
             activetags.pop()
           else:
-            print "tag so far", thistag, "activetags", activetags
+#            print "tag so far", thistag, "activetags", activetags
             inopeningtag = False
           if inclosingtag:
             print theanswer[-120:]
@@ -985,23 +1009,54 @@ def mytransform_fixptx(text):
           inopeningtag = False
           thistag = ""
         elif inopeningtag:
+          if activetags and taglevel[thistag] < taglevel[activetags[-1]]:
+            pass
+ ##           print "error: major tag", thistag, "opening inside", activetags[-1]
+ #           print "cccc\n",theanswer[-150:], "\ndddd"
+ #           theanswer = re.sub("(<" + thistag + ")$",
+ #                         "</" + activetags[-1] + ">" + r"\1", theanswer)
+ #           print "eeee\n",theanswer[-150:], "\nffff"
+ #           activetags.pop()
+
           activetags.append(thistag)
           inopeningtag = False
           thistag = ""
         elif inclosingtag:
           inclosingtag = False
           if thistag != activetags[-1]:
-            print theanswer[-120:]
+            print "aaaa\n",theanswer[-150:], "\nbbbb"
             print "thistag", thistag, "activetags", activetags
             print "tag error", activetags[-1], "closed by", thistag
             if taglevel[thistag] > taglevel[activetags[-1]]:
-                print "minor tag", thistag, "closed major tag", activetags[-1]
+              print "minor tag", thistag, "closed major tag", activetags[-1]
+                # eg., <section></p> .  So we neeed to insert an opening p
+              if thistag == activetags[-2]:
+                print "good news: just one mismatched tag"
+                activetags.pop(-2)
+                currtag = activetags[-1]
+          #      theanswer = re.sub("(<" + currtag + ".*?)$", "</" + thistag + ">" + r"\1", theanswer, 1, re.DOTALL)
+                theanswer = re.sub("^(.*)(<" + currtag + "((?!" + currtag + ").)*)$",
+                              r"\1" + "</" + thistag + ">" + r"\2",
+                              theanswer, 1, re.DOTALL)
+                theanswer = re.sub("</" + thistag + "$", "", theanswer)
+                print "now the end is", theanswer[-50:]
+                thistag = ""
+                continue # because this closing tag was inserted earlier
+              else:
+                theanswer = re.sub("(</" + thistag + ")$",
+                              "<" + thistag + ">" + r"\1", theanswer)
+                print "now we have\n", theanswer[-100:], "\nxxx"
             else:
-                print "minor tag", thistag, "failed to close"
-            die
+                print "minor tag", thistag, "closed another tag"
+                theanswer = re.sub("(</" + thistag + ")$",
+                              "", theanswer)
+                print "gggg\n",theanswer[-150:], "\nhhhh"
+        #        die
           else:
             activetags.pop()
-            thistag = ""
+
+          thistag = ""
+
         elif True:
           pass
         else:
@@ -1017,11 +1072,16 @@ def mytransform_fixptx(text):
           thistag += ch
         sawleft = False
 
-      if thistag == "times":
-        print "found times", activetags, theanswer[-120:]
+#      if thistag == "times":
+#        print "found times", activetags, theanswer[-120:]
       theanswer += ch
       prevch = ch
 
+    if activetags:
+        print "UNCLOSED", activetags
+
+    theanswer = re.sub("HIDECDATASTART", "<![", theanswer);
+    theanswer = re.sub("HIDECDATAEND", "]>", theanswer);
     return theanswer
 
 #############

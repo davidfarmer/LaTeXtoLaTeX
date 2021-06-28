@@ -110,6 +110,9 @@ def mbx_pp(text):
                      lambda match: utilities.sha1hide(match, "comment"),
                      thetext, 0, re.DOTALL)
 
+    # fix dangling punctuation
+    thetext = re.sub(r"\s*</p>\s*<p>\s*(,|\.)\s*", r"\1" + "\n",thetext)
+
     # some tags can have punctuation after them
     for tag in component.punctuatable_tags:
         thetext = re.sub(r"(</" + tag + ">)" + r"(\S)", r"\1UVUnooooSpACeVUV\2", thetext)

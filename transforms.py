@@ -96,6 +96,27 @@ def mbx_fa(text):
 
 ###################
 
+def html_pp(text):
+
+    thetext = text
+
+    for tag in ["h1", "h2", "h3", "h4", "h5", "h6","p","section", "article"]:
+        #start tag on new line
+        thetext = re.sub(r"\s*(<" + tag + "( |>))", "\n" + r"\1", thetext)
+
+    for tag in ["p","section", "article"]:
+        # end tag by itself on a line
+        thetext = re.sub(r"\s*(</" + tag + ">)\s*", "\n" + r"\1" + "\n", thetext)
+
+    for tag in ["h1", "h2", "h3", "h4", "h5", "h6"]:
+        # line feed after end tag
+        thetext = re.sub(r"(</" + tag + ">)\s*", r"\1" + "\n", thetext)
+
+
+    return thetext
+
+###################
+
 def mbx_pp(text):
     """ Pretty-print MBX source.
 

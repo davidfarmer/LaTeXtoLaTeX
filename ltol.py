@@ -26,6 +26,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "fixptx",
                       "ldata",
                       "html_ptx",
+                      "html_pp",
                       "html_matrix",
                       "xml_semantic", "ptx_semantic", "html_semantic",
                       "mbx_permid", "xml_permid", "ptx_permid",
@@ -93,6 +94,9 @@ if component.filetype_plus in ["ptx", "ptx_pp", "ptx_permid", "ptx_fix", "ptx_se
 elif component.filetype_plus in ["mbx_pp"]:
     fileextension_in = "mbx"
     fileextension_out = "ptx"
+elif component.filetype_plus in ["html_pp"]:
+    fileextension_in = "html"
+    fileextension_out = "html"
 elif component.filetype_plus in ["xml", "xml_pp", "xml_permid", "xml_semantic"]:
     fileextension_in = "xml"
     fileextension_out = "xml"
@@ -269,6 +273,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_txt(component.onefile)
     elif component.filetype_plus == 'html':
         component.onefile = myoperations.mytransform_html(component.onefile)
+    elif component.filetype_plus == 'html_pp':
+        component.onefile = transforms.html_pp(component.onefile)
     elif component.filetype_plus in ['ptx']:
         component.onefile = myoperations.mytransform_ptx(component.onefile)
     elif component.filetype_plus in ['svg']:

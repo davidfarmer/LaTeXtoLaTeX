@@ -130,6 +130,11 @@ def mbx_pp(text):
     thetext = re.sub(r"(\s*(<!--)(.*?)(-->))",
                      lambda match: utilities.sha1hide(match, "comment"),
                      thetext, 0, re.DOTALL)
+   # bad BU physics hack
+    firstline = re.sub("\n.*", "", thetext, 1, re.DOTALL);
+    if firstline.startswith("<section") and firstline.endswith('problems">'):
+        thetext = re.sub("<section ", "<exercises ", thetext)
+        thetext = re.sub("</section", "</exercises", thetext)
 
     # fix dangling punctuation
     thetext = re.sub(r"\s*</p>\s*<p>\s*(,|\.)\s*", r"\1" + "\n",thetext)

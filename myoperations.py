@@ -1147,14 +1147,31 @@ def mytransform_html(text):
 
   #  print thetext
 
-    # UCSC math
-    thetext = re.sub(r'class="p-name">([^<>]+)</span>.*?mailto:([^"]+)"', mytransform_ht, thetext, 0, re.DOTALL)
+    base_url = re.sub("\n.*", "", thetext, 1, re.DOTALL)
+    if "<" in base_url:
+        print base_url
+        die
+    base_url = re.sub("^.*//", "", base_url, 1, re.DOTALL)
+    base_url = re.sub("/[^/]*$", "/", base_url, 1, re.DOTALL)
 
-    for _ in component.people_list:
-        print _
+    thetext = re.sub(r'.*<nav id="toc"><ul>', "", thetext, 1, re.DOTALL)
+    thetext = re.sub(r'</ul></nav>.*', "", thetext, 1, re.DOTALL)
+    thetext = re.sub(r'link backmatter.*', "", thetext, 1, re.DOTALL)
+    thetext = re.sub(r'.*link frontmatter.*?</li>', "", thetext, 1, re.DOTALL)
+    these_links = re.findall(r'a href="([^"]*)"',thetext)
 
-    print "found", len(component.people_list), "people"
-    return thetext
+    links_only = ""
+    for ll in these_links:
+        print ll
+        ll = re.sub("#.*", "", ll)
+        if ll.startswith("C-") or ll.startswith("chap") or ll.startswith("ch_") or ll.startswith("index") or ll.startswith("Ch") or ("chapter" in ll):
+            continue
+        ll = base_url + ll
+        if ll not in links_only:
+            links_only += ll + "\n"
+
+    print links_only
+    return links_only
 
 ###################
 
@@ -1518,6 +1535,52 @@ def mytransform_svg(text):
 ###################
 
 def mytransform_txt(text):
+
+    thetext = text
+
+    thelines = thetext.splitlines()
+    theanswer = ""
+
+    for line in thelines:
+        filestub = re.sub(".*/", "", line)
+        filestub = filestub[:-4]
+        theanswer += "pdf2svg " + line + " /Users/farmer/Publishing/BooksByOtherAuthors/phys212pretext/html/images/" + filestub + ".svg\n"
+
+    return theanswer
+
+    thetext = re.sub(r"(<biblio [^>]+>)(.*?)(</biblio>)",
+            mytransform_biblio, thetext, 0, re.DOTALL)
+    return thetext
+
+def mytransform_biblio(txt):
+    start_tag = txt.group(1)
+    bib_content = txt.group(2)
+    end_tag = txt.group(3)
+
+    start_tag = re.sub('type="raw" ', '', start_tag)
+
+    bib_content = re.sub(r'\s*(.*?),\s+(\\textit)', r"<author>\1</author>\2", bib_content, 0, re.DOTALL)
+    bib_content = utilities.replacemacro(bib_content, "textit", 1, "<title>#1</title>")
+    bib_content = utilities.replacemacro(bib_content, "textbf", 1, "<volume>#1</volume>")
+
+    bib_content = re.sub(r'\s+(19|20|21)([0-9]{2}),*\.*\s*', r"<year>\1\2</year>", bib_content, 0, re.DOTALL)
+    bib_content = re.sub(r'\s*\(([0-9]+)\)\s*', r"<number>\1</number>", bib_content, 0, re.DOTALL)
+    bib_content = re.sub(r'pp\.*\s+([0-9]+)\s*\-+\s*([0-9]+)\s*\.*\s*', r'<pages start="\1" end="\2"/>', bib_content, 0, re.DOTALL)
+    bib_content = re.sub(r'(</title>),+\s*', r"\1", bib_content, 0, re.DOTALL)
+    bib_content = re.sub(r'(</number>),+\s*', r"\1", bib_content, 0, re.DOTALL)
+
+    bib_content = re.sub(r'^\s*(.*),\s+([^,]+),\s*', r"<author>\1</author><title>\2</title>", bib_content, 0, re.DOTALL)
+    bib_content = re.sub(r'(<|>)\s+', r"\1", bib_content, 0, re.DOTALL)
+
+    bib_content = re.sub(r'\s+', " ", bib_content, 0, re.DOTALL)
+
+    bib_content = re.sub(r'><', ">\n<", bib_content)
+
+    return start_tag + "\n" + bib_content + "\n" + end_tag
+
+#-------------------__#
+
+def old_mytransform_txt(text):
 
     thetext = text
 

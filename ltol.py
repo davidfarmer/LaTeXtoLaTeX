@@ -21,6 +21,7 @@ import myoperations
 conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mbx_strict_tex", "mbx_strict_html", "mbx_fa",
                       "txt",
                       "svg",
+                      "css",
                       "iso",
                       "ptx",
                       "fixptx",
@@ -115,6 +116,9 @@ elif component.filetype_plus in ["html_semantic"]:
 elif component.filetype_plus in ["svg"]:
     fileextension_in = "src"
     fileextension_out = "svg"
+elif component.filetype_plus in ["css"]:
+    fileextension_in = "css"
+    fileextension_out = "css"
 elif component.filetype_plus in ["ldata"]:
     fileextension_in = ""
     fileextension_out = ""
@@ -279,6 +283,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_ptx(component.onefile)
     elif component.filetype_plus in ['svg']:
         component.onefile = myoperations.mytransform_svg(component.onefile)
+    elif component.filetype_plus in ['css']:
+        component.onefile = myoperations.mytransform_css(component.onefile)
     elif component.filetype_plus in ['ldata']:
         component.onefile = myoperations.mytransform_ldata(component.onefile)
     elif component.filetype_plus in ['iso']:

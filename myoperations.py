@@ -1534,6 +1534,29 @@ def mytransform_svg(text):
 
 ###################
 
+def mytransform_css(text):
+
+    thetext = text
+
+    thetext = re.sub(r"threebuttons", "treebuttons", thetext)
+    thetext = re.sub(r"primary-navbar", "ptx-navbar", thetext)
+    thetext = re.sub(r"sidebar-left-toggle-button", "toc-toggle", thetext)
+    thetext = re.sub(r"#(next|up|previous)(button)", r".\1-\2", thetext)
+    thetext = re.sub(r"#toc", r"#ptx-toc", thetext)
+    thetext = re.sub(r"#sidebar", r"#ptx-sidebar", thetext)
+    thetext = re.sub(r"#masthead", r"#ptx-masthead", thetext)
+    thetext = re.sub(r"\.banner", ".ptx-banner", thetext)
+    thetext = re.sub(r"\.page", ".ptx-page", thetext)
+    thetext = re.sub(r"\.main", ".ptx-main", thetext)
+    thetext = re.sub(r"\.content-footer", ".ptx-content-footer", thetext)
+    thetext = re.sub(r"\.page-footer", ".ptx-page-footer", thetext)
+    thetext = re.sub(r"#content", r".pretext-content", thetext)
+    thetext = re.sub(r"\.pretext-content", ".ptx-content", thetext)
+
+    return thetext
+
+###################
+
 def mytransform_txt(text):
 
     thetext = text

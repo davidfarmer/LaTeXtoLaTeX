@@ -95,6 +95,34 @@ def mbx_fa(text):
     return thetext
 
 ###################
+def alice(text):
+
+    thetext = text
+
+    thetext = re.sub(r'<div class="chapter">', "<chapter>", thetext)
+    thetext = re.sub(r'</div>', "</chapter>", thetext)
+
+    thetext = re.sub(r'\n*<h2.*', "", thetext)
+    thetext = re.sub(r'(.*)</h2>', r"<title>\1</title>", thetext)
+
+    thetext = re.sub(r'([a-zA-Z])&rsquo;([a-zA-Z])', r"\1'\2", thetext)
+
+    thetext = re.sub(r'&mdash;', r" <mdash/> ", thetext)
+    thetext = re.sub(r'<i>', r"<em>", thetext)
+    thetext = re.sub(r'</i>', r"</em>", thetext)
+
+    thetext = re.sub(r'&ldquo;', r"&#x201C;", thetext)
+    thetext = re.sub(r'&rdquo;', r"&#x201D;", thetext)
+
+###### temporary!
+    thetext = re.sub(r'&([^#])', r'AMP\1', thetext)
+
+    thetext = re.sub(r'AMPrsquo;', r"&#x2019;", thetext)
+    thetext = re.sub(r'AMPlsquo;', r"&#x2018;", thetext)
+
+    return thetext
+
+###################
 
 def html_pp(text):
 
@@ -144,11 +172,11 @@ def mbx_pp(text):
         thetext = re.sub(r"(</" + tag + ">)" + r"(\S)", r"\1UVUnooooSpACeVUV\2", thetext)
         thetext = re.sub(r"(</" + tag + ">)" + r" ", r"\1UVUSpACeVUV", thetext)
 
-    # then hide verbatim content
-    for tag in component.verbatim_tags:
-        thetext = re.sub(r"(\s*(<" + tag + "(>| [^/>]*>))(.*?)(</" + tag + ">))",
-                         lambda match: utilities.sha1hide(match, tag),
-                         thetext, 0, re.DOTALL)
+#    # then hide verbatim content
+#    for tag in component.verbatim_tags:
+#        thetext = re.sub(r"(\s*(<" + tag + "(>| [^/>]*>))(.*?)(</" + tag + ">))",
+#                         lambda match: utilities.sha1hide(match, tag),
+#                         thetext, 0, re.DOTALL)
 
     # empty tags that should be on their own line
     for tag in component.document_pieces_empty:

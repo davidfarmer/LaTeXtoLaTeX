@@ -27,6 +27,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "ldata",
                       "html_ptx",
                       "html_pp",
+                      "alice",
                       "html_matrix",
                       "xml_semantic", "ptx_semantic", "html_semantic",
                       "mbx_permid", "xml_permid", "ptx_permid",
@@ -97,6 +98,9 @@ elif component.filetype_plus in ["mbx_pp"]:
 elif component.filetype_plus in ["html_pp"]:
     fileextension_in = "html"
     fileextension_out = "html"
+elif component.filetype_plus in ["alice"]:
+    fileextension_in = "txt"
+    fileextension_out = "ptx"
 elif component.filetype_plus in ["xml", "xml_pp", "xml_permid", "xml_semantic"]:
     fileextension_in = "xml"
     fileextension_out = "xml"
@@ -275,6 +279,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = myoperations.mytransform_html(component.onefile)
     elif component.filetype_plus == 'html_pp':
         component.onefile = transforms.html_pp(component.onefile)
+    elif component.filetype_plus == 'alice':
+        component.onefile = transforms.alice(component.onefile)
     elif component.filetype_plus in ['ptx']:
         component.onefile = myoperations.mytransform_ptx(component.onefile)
     elif component.filetype_plus in ['svg']:
@@ -292,6 +298,12 @@ for inputfile, outputfile in component.iofilepairs:
             component.onefile = re.sub(r'\.mbx"', '.ptx"', component.onefile)
 
     if component.filetype_plus in ['mbx_pp', 'ptx_pp', 'xml_pp', 'tex_ptx', 'html_ptx']:
+
+    # then hide verbatim content
+        for tag in component.verbatim_tags:
+            component.onefile = re.sub(r"(\s*(<" + tag + "(>| [^/>]*>))(.*?)(</" + tag + ">))",
+                         lambda match: utilities.sha1hide(match, tag),
+                         component.onefile, 0, re.DOTALL)
 
         component.onefile = myoperations.mytransform_mbx_remove_linefeeds(component.onefile)
 

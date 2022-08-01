@@ -77,7 +77,7 @@ def mbx_strict_html(text):
 
 ###################
 
-def mbx_fa(text):
+def mbibtexbx_fa(text):
     """ replace f(x) by \fa{f}{x}.
 
     """
@@ -93,6 +93,58 @@ def mbx_fa(text):
     thetext = re.sub(r"<mrow>.*?</mrow>", myoperations.fa_convert, thetext, 0, re.DOTALL)
 
     return thetext
+
+###################
+def bibtex(text):
+
+    thetext = text
+
+    thetext = re.sub("^@", "!!!!", thetext)
+    thetext = re.sub("\s+@", "!!!!", thetext)
+
+    the_entries = thetext.split("!!!!")
+
+    theanswer = ""
+
+    for entry in the_entries:
+        if not entry: continue
+  #      print entry
+  #      print entry.split("{", 1)
+        (pubtype, remainder) = entry.split("{", 1)
+        pubtype = pubtype.strip();
+        remainder = remainder.strip();
+        remainder = remainder[:-1]  # remove final "}"
+
+        this_tag, remainder = remainder.split(",",1)
+
+        this_tag = this_tag.strip()
+        this_tag = re.sub(":", "_", this_tag)
+        theanswer += '<biblio type="bibtex" xml:id="' + this_tag + '">' + "\n"
+        theanswer += "  <!--" + '<pubtype>' + pubtype + '</pubtype>' + "-->\n"
+
+   #     print len(remainder), remainder
+        entryparts = remainder.split("\n")
+
+        for part in entryparts:
+            part = part.strip()
+            if not part: continue
+            if not "=" in part: print "error, bad part", part
+   #         print "part", part
+            partname, partcontent = part.split("=", 1)
+            partname = partname.strip()
+            partcontent = partcontent.strip()
+            partcontent = re.sub(",$", "", partcontent)  # ending ,
+            partcontent = partcontent[1:-1]  # surrounding {...} or "..."
+            if partcontent.startswith("{") and partcontent.endswith("}"):
+                partcontent = partcontent[1:-1]  # surrounding {...} or "..."
+            partcontent = re.sub("&", "&amp;", partcontent)  # ending ,
+            theanswer += "  " + '<' + partname + '>'
+            theanswer += partcontent
+            theanswer += '</' + partname + '>' + "\n"
+
+        theanswer += '</biblio>' + "\n\n"
+    
+    return theanswer
 
 ###################
 def alice(text):

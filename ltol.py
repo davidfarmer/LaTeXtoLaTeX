@@ -28,6 +28,7 @@ conversion_options = ["xml", "mbx", "ptx_pp", "xml_pp", "mbx_pp", "ptx_fix", "mb
                       "html_ptx",
                       "html_pp",
                       "alice",
+                      "bibtex",
                       "html_matrix",
                       "xml_semantic", "ptx_semantic", "html_semantic",
                       "mbx_permid", "xml_permid", "ptx_permid",
@@ -100,6 +101,9 @@ elif component.filetype_plus in ["html_pp"]:
     fileextension_out = "html"
 elif component.filetype_plus in ["alice"]:
     fileextension_in = "txt"
+    fileextension_out = "ptx"
+elif component.filetype_plus in ["bibtex"]:
+    fileextension_in = "bib"
     fileextension_out = "ptx"
 elif component.filetype_plus in ["xml", "xml_pp", "xml_permid", "xml_semantic"]:
     fileextension_in = "xml"
@@ -281,6 +285,8 @@ for inputfile, outputfile in component.iofilepairs:
         component.onefile = transforms.html_pp(component.onefile)
     elif component.filetype_plus == 'alice':
         component.onefile = transforms.alice(component.onefile)
+    elif component.filetype_plus == 'bibtex':
+        component.onefile = transforms.bibtex(component.onefile)
     elif component.filetype_plus in ['ptx']:
         component.onefile = myoperations.mytransform_ptx(component.onefile)
     elif component.filetype_plus in ['svg']:
@@ -440,7 +446,8 @@ if component.generic_counter:
 if component.extra_macros:
     print "component.extra_macros", component.extra_macros
 
-print "need to start again at",  component.startagain
+if component.startagain:
+    print "need to start again at",  component.startagain
 
 #print "all found values"
 #for j in range(20):

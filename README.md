@@ -2,7 +2,7 @@
 
 # This repository is no longer being maintained.
 
-## This python2 code has been replaced by the pythin3 code in LaTeX3LaTeX
+## This python2 code has been replaced by the python3 code in LaTeX3LaTeX
 
 Do something like
 ```bash

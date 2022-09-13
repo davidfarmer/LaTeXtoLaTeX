@@ -77,7 +77,7 @@ def mbx_strict_html(text):
 
 ###################
 
-def mbx_fa(text):
+def mbibtexbx_fa(text):
     """ replace f(x) by \fa{f}{x}.
 
     """
@@ -91,6 +91,86 @@ def mbx_fa(text):
     thetext = re.sub(r"<men[^>]*>.*?</men>", myoperations.fa_convert, thetext, 0, re.DOTALL)
     # a row of a multiline
     thetext = re.sub(r"<mrow>.*?</mrow>", myoperations.fa_convert, thetext, 0, re.DOTALL)
+
+    return thetext
+
+###################
+def bibtex(text):
+
+    thetext = text
+
+    thetext = re.sub("^@", "!!!!", thetext)
+    thetext = re.sub("\s+@", "!!!!", thetext)
+
+    the_entries = thetext.split("!!!!")
+
+    theanswer = ""
+
+    for entry in the_entries:
+        if not entry: continue
+  #      print entry
+  #      print entry.split("{", 1)
+        (pubtype, remainder) = entry.split("{", 1)
+        pubtype = pubtype.strip();
+        remainder = remainder.strip();
+        remainder = remainder[:-1]  # remove final "}"
+
+        this_tag, remainder = remainder.split(",",1)
+
+        this_tag = this_tag.strip()
+        this_tag = re.sub(":", "_", this_tag)
+        theanswer += '<biblio type="bibtex" xml:id="' + this_tag + '">' + "\n"
+        theanswer += "  <!--" + '<pubtype>' + pubtype + '</pubtype>' + "-->\n"
+
+   #     print len(remainder), remainder
+        entryparts = remainder.split("\n")
+
+        for part in entryparts:
+            part = part.strip()
+            if not part: continue
+            if not "=" in part: print "error, bad part", part
+   #         print "part", part
+            partname, partcontent = part.split("=", 1)
+            partname = partname.strip()
+            partcontent = partcontent.strip()
+            partcontent = re.sub(",$", "", partcontent)  # ending ,
+            partcontent = partcontent[1:-1]  # surrounding {...} or "..."
+            if partcontent.startswith("{") and partcontent.endswith("}"):
+                partcontent = partcontent[1:-1]  # surrounding {...} or "..."
+            partcontent = re.sub("&", "&amp;", partcontent)  # ending ,
+            theanswer += "  " + '<' + partname + '>'
+            theanswer += partcontent
+            theanswer += '</' + partname + '>' + "\n"
+
+        theanswer += '</biblio>' + "\n\n"
+    
+    return theanswer
+
+###################
+def alice(text):
+
+    thetext = text
+
+    thetext = re.sub(r'<div class="chapter">', "<chapter>", thetext)
+    thetext = re.sub(r'</div>', "</chapter>", thetext)
+
+    thetext = re.sub(r'\n*<h2.*', "", thetext)
+    thetext = re.sub(r'(.*)</h2>', r"<title>\1</title>", thetext)
+
+    thetext = re.sub(r'([a-zA-Z])&rsquo;([a-zA-Z])', r"\1'\2", thetext)
+
+    thetext = re.sub(r'&mdash;', r" <mdash/> ", thetext)
+    thetext = re.sub(r'<i>', r"<em>", thetext)
+    thetext = re.sub(r'</i>', r"</em>", thetext)
+
+    thetext = re.sub(r'&ldquo;', r"&#x201C;", thetext)
+    thetext = re.sub(r'&rdquo;', r"&#x201D;", thetext)
+
+###### temporary!
+    thetext = re.sub(r'&([^#])', r'AMP\1', thetext)
+
+    thetext = re.sub(r'AMPrsquo;', r"&#x2019;", thetext)
+    thetext = re.sub(r'AMPlsquo;', r"&#x2018;", thetext)
 
     return thetext
 
@@ -144,11 +224,11 @@ def mbx_pp(text):
         thetext = re.sub(r"(</" + tag + ">)" + r"(\S)", r"\1UVUnooooSpACeVUV\2", thetext)
         thetext = re.sub(r"(</" + tag + ">)" + r" ", r"\1UVUSpACeVUV", thetext)
 
-    # then hide verbatim content
-    for tag in component.verbatim_tags:
-        thetext = re.sub(r"(\s*(<" + tag + "(>| [^/>]*>))(.*?)(</" + tag + ">))",
-                         lambda match: utilities.sha1hide(match, tag),
-                         thetext, 0, re.DOTALL)
+#    # then hide verbatim content
+#    for tag in component.verbatim_tags:
+#        thetext = re.sub(r"(\s*(<" + tag + "(>| [^/>]*>))(.*?)(</" + tag + ">))",
+#                         lambda match: utilities.sha1hide(match, tag),
+#                         thetext, 0, re.DOTALL)
 
     # empty tags that should be on their own line
     for tag in component.document_pieces_empty:

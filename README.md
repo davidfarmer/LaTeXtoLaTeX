@@ -1,5 +1,9 @@
 # LaTeXtoLaTeX
 
+# This repository is no longer being maintained.
+
+## This python2 code has been replaced by the pythin3 code in LaTeX3LaTeX
+
 Do something like
 ```bash
 ./ltol.py filetype_plus full_path_to_original_directory full_path_to_new_directory

@@ -62,7 +62,7 @@ permid_base_mod = 140608
 document_global_structure = [
     'pretext', 'mathbook', 'book', 'part', 'article', 
     'docinfo', 'macros',
-    'html', 'search', 'google', 'feedback', 'index',
+    'html', 'search', 'google', 'index',
     'frontmatter', 'backmatter', 
     'appendix', 'solutions', 'references', 'biography', 'dedication',
     'titlepage', 'preface', 'abstract', 'colophon', 'shortlicense',
@@ -92,6 +92,7 @@ document_environments = ['proof',
 document_components = ['exercises', 'exercisegroup', 'row', 'reading-questions',
                        'webwork', 'instruction', 'instructions',
                        'statement', 'solution', 'answer', 'hint', 'case', 'aside',
+                       'feedback', 'choices', 'choice', 'blocks', 'block',
                        'interactive', 'static', 'investigation',
                        'quantity',
                        'webwork', 'setup']
@@ -99,7 +100,7 @@ document_components = ['exercises', 'exercisegroup', 'row', 'reading-questions',
 document_pieces = ['title', 'subtitle', 'cell', 'caption',
                    'address', 'attribution', 'location', 'edition',
                    'personname', 'date', 'email', 'department', 'institution',
-                   'cd', 'line', 'cline',
+                   'cd', 'line', 'cline', 'premise', 'response',
                    'alert', 'url', 'q', 'pubtitle',
                    'role', 'entity', 'year', 'minilicense', 'holder',
                    'usage', 'description', 'journal', 'volume', 'number',
@@ -109,6 +110,7 @@ document_pieces = ['title', 'subtitle', 'cell', 'caption',
 # empty tags that shoudl be on their own line
 document_pieces_empty = ['cell', 'col', 'notation-list', 'brandlogo',
                          'cross-references', 'input', 'video', 'slate',
+                         'program',
                          'webwork']
 
 list_like = ['ol', 'ul', 'dl']
@@ -123,7 +125,7 @@ nestable_tags = ["ul", "ol", "li", "p", "task", "figure", "sidebyside"]
 verbatim_tags = ['latex-image-preamble', 'latex-image', 'latex-preamble',
                  'slate', 'sage', 'sageplot', 'asymptote', 'macros',
                  'program', 'input', 'output', 'prompt', 'pre', 'pg-code',
-                 'tikzpicture', 'tikz',
+                 'tikzpicture', 'tikz', 'pre',
                  'c']
 
 # may or may not have white space after them:

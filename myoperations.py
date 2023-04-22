@@ -203,35 +203,42 @@ def mytransform_ldata(text):
     thetext = re.sub(r'HRmoreB', '', thetext)
     thetext = re.sub(r'HRmore', '', thetext)
     thetext = re.sub(r'HR', '', thetext)
+    thetext = re.sub(r'r0r0r0', 'R0R0R0', thetext)
 
     if not thetext.startswith('itemtosave={"R') and not thetext.startswith('itemtosave={"ckappa'):
         print "starts with", thetext[:50]
         print "data file starts wrong, quitting"
         die()
 
-    if thetext.startswith('itemtosave={"R0_R1_R1",'):
+    if thetext.startswith('itemtosave={"R0_R1_R1') or thetext.startswith('itemtosave={"R0_R0_R0'):
 
       thetext = re.sub(r"\\\s+", "", thetext)
       thetext = re.sub("\s", "", thetext)
       thetext = re.sub("`[0-9]+\.[0-9]+", "", thetext)
 
-      thetext = re.sub('^itemtosave *= *{"R0_R1_R1", *', "", thetext)
-      startval, thetext = utilities.first_bracketed_string(thetext)
-      thetext = re.sub("^\s*,*", "", thetext)
-      print thetext[:50]
+  #    thetext = re.sub('^itemtosave *= *{"R0_R1_R1", *', "", thetext)
+      thetext = re.sub('^itemtosave *= *{"R0_R[01]_R[01][^"]*, *', "", thetext)
 
-      if len(startval) > 40:  # startval is actually lamset
-          lamset = startval
-          startval = "{999, 999}"
-      else:
-          lamset, thetext = utilities.first_bracketed_string(thetext)
-          thetext = re.sub("^\s*,*", "", thetext)
-          print thetext[:50]
+      # throw away version
+      thetext = re.sub("^\s*,*", "", thetext)
+      # throw away equations
+      thetext = re.sub("^\s*,*", "", thetext)
 
-      func_eq, thetext = utilities.first_bracketed_string(thetext)
+      thedata, thetext = utilities.first_bracketed_string(thetext)
+      thedata = thedata[1:-1]
       thetext = re.sub("^\s*,*", "", thetext)
-      euler_prod, thetext = utilities.first_bracketed_string(thetext)
-      thetext = re.sub("^\s*,*", "", thetext)
+
+#      startval, thetext = utilities.first_bracketed_string(thetext)
+#      thetext = re.sub("^\s*,*", "", thetext)
+#      print thetext[:50]
+
+      theeigs, thedata = utilities.first_bracketed_string(thedata)
+      theeigs = re.sub("^\s*,*", "", theeigs)
+
+      func_eq, thedata = utilities.first_bracketed_string(thedata)
+      thedata = re.sub("^\s*,*", "", thedata)
+      euler_prod, thedata = utilities.first_bracketed_string(thedata)
+      thedata = re.sub("^\s*,*", "", thetext)
       coefficients_set, thetext = utilities.first_bracketed_string(thetext)
       thetext = re.sub("^\s*,*", "", thetext)
       search_params, thetext = utilities.first_bracketed_string(thetext)
